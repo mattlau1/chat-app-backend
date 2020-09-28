@@ -1,4 +1,4 @@
-from data import data, valid_email, user_email_list, user_handle_list, user_with_email, user_update_token
+from data import data, valid_email, user_email_list, user_handle_list, user_with_email, user_update_token, active_tokens
 from error import InputError, AccessError
 
 def generate_handle(id, name_first, name_last):
@@ -36,6 +36,10 @@ def auth_login(email, password):
     }
 
 def auth_logout(token):
+    # Check for valid token
+    if token not in active_tokens():
+        raise AccessError
+    # Find user
     for user in data['users']:
         if user['token'] == token:
             # Invalidate token

@@ -20,6 +20,7 @@ def test_register_email_invalid():
         auth_register('shouldbevalid@yahoo.com.au', 'password', 'Champ', 'Chimp')
     with pytest.raises(InputError):
         auth_register('@gmail.com', 'password', 'Nameis', 'Mia')
+    clear()
 
 # Valid email format
 def test_register_email_valid():
@@ -68,6 +69,7 @@ def test_register_password_invalid():
         auth_register('spaced@out.com', ' ', 'Spaced', 'Out')
     with pytest.raises(InputError):
         auth_register('valid@email.com', 'pass', 'Whois', 'Bob')
+    clear()
 
 # Test valid passwords
 def test_register_password_valid():
@@ -76,14 +78,63 @@ def test_register_password_valid():
     auth_register('user@seaworld.com', pwd, 'Steven', 'Long')
     auth_register('nemo@finding.com', 'password', 'Secure', 'Pwd')
     auth_register('email@sample.cn', 'V3ryS#cuR3', 'Forgot', 'Password')
+    auth_register('empty@space.com', '      ', 'Limit', 'Testing')
+    auth_register('seven@seven.com', '1234567', 'S7v7n', 'Teen')
+    clear()
+
+# Test invalid first and last names
+def test_register_name_invalid():
+    invalid_string1 = ''
+    # 52 characters
+    invalid_string2 = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'
+    # 51 characters
+    invalid_string3 = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy'
+    invalid_string4 = invalid_string3 + invalid_string2
+    # Test name_first
+    with pytest.raises(InputError):
+        auth_register('email@sample.com', 'password', invalid_string1, 'Name')
+    with pytest.raises(InputError):
+        auth_register('fmail@sample.com', 'password', invalid_string2, 'Name')
+    with pytest.raises(InputError):
+        auth_register('gmail@sample.com', 'password', invalid_string3, 'Name')
+    with pytest.raises(InputError):
+        auth_register('hmail@sample.com', 'password', invalid_string4, 'Name')
+    # Test name_last
+    with pytest.raises(InputError):
+        auth_register('imail@sample.com', 'password', 'Name', invalid_string1)
+    with pytest.raises(InputError):
+        auth_register('jmail@sample.com', 'password', 'Name', invalid_string2)
+    with pytest.raises(InputError):
+        auth_register('kmail@sample.com', 'password', 'Name', invalid_string3)
+    with pytest.raises(InputError):
+        auth_register('lmail@sample.com', 'password', 'Name', invalid_string4)
+    # Test both
+    with pytest.raises(InputError):
+        auth_register('mmail@sample.com', 'password', invalid_string1, invalid_string2)
+    with pytest.raises(InputError):
+        auth_register('femail@sample.com', 'password', invalid_string3, invalid_string4)
+    with pytest.raises(InputError):
+        auth_register('tmail@sample.com', 'password', invalid_string1, invalid_string1)
+    clear()
+    
+# Test valid first and last names
+def test_register_name_valid():
+    auth_register('bob@gmail.com', 'password', 'Just', 'bob')
+    auth_register('cc@gmail.com', 'password', 'c', 'c')
+    valid_string1 = 'c' * 49
+    valid_string2 = 'c' * 50
+    auth_register('long@gmail.com', 'password', valid_string1, 'Normal')
+    auth_register('dragon@gmail.com', 'password', 'Normal', valid_string1)
+    auth_register('fire@gmail.com', 'password', valid_string1, valid_string1)
+    auth_register('long1@gmail.com', 'password', valid_string2, 'Normal')
+    auth_register('dragon1@gmail.com', 'password', 'Normal', valid_string2)
+    auth_register('fire1@gmail.com', 'password', valid_string2, valid_string2)
+    auth_register('secret@me.com', 'password', 'CryP+1c', 'N4m3')
+    auth_register('very@interesting.com', 'password', 'Anne-Marie', 'Sirn@m3')
     clear()
 
 
 # Todo:
-
-####################
-# Test name length #
-####################
 
 # Test login and logout with different tokens
 
