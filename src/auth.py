@@ -1,3 +1,5 @@
+from data import *
+
 def auth_login(email, password):
     return {
         'u_id': 1,

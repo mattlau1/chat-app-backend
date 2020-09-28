@@ -1,5 +1,9 @@
+from data import *
+
 def clear():
-    pass
+    data['users'] = []
+    data['channels'] = []
+    data['messages'] = []
 
 def users_all(token):
     return {
