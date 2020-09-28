@@ -1,3 +1,5 @@
+from data import *
+
 def channels_list(token):
     return {
         'channels': [
