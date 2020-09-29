@@ -25,7 +25,15 @@ def channels_create(token, name, is_public):
     max_channel_length = 20
 
     if (channel_length > max_channel_length):
+        # Long channel names
         raise InputError
+    if (not name):
+        # Empty name
+        raise InputError
+    if (name.isspace()):
+        # Whitespace name
+        raise InputError
+
     return {
         'channel_id': 1,
     }

@@ -12,13 +12,31 @@ def test_create_valid_names():
     channels_create("token", "Private", False)
     clear()
 
-def test_create_invalid_names():
-    # create a channel that has more than 20 chracters in name
+def test_create_long_names():
+    # create a channel that has more than 20 characters (max length) in name
     long_name = "abcdefghijklmnopqrstuvwxyz"
     with pytest.raises(InputError):
         channels_create("token", long_name, True)
-    # edge case
     long_name = "thisnameisverylong000"
     with pytest.raises(InputError):
         channels_create("token", long_name, True)
+    long_name = "ijxiqwji9xq9iqdjim9dwq89n189819me781neuensa9xaj9xd"
+    with pytest.raises(InputError):
+        channels_create("token", long_name, False)
+    clear()
+
+def test_create_empty_name():
+    with pytest.raises(InputError):
+        channels_create("token", '', True)
+    with pytest.raises(InputError):
+        channels_create("token", '', False)
+    clear()
+
+def test_create_whitespace_name():
+    with pytest.raises(InputError):
+        channels_create("token", ' ', True)
+    with pytest.raises(InputError):
+        channels_create("token", '          ', True)
+    with pytest.raises(InputError):
+        channels_create("token", '      ', False)
     clear()
