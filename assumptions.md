@@ -13,3 +13,6 @@
 ### channel.py:
 
 ### channels.py:
+- Channel names full of whitespace characters are invalid
+- Empty channel names are also invalid
+
