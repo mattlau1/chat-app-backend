@@ -18,7 +18,7 @@ def test_create_invalid_names():
     with pytest.raises(InputError):
         channels_create("token", long_name, True)
     # edge case
-    long_name = "thisnameisverylong00"
+    long_name = "thisnameisverylong000"
     with pytest.raises(InputError):
         channels_create("token", long_name, True)
     clear()

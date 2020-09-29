@@ -1,3 +1,5 @@
+from error import InputError, AccessError
+
 def channels_list(token):
     return {
         'channels': [
@@ -19,6 +21,11 @@ def channels_listall(token):
     }
 
 def channels_create(token, name, is_public):
+    channel_length = len(name)
+    max_channel_length = 20
+
+    if (channel_length > max_channel_length):
+        raise InputError
     return {
         'channel_id': 1,
     }
