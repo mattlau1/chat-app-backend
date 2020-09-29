@@ -4,6 +4,8 @@ from auth import auth_login, auth_logout, auth_register
 from error import InputError, AccessError
 from other import clear
 
+""" Tests for auth_register """
+
 # Invalid email format
 def test_register_email_invalid():
     with pytest.raises(InputError):
@@ -133,12 +135,28 @@ def test_register_name_valid():
     auth_register('very@interesting.com', 'password', 'Anne-Marie', 'Sirn@m3')
     clear()
 
+""" Tests for auth_login """
 
-# Todo:
+def test_login_email_invalid():
+    pass
 
-# Test login and logout with different tokens
+def test_login_unregistered_email():
+    pass
 
+def test_login_incorrect_password():
+    pass
 
+def test_login_success():
+    pass
+
+""" Tests for auth_logout """
+
+def test_logout_invalid_token():
+    # User not logged in
+    pass
+
+def test_logout_success():
+    pass
 
 # Random:
 

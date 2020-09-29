@@ -1,6 +1,15 @@
-from data import data, valid_email, user_email_list, user_handle_list, user_with_email, user_update_token, active_tokens
+from data import (
+    data, valid_email, user_with_email, user_with_token,
+    user_email_list, user_handle_list, active_tokens, user_update_token,
+)
 from error import InputError, AccessError
 
+# Generates a token for a registered user
+def generate_token(id):
+    # import user_with_id for future iterations
+    return str(id)
+
+# Generates a handle for a user
 def generate_handle(id, name_first, name_last):
     # First 20 characters of concatenation of name_first and name_last
     handle_string = (name_first.lower() + name_last.lower())[:20]
@@ -20,9 +29,10 @@ def auth_login(email, password):
     
     # Login attempt
     user = user_with_email(email)
+    assert user is not None
     token = ''
     if user['password'] == password:
-        token = str(user['id'])
+        token = generate_token(user['id'])
     else:
         raise InputError
     
@@ -35,17 +45,22 @@ def auth_login(email, password):
         'token': token,
     }
 
+
 def auth_logout(token):
     # Check for valid token
     if token not in active_tokens():
         raise AccessError
-    # Find user
-    for user in data['users']:
-        if user['token'] == token:
-            # Invalidate token
-            user['token'] = ''
-            return {'is_success': True}
-    return {'is_success': False}
+    
+    # Update user token
+    user = user_with_token(token)
+    assert user is not None
+    updated = user_update_token(user['id'], '')
+    assert updated['update_success'] == True
+    
+    return {
+        'is_success': True,
+    }
+
 
 def auth_register(email, password, name_first, name_last):
     # Error check
@@ -67,6 +82,7 @@ def auth_register(email, password, name_first, name_last):
 
     # Register new user
     id = len(data['users']) + 1
+    token = generate_token(id)
     user_info = {
         'id': id,
         'email': email,
@@ -74,11 +90,11 @@ def auth_register(email, password, name_first, name_last):
         'name_first': name_first,
         'name_last': name_last,
         'handle': generate_handle(id, name_first, name_last),
-        'token': str(id),
+        'token': token,
     }
     data['users'].append(user_info)
     
     return {
         'u_id': id,
-        'token': str(id),
+        'token': token,
     }
