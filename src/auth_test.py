@@ -133,6 +133,7 @@ def test_register_name_valid():
     auth_register('fire1@gmail.com', 'password', valid_string2, valid_string2)
     auth_register('secret@me.com', 'password', 'CryP+1c', 'N4m3')
     auth_register('very@interesting.com', 'password', 'Anne-Marie', 'Sirn@m3')
+    auth_register('dot.dot@dot.com', 'password', 'Dot', 'Dot')
     clear()
 
 """ Tests for auth_login """
