@@ -38,11 +38,27 @@ def test_channel_addowner():
 
 
 def test_channel_removeowner():
+    owner = auth_register('bobsmith@gmail.com', 'hello', 'Bob', 'Smith')
+    work = channels_create(owner['token'], 'work', True)
+    user = auth_register('jesschen@gmail.com', 'hello', 'Jess', 'Chen')
+
     # Checking if someone can be removed (Add then remove)
+    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
+    channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
 
-    # Removing someone who is already removed
+    # Removing someone who is already removed (not an owner)
+    with pytest.raises(InputError):
+        channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
+    
+    # Channel ID is not a valid channel
+    with pytest.raises(InputError):
+        channel_removeowner(owner['token'], work['channel_id'] + 100, user['u_id'])
+    
+    # Authorised user is not an owner
+    with pytest.raises(AccessError):
+        channel_removeowner(user['token'], work['channel_id'], user['u_id'])
 
-    pass
+    clear()
 
 
 def test_channel_invite():
@@ -70,5 +86,5 @@ def test_channel_invite():
         user3 = auth_register('user3@gmail.com', 'password3', 'Jim', 'Johnson')
         channel_invite(user3['token'], test_channel2['channel_id'], user2['u_id'])
 
-
     clear()
+    
