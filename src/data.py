@@ -52,6 +52,14 @@ def user_with_id(id):
 def user_handle_list():
     return [user['handle'] for user in data['users'] if user['handle'] != '']
 
+# Updates the token for a specified user
+def user_update_token(id, new_token):
+    for user in data['users']:
+        if user['id'] == id:
+            user['token'] = new_token
+            return {'update_success': True}
+    return {'update_success': False}
+
 
 """ Helper functions for channels """
 
