@@ -45,6 +45,10 @@ def test_channel_removeowner():
     with pytest.raises(InputError):
         channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
     
+    # Add someone to be removed (maybe have this at the start of a helper function
+    # since it will get repeated and is not technically a whole test)
+    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
+
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
         channel_removeowner(owner['token'], work['channel_id'] + 100, user['u_id'])
@@ -117,13 +121,13 @@ def test_channel_leave():
     channel_leave(user['token'], channel['channel_id'])
     with pytest.raises(AccessError):
         channel_details(user['token'], channel['channel_id'])
-
     
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
+        channel_join(user['token'], channel['channel_id'])
         channel_leave(user['token'], channel['channel_id'] + 100)
     
-    # Authorised user is not a member of the channel
+    # Authorised user is not a member of the channel (leaving channel twice)
     with pytest.raises(AccessError):
         channel_leave(user['token'], channel['channel_id'])
 
