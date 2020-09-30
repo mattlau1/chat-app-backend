@@ -43,3 +43,32 @@ def test_channel_removeowner():
     # Removing someone who is already removed
 
     pass
+
+
+def test_channel_invite():
+    user1 = auth_register('user1@gmail.com', 'password1', 'John', 'Smith')
+    user2 = auth_register('user2@gmail.com', 'password2', 'Steve', 'Jackson') 
+    # User 1 creates a new channel, and invites User 2
+    test_channel1 = channels_create(user1['token'], 'Test Channel 1', True)
+    channel_invite(user1['token'], test_channel1['channel_id'], user2['u_id'])
+
+    # Checking if User 2 is a member of the channel (by attempting to access channel details through User 2)
+    channel_details(user2['token'], test_channel1['channel_id'])
+    
+    test_channel2 = channels_create(user1['token'], 'Test Channel 2', True)
+
+    # Channel ID does not refer to a valid channel
+    with pytest.raises(InputError):
+        channel_invite(user1['token'], test_channel2['channel_id'] + 100, user2['u_id'])
+
+    # User ID does not refer to a valid user
+    with pytest.raises(InputError):
+        channel_invite(user1['token'], test_channel2['channel_id'], user2['u_id'] + 100)
+
+    # Authorised user is not a member of the channel
+    with pytest.raises(AccessError):
+        user3 = auth_register('user3@gmail.com', 'password3', 'Jim', 'Johnson')
+        channel_invite(user3['token'], test_channel2['channel_id'], user2['u_id'])
+
+
+    clear()
