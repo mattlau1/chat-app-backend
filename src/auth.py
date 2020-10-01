@@ -39,6 +39,7 @@ def auth_login(email, password):
     # Update token
     updated = user_update_token(user['id'], token)
     assert updated['update_success'] == True
+    assert user_with_email(email)['token'] == token
 
     return {
         'u_id': user['id'],
@@ -56,6 +57,7 @@ def auth_logout(token):
     assert user is not None
     updated = user_update_token(user['id'], '')
     assert updated['update_success'] == True
+    assert user_with_email(user['email'])['token'] == ''
     
     return {
         'is_success': True,
