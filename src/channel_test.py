@@ -1,6 +1,6 @@
 # Test file for channel.py
 
-from channel import channel_invite, channel_details, channel_messages, channel_leave, channel_join, channel_addowner, channel_removeowner
+from channel import channel_invite, channel_details, channel_leave, channel_join, channel_addowner, channel_removeowner
 from channels import channels_create
 from auth import auth_register
 from error import InputError, AccessError
@@ -16,7 +16,7 @@ def test_channel_addowner():
     channel_addowner(owner['token'], work['channel_id'], user['u_id'])
     channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
 
-    # Adding someone who is already the owner
+    # Add someone who is already the owner
     with pytest.raises(InputError):
         channel_addowner(owner['token'], work['channel_id'], user['u_id'])
         channel_addowner(owner['token'], work['channel_id'], user['u_id'])
@@ -41,7 +41,7 @@ def test_channel_removeowner():
     channel_addowner(owner['token'], work['channel_id'], user['u_id'])
     channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
 
-    # Removing someone who is already removed (not an owner)
+    # Removing someone who is already removed (no longer an owner)
     with pytest.raises(InputError):
         channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
     
@@ -67,7 +67,7 @@ def test_channel_invite():
     test_channel1 = channels_create(user1['token'], 'Test Channel 1', True)
     channel_invite(user1['token'], test_channel1['channel_id'], user2['u_id'])
 
-    # Checking if User 2 is a member of the channel (by attempting to access channel details through User 2)
+    # Checking if User 2 is a member of the channel (whether they can access channel details)
     channel_details(user2['token'], test_channel1['channel_id'])
     
     test_channel2 = channels_create(user1['token'], 'Test Channel 2', True)
@@ -155,6 +155,6 @@ def test_channel_details():
 
     clear()
 
-
+# It is not feasible to do testing for channel_messages during iteration one
 def test_channel_messages():
     pass
