@@ -1,24 +1,16 @@
 from error import InputError, AccessError
+from data import data
+
+# initialise dictionary to store detail of the channel
+scaffold = {}
 
 def channels_list(token):
-    return {
-        'channels': [
-        	{
-        		'channel_id': 1,
-        		'name': 'My Channel',
-        	}
-        ],
-    }
+    # yet to be compeleted
+    return data['channels']
 
 def channels_listall(token):
-    return {
-        'channels': [
-        	{
-        		'channel_id': 1,
-        		'name': 'My Channel',
-        	}
-        ],
-    }
+    # yet to be completed
+    return data['channels']
 
 def channels_create(token, name, is_public):
     channel_length = len(name)
@@ -34,6 +26,12 @@ def channels_create(token, name, is_public):
         # Whitespace name
         raise InputError
 
-    return {
-        'channel_id': 1,
-    }
+    # make a dictionary and append it
+    d = scaffold.copy()
+    d['id'] = 1
+    d['name'] = name
+    data['channels'].append(d)
+
+    #if there is already a channel, change id
+    if (len(data['channels']) > 1):
+        d['id'] = len(data['channels'])
