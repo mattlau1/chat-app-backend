@@ -15,6 +15,7 @@
 - All members can invite (not restricted to owners)
 - What if invited user is already in the channel? - No
 - Owner can't leave channel if they're the only member?
+-   OR Channels don't get deleted when there are no members
 
 ### channels.py:
 - Channel names full of whitespace characters are invalid
