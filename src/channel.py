@@ -92,9 +92,9 @@ def channel_join(token, channel_id):
         raise Exception('AccessError')
 
     if authorised_user in channel['owner_members']:
-        channel['owner_members'].remove(authorised_user)
+        channel['owner_members'].append(authorised_user)
     if authorised_user in channel['all_members']:
-        channel['all_members'].remove(authorised_user)
+        channel['all_members'].append(authorised_user)
     
     return {
     }
