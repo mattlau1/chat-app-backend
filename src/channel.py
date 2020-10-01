@@ -91,9 +91,9 @@ def channel_join(token, channel_id):
     elif authorised_user is None:
         raise Exception('AccessError')
 
-    if authorised_user in channel['owner_members']:
-        channel['owner_members'].append(authorised_user)
-    if authorised_user in channel['all_members']:
+    # if authorised_user in channel['owner_members']:
+    #    channel['owner_members'].append(authorised_user)
+    if authorised_user not in channel['all_members']:
         channel['all_members'].append(authorised_user)
     
     return {
