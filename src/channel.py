@@ -25,20 +25,20 @@ def channel_details(token, channel_id):
         raise Exception('AccessError')
 
     return {
-        'name': 'Hayden',
+        'name': channel['name'],
         'owner_members': [
             {
-                'u_id': 1,
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
+                'u_id': channel['owner_members']['u_id'],
+                'name_first': channel['owner_members']['name_first'],
+                'name_last': channel['owner_members']['name_last'],
             }
             for owner in channel['owner_members']
         ],
         'all_members': [
             {
-                'u_id': 1,
-                'name_first': 'Hayden',
-                'name_last': 'Jacobs',
+                'u_id': channel['all_members']['u_id'],
+                'name_first': channel['all_members']['name_frst'],
+                'name_last': channel['all_members']['name_last'],
             }
             for member in channel['all_members']
         ],
@@ -53,18 +53,22 @@ def channel_messages(token, channel_id, start):
         raise Exception('InputError')
     elif authorised_user not in channel['all_members']:
         raise Exception('AccessError')
+    
+    end = start + 50
+    if end > len(channel['messages']):
+        end = -1
+
     return {
         'messages': [
             {
-                'message_id': 1,
-                'u_id': 1,
-                'message': 'Hello world',
-                'time_created': 1582426789,
+                'message_id': channel['messages']['message_id'],
+                'u_id': channel['messages']['u_id'],
+                'message': channel['messages']['message'],
+                'time_created': channel['messages']['time_created'],
             }
         ],
-        'start': 0,
-        'end': 50,
-        # Must account for 'end' being -1
+        'start': start,
+        'end': end,
     }
 
 def channel_leave(token, channel_id):
