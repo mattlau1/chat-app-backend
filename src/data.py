@@ -4,10 +4,8 @@ import re
 data = {
     # Users - array of {id, email, password, name_first, name_last, token}
     'users': [],
-    # Channels - array of {id, name, }
+    # Channels - array of {id, name, owner_members, all_members, messages}
     'channels': [],
-    # Messages
-    'messages': [],
 }
 
 
