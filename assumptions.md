@@ -20,6 +20,7 @@
 - The creator of a channel can be removed as an owner if they add an owner who removes them
 - channel_leave also removes a user as owner if they are an owner
 - A channel (public or private) can have no members if everyone leaves (including owners), but won't be deleted (to maintain sequential unique id ordering), but could add a deactivation status in the future if necessary
+- For storing member/owner data, only their unique id is stored - for ease of retrieving future name updates
 
 ### channels.py:
 - Users without tokens (or have invalid tokens) are unable to access channels_listall
