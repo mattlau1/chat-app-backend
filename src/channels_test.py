@@ -5,15 +5,6 @@ from error import InputError, AccessError
 from other import clear
 from auth import auth_register
 
-def test_create_valid_names():
-    # create channel and set public to true
-    user = auth_register('steven22131@gmail.com', 'thisisagoodpassword', 'Steven', 'Smith')
-    channels_create(user['token'], "FirstChannel", True)
-    channels_create(user['token'], "UNSW discussion",  True)
-    channels_create(user['token'], "Private", False)
-    assert data['channels'] == [{'id': 1, 'name': 'FirstChannel'}, {'id': 2, 'name': 'UNSW discussion'}, {'id': 3, 'name': 'Private'}]
-    clear()
-
 def test_create_long_names():
     # create a channel that has more than 20 characters (max length) in name
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
@@ -90,4 +81,18 @@ def test_invalid_token():
         channels_listall("this is not valid")
         channels_listall("!@#* !@(*#&")
 
-# Please add valid tests here <--
+def test_create_valid_names():
+    # create channel and set public to true
+    user1 = auth_register('andrew42421s23@gmail.com', 'thisisagoodpassword', 'Andrew', 'Smith')
+    channels_create(user1['token'], "FirstChannel", True)
+    channels_create(user1['token'], "UNSW discussion",  True)
+    channels_create(user1['token'], "Private", False)
+    assert len(channels_list(user1['token'])['channels']) == 3
+
+    user2 = auth_register('stevenmatthewson@gmail.com', 'khjsdfiowefh2', 'Steven', 'Matthewson')
+    assert len(channels_list(user2['token'])['channels']) == 0
+    channels_create(user2['token'], "Steven land", True)
+    assert len(channels_list(user2['token'])['channels']) == 1
+
+    assert len(channels_listall(user1['token'])['channels']) == 4
+    clear()
