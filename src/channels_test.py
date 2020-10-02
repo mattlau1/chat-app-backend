@@ -5,6 +5,15 @@ from error import InputError, AccessError
 from other import clear
 from auth import auth_register
 
+def test_create_valid_names():
+    # create channel and set public to true
+    user = auth_register('steven22131@gmail.com', 'thisisagoodpassword', 'Steven', 'Smith')
+    channels_create(user['token'], "FirstChannel", True)
+    channels_create(user['token'], "UNSW discussion",  True)
+    channels_create(user['token'], "Private", False)
+    assert data['channels'] == [{'id': 1, 'name': 'FirstChannel'}, {'id': 2, 'name': 'UNSW discussion'}, {'id': 3, 'name': 'Private'}]
+    clear()
+
 def test_create_long_names():
     # create a channel that has more than 20 characters (max length) in name
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
