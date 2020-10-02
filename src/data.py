@@ -2,12 +2,29 @@ import re
 
 # Database
 data = {
-    # Users - array of {id, email, password, name_first, name_last, token}
+    # Users - array of dictionaries {
+    #   id - unique integer, 
+    #   email - string, 
+    #   password - string, 
+    #   name_first - string, 
+    #   name_last - string, 
+    #   token - string,
+    # }
     'users': [],
-    # Channels - array of {id, name, }
+    # Channels - array of dictionaries {
+    #   id - unique integer, 
+    #   name - string, 
+    #   is_public - boolean,
+    #   owner_members - array of u_id (integer corresponding to a user id),
+    #   all_members - array of u_id (integer corresponding to a user id),
+    #   messages - array of dictionaries {
+    #       member_id - unique integer,
+    #       u_id - integer corresponding to the sender's user id,
+    #       time_created - datetime object,
+    #       message - string,
+    #   },
+    # }
     'channels': [],
-    # Messages
-    'messages': [],
 }
 
 
@@ -37,7 +54,7 @@ def user_with_email(email):
 # Returns the user with specified token
 def user_with_token(token):
     for user in data['users']:
-        if user['token'] == token:
+        if user['token'] == token and token != '':
             return user
     return None
 
@@ -68,6 +85,4 @@ def channel_with_id(id):
         if channel['id'] == id:
             return channel
     return None
-
-""" Helper functions for messages """
 

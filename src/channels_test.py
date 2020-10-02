@@ -1,9 +1,7 @@
 # Test file for channels.py
-
 import pytest
-from data import data
-from error import InputError, AccessError
 from channels import channels_list, channels_listall, channels_create
+from error import InputError, AccessError
 from other import clear
 from auth import auth_register
 
@@ -37,6 +35,8 @@ def test_create_whitespace_name():
         channels_create(user['token'], '          ', True)
     with pytest.raises(InputError):
         channels_create(user['token'], '      ', False)
+    with pytest.raises(InputError):
+        channels_create(user['token'], '    ', True)
     clear()
 
 def test_hidden_channels():
@@ -80,4 +80,5 @@ def test_invalid_token():
     with pytest.raises(AccessError): 
         channels_listall("this is not valid")
         channels_listall("!@#* !@(*#&")
-        
+
+# Please add valid tests here <--
