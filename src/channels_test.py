@@ -93,6 +93,8 @@ def test_create_valid_channels():
     # user2 creating private channel
     user2 = auth_register('stevenmatthewson@gmail.com', 'khjsdfiowefh2', 'Steven', 'Matthewson')
     assert len(channels_list(user2['token'])['channels']) == 0
+    assert len(channels_listall(user2['token'])['channels']) == 2
+    
     channels_create(user2['token'], "Steven land", True)
     assert len(channels_list(user2['token'])['channels']) == 1
 
