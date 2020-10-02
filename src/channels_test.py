@@ -80,6 +80,7 @@ def test_invalid_token():
     with pytest.raises(AccessError): 
         channels_listall("this is not valid")
         channels_listall("!@#* !@(*#&")
+    clear()
 
 def test_create_valid_channels():
     # user1 creating 3 channels normally
