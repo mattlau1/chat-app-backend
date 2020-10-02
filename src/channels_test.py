@@ -68,3 +68,16 @@ def test_hidden_channels():
     assert len(channels_listall(user2['token'])) == 5
 
     clear()
+
+def test_invalid_token():
+    # creating channel without a valid token
+    with pytest.raises(AccessError):
+        channels_create("thisisaninvalidtoken", 'steven lair', True)
+        channels_create("!)@(#*)!@*", '   ', False)
+    with pytest.raises(AccessError):
+        channels_list("anotherinvalidtoken")
+        channels_list("!@#(*&%")
+    with pytest.raises(AccessError): 
+        channels_listall("this is not valid")
+        channels_listall("!@#* !@(*#&")
+        
