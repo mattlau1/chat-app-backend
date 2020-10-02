@@ -41,7 +41,7 @@ def test_create_whitespace_name():
 
 def test_hidden_channels():
     # user1 makes 3 channels
-    user1 = auth_register('stevenGAMING@gmail.com', 'ilikeapPlEs', 'Steven', 'Stevenson')
+    user1 = auth_register('stevengaming@gmail.com', 'ilikeapPlEs', 'Steven', 'Stevenson')
     channels_create(user1['token'], 'Private Channel 1', False)
     channels_create(user1['token'], 'Secret Club', False)
     channels_create(user1['token'], 'HIDDEN channel', False)
