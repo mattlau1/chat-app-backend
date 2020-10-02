@@ -75,8 +75,8 @@ def channel_messages(token, channel_id, start):
     
     # Messages originally ordered chronologically
     messages = list(reversed(channel['messages']))[start : start + 50 + 1]
-    # The end is reached if the first message (message index 0) is included in messages
-    end = -1 if any(message['m_id'] == 0 for message in messages) else start + 50
+    # The end is reached if the first message (message index 1) is included in messages
+    end = -1 if any(message['m_id'] == 1 for message in messages) else start + 50
 
     return {
         'messages': messages,
