@@ -20,6 +20,7 @@ def test_create_long_names():
     clear()
 
 def test_create_empty_name():
+    # Creating channels with empty names, public and private
     user = auth_register('user1@gmail.com', 'password1', 'John', 'Smith')
     with pytest.raises(InputError):
         channels_create(user['token'], '', True)
@@ -28,6 +29,7 @@ def test_create_empty_name():
     clear()
 
 def test_create_whitespace_name():
+    # Creating channels with whitespace as name
     user = auth_register('petermichaels@gmail.com', 'password', 'Peter', 'Michaels')
     with pytest.raises(InputError):
         channels_create(user['token'], ' ', True)
@@ -69,7 +71,7 @@ def test_hidden_channels():
 
     clear()
 
-def test_invalid_token():
+def test_invalid_tokens():
     # creating channel without a valid token
     with pytest.raises(AccessError):
         channels_create("thisisaninvalidtoken", 'steven lair', True)
@@ -89,16 +91,13 @@ def test_create_valid_channels():
     channels_create(user1['token'], "UNSW discussion",  True)
     channels_create(user1['token'], "Private", False)
     assert len(channels_list(user1['token'])['channels']) == 3
+    assert len(channels_listall(user1['token'])['channels']) == 3
 
-    # user2 creating private channel
+    # user2 creating private channel, total     
     user2 = auth_register('stevenmatthewson@gmail.com', 'khjsdfiowefh2', 'Steven', 'Matthewson')
     assert len(channels_list(user2['token'])['channels']) == 0
-    assert len(channels_listall(user2['token'])['channels']) == 2
-    
     channels_create(user2['token'], "Steven land", True)
     assert len(channels_list(user2['token'])['channels']) == 1
+    assert len(channels_listall(user1['token'])['channels']) == 4 
 
-    # user1 and user2 should be in 3 channels each
-    assert len(channels_listall(user1['token'])['channels']) == 3
-    assert len(channels_listall(user2['token'])['channels']) == 3
     clear()
