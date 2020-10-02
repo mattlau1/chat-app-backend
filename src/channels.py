@@ -5,8 +5,20 @@ from data import data, user_with_token
 scaffold = {}
 
 def channels_list(token):
-    # yet to be compeleted
-    return data['channels']
+    authorised_user = user_with_token(token)
+    # Error check
+    if authorised_user is None:
+        raise AccessError
+    
+    return {
+        'channels': [
+        	{
+        		'channel_id': channel['id'],
+        		'name': channel['name'],
+        	}
+            for channel in data['channels'] if authorised_user['id'] in channel['all_members']
+        ],
+    }
 
 def channels_listall(token):
     # Error check
