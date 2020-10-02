@@ -7,15 +7,6 @@ from channels import channels_list, channels_listall, channels_create
 from other import clear
 from auth import auth_register
 
-def test_create_valid_names():
-    # create channel and set public to true
-    user = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
-    channels_create(user['token'], "FirstChannel", True)
-    channels_create(user['token'], "UNSW discussion",  True)
-    channels_create(user['token'], "Private", False)
-    assert data['channels'] == [{'id': 1, 'name': 'FirstChannel'}, {'id': 2, 'name': 'UNSW discussion'}, {'id': 3, 'name': 'Private'}]
-    clear()
-
 def test_create_long_names():
     # create a channel that has more than 20 characters (max length) in name
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
@@ -46,4 +37,34 @@ def test_create_whitespace_name():
         channels_create(user['token'], '          ', True)
     with pytest.raises(InputError):
         channels_create(user['token'], '      ', False)
+    clear()
+
+def test_hidden_channels():
+    # user1 makes 3 channels
+    user1 = auth_register('stevenGAMING@gmail.com', 'ilikeapPlEs', 'Steven', 'Stevenson')
+    channels_create(user1['token'], 'Private Channel 1', False)
+    channels_create(user1['token'], 'Secret Club', False)
+    channels_create(user1['token'], 'HIDDEN channel', False)
+    assert len(channels_list(user1['token'])) == 3
+    assert len(channels_listall(user1['token'])) == 3
+
+    # Public channel created, user1 should be able to see all 4
+    channels_create(user1['token'], 'Public', True)
+    assert len(channels_list(user1['token'])) == 4
+
+    # New user should only see public channel
+    user2 = auth_register('matthew2323@gmail.com', 'idontlikeapples', 'Matthew', 'Matthewson')
+    assert len(channels_list(user2['token'])) == 1
+    assert len(channels_listall(user2['token'])) == 4
+
+    # user2 can see 2 channels
+    channels_create(user2['token'], 'matthew lair', False)
+    assert len(channels_list(user2['token'])) == 2
+
+    # user1 can still only see 4
+    assert len(channels_list(user1['token'])) == 4
+
+    # there should be a total of 5 channels
+    assert len(channels_listall(user2['token'])) == 5
+
     clear()
