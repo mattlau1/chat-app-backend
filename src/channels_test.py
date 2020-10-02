@@ -99,5 +99,9 @@ def test_create_valid_channels():
     channels_create(user2['token'], "Steven land", True)
     assert len(channels_list(user2['token'])['channels']) == 1
     assert len(channels_listall(user1['token'])['channels']) == 4 
+    
+    # user3 creating no channels
+    user3 = auth_register('stevensmithson@gmail.com', 'dwfwefhf', 'Steven', 'Smithson')
+    assert len(channels_list(user3['token'])['channels']) == 0
 
     clear()
