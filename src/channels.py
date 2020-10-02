@@ -1,5 +1,5 @@
 from error import InputError, AccessError
-from data import data
+from data import data, user_with_token
 
 # initialise dictionary to store detail of the channel
 scaffold = {}
