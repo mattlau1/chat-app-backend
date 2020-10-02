@@ -81,18 +81,21 @@ def test_invalid_token():
         channels_listall("this is not valid")
         channels_listall("!@#* !@(*#&")
 
-def test_create_valid_names():
-    # create channel and set public to true
+def test_create_valid_channels():
+    # user1 creating 3 channels normally
     user1 = auth_register('andrew42421s23@gmail.com', 'thisisagoodpassword', 'Andrew', 'Smith')
     channels_create(user1['token'], "FirstChannel", True)
     channels_create(user1['token'], "UNSW discussion",  True)
     channels_create(user1['token'], "Private", False)
     assert len(channels_list(user1['token'])['channels']) == 3
 
+    # user2 creating private channel
     user2 = auth_register('stevenmatthewson@gmail.com', 'khjsdfiowefh2', 'Steven', 'Matthewson')
     assert len(channels_list(user2['token'])['channels']) == 0
     channels_create(user2['token'], "Steven land", True)
     assert len(channels_list(user2['token'])['channels']) == 1
 
-    assert len(channels_listall(user1['token'])['channels']) == 4
+    # user1 and user2 should be in 3 channels each
+    assert len(channels_listall(user1['token'])['channels']) == 3
+    assert len(channels_listall(user2['token'])['channels']) == 3
     clear()
