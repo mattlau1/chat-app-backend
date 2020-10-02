@@ -16,7 +16,7 @@ def test_channel_addowner():
     channel_addowner(owner['token'], work['channel_id'], user['u_id'])
     channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
     
-    # Add someone who is already the owner
+    # Addding someone who is already the owner
     channel_addowner(owner['token'], work['channel_id'], user['u_id'])
     with pytest.raises(InputError):
         channel_addowner(owner['token'], work['channel_id'], user['u_id'])
@@ -46,20 +46,19 @@ def test_channel_removeowner():
     with pytest.raises(InputError):
         channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
     
-    # Add someone to be removed (maybe have this at the start of a helper function
-    # since it will get repeated and is not technically a whole test)
-    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
+    # Authorised user is not an owner
+    with pytest.raises(AccessError):
+        channel_removeowner(user['token'], work['channel_id'], owner['u_id'])
 
-    # User can remove owner now
-    channel_removeowner(user['token'], work['channel_id'], owner['u_id'])
+    # Addding someone to be removed
+    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
         channel_removeowner(owner['token'], work['channel_id'] + 100, user['u_id'])
-    
-    # Authorised user is not an owner
-    with pytest.raises(AccessError):
-        channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
+
+    # Authorised user can remove owner (since they are now another owner)
+    channel_removeowner(user['token'], work['channel_id'], owner['u_id'])
 
     clear()
 
@@ -100,7 +99,6 @@ def test_channel_join():
     # Checking if a user can join a channel (verified if they can leave the channel)
     channel_join(user['token'], channel1['channel_id'])
     channel_leave(user['token'], channel1['channel_id'])
-
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
@@ -147,7 +145,6 @@ def test_channel_details():
     # Checking if member of channel can check channel details
     channel_join(user['token'], channel['channel_id'])
     channel_details(user['token'], channel['channel_id'])
-
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
