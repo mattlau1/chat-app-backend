@@ -2,7 +2,6 @@ from error import InputError, AccessError
 from data import data, user_with_token
 
 # initialise dictionary to store detail of the channel
-scaffold = {}
 
 def channels_list(token):
     authorised_user = user_with_token(token)
@@ -36,25 +35,31 @@ def channels_listall(token):
     }
 
 def channels_create(token, name, is_public):
-    channel_length = len(name)
-    max_channel_length = 20
-
-    if (channel_length > max_channel_length):
-        # Long channel names
+    authorised_user = user_with_token(token)
+    # Error check
+    if len(name) > 20:
         raise InputError
-    if (not name):
+    elif (not name):
         # Empty name
         raise InputError
-    if (name.isspace()):
+    elif (name.isspace()):
         # Whitespace name
         raise InputError
+    elif authorised_user is None:
+        raise AccessError
 
-    # make a dictionary and append it
-    d = scaffold.copy()
-    d['id'] = 1
-    d['name'] = name
-    data['channels'].append(d)
 
-    #if there is already a channel, change id
-    if (len(data['channels']) > 1):
-        d['id'] = len(data['channels'])
+    # Register
+    channel_id = len(data['channels']) + 1
+    data['channels'].append({
+        'id': channel_id,
+        'name': name,
+        'is_public': is_public,
+        'owner_members': [authorised_user['id'],],
+        'all_members': [authorised_user['id'],],
+        'messages': [],
+    })
+    
+    return {
+        'channel_id': channel_id,
+    }
