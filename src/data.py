@@ -2,12 +2,33 @@ import re
 
 # Database
 data = {
-    # Users - array of {id, email, password, name_first, name_last, token}
+    """
+    Users - array of dictionaries {
+      id - unique integer, 
+      email - string, 
+      password - string, 
+      name_first - string, 
+      name_last - string, 
+      token - string,
+    }
+    """
     'users': [],
-    # Channels - array of {id, name, }
+    """
+    Channels - array of dictionaries {
+      id - unique integer, 
+      name - string, 
+      is_public - boolean,
+      owner_members - array of u_id (integer corresponding to a user id),
+      all_members - array of u_id (integer corresponding to a user id),
+      messages - array of dictionaries {
+          member_id - unique integer,
+          u_id - integer corresponding to the sender's user id,
+          time_created - datetime object,
+          message - string,
+      },
+    }
+    """
     'channels': [],
-    # Messages
-    'messages': [],
 }
 
 
@@ -62,8 +83,10 @@ def user_update_token(id, new_token):
 
 
 """ Helper functions for channels """
-
-
-
-""" Helper functions for messages """
+# Extracts information about a specified channel (by id)
+def channel_with_id(id):
+    for channel in data['channels']:
+        if channel['id'] == id:
+            return channel
+    return None
 
