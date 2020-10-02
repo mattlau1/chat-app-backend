@@ -9,8 +9,19 @@ def channels_list(token):
     return data['channels']
 
 def channels_listall(token):
-    # yet to be completed
-    return data['channels']
+    # Error check
+    if user_with_token(token) is None:
+        raise AccessError
+
+    return {
+        'channels': [
+        	{
+        		'channel_id': channel['id'],
+        		'name': channel['name'],
+        	}
+            for channel in data['channels']
+        ],
+    }
 
 def channels_create(token, name, is_public):
     channel_length = len(name)
