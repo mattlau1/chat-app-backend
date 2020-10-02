@@ -45,27 +45,27 @@ def test_hidden_channels():
     channels_create(user1['token'], 'Private Channel 1', False)
     channels_create(user1['token'], 'Secret Club', False)
     channels_create(user1['token'], 'HIDDEN channel', False)
-    assert len(channels_list(user1['token'])) == 3
-    assert len(channels_listall(user1['token'])) == 3
+    assert len(channels_list(user1['token'])['channels']) == 3
+    assert len(channels_listall(user1['token'])['channels']) == 3
 
     # Public channel created, user1 should be able to see all 4
     channels_create(user1['token'], 'Public', True)
-    assert len(channels_list(user1['token'])) == 4
+    assert len(channels_list(user1['token'])['channels']) == 4
 
     # New user should only see public channel
     user2 = auth_register('matthew2323@gmail.com', 'idontlikeapples', 'Matthew', 'Matthewson')
-    assert len(channels_list(user2['token'])) == 1
-    assert len(channels_listall(user2['token'])) == 4
+    assert len(channels_list(user2['token'])['channels']) == 0
+    assert len(channels_listall(user2['token'])['channels']) == 4
 
-    # user2 can see 2 channels
+    # user2 has 1 channel
     channels_create(user2['token'], 'matthew lair', False)
-    assert len(channels_list(user2['token'])) == 2
+    assert len(channels_list(user2['token'])['channels']) == 1
 
     # user1 can still only see 4
-    assert len(channels_list(user1['token'])) == 4
+    assert len(channels_list(user1['token'])['channels']) == 4
 
     # there should be a total of 5 channels
-    assert len(channels_listall(user2['token'])) == 5
+    assert len(channels_listall(user2['token'])['channels']) == 5
 
     clear()
 
