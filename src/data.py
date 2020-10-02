@@ -2,32 +2,28 @@ import re
 
 # Database
 data = {
-    """
-    Users - array of dictionaries {
-      id - unique integer, 
-      email - string, 
-      password - string, 
-      name_first - string, 
-      name_last - string, 
-      token - string,
-    }
-    """
+    # Users - array of dictionaries {
+    #   id - unique integer, 
+    #   email - string, 
+    #   password - string, 
+    #   name_first - string, 
+    #   name_last - string, 
+    #   token - string,
+    # }
     'users': [],
-    """
-    Channels - array of dictionaries {
-      id - unique integer, 
-      name - string, 
-      is_public - boolean,
-      owner_members - array of u_id (integer corresponding to a user id),
-      all_members - array of u_id (integer corresponding to a user id),
-      messages - array of dictionaries {
-          member_id - unique integer,
-          u_id - integer corresponding to the sender's user id,
-          time_created - datetime object,
-          message - string,
-      },
-    }
-    """
+    # Channels - array of dictionaries {
+    #   id - unique integer, 
+    #   name - string, 
+    #   is_public - boolean,
+    #   owner_members - array of u_id (integer corresponding to a user id),
+    #   all_members - array of u_id (integer corresponding to a user id),
+    #   messages - array of dictionaries {
+    #       member_id - unique integer,
+    #       u_id - integer corresponding to the sender's user id,
+    #       time_created - datetime object,
+    #       message - string,
+    #   },
+    # }
     'channels': [],
 }
 
