@@ -22,6 +22,14 @@ def test_channel_addowner():
         channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
 
+    # Authorised user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_addowner('', channel['channel_id'], user['u_id'])
+    
+    # New owner does not have a valid token
+    with pytest.raises(AccessError):
+        channel_addowner(owner['token'], channel['channel_id'], '')
+
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
         channel_addowner(owner['token'], channel['channel_id'] + 100, user['u_id'])
@@ -44,13 +52,21 @@ def test_channel_removeowner():
     # Removing someone who is already removed (no longer an owner)
     with pytest.raises(InputError):
         channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
-    
+
     # Authorised user is not an owner
     with pytest.raises(AccessError):
         channel_removeowner(user['token'], channel['channel_id'], owner['u_id'])
 
     # Addding someone to be removed
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
+
+    # Authorised user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_removeowner('', channel['channel_id'], user['u_id'])
+
+    # Old owner does not have a valid token
+    with pytest.raises(AccessError):
+        channel_removeowner(owner['token'], channel['channel_id'], '')
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
@@ -65,26 +81,30 @@ def test_channel_invite():
     user1 = auth_register('user1@gmail.com', 'password1', 'John', 'Smith')
     user2 = auth_register('user2@gmail.com', 'password2', 'Steve', 'Jackson') 
     # User 1 creates a new channel, and invites User 2
-    test_channel1 = channels_create(user1['token'], 'Test Channel 1', True)
-    channel_invite(user1['token'], test_channel1['channel_id'], user2['u_id'])
+    channel1 = channels_create(user1['token'], 'Test Channel 1', True)
+    channel_invite(user1['token'], channel1['channel_id'], user2['u_id'])
 
     # Checking if User 2 is a member of the channel (whether they can access channel details)
-    channel_details(user2['token'], test_channel1['channel_id'])
+    channel_details(user2['token'], channel1['channel_id'])
     
-    test_channel2 = channels_create(user1['token'], 'Test Channel 2', True)
+    channel2 = channels_create(user1['token'], 'Test Channel 2', True)
+
+    # Authorised user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_invite('', channel2['channel_id'], user2['u_id'])
 
     # Channel ID does not refer to a valid channel
     with pytest.raises(InputError):
-        channel_invite(user1['token'], test_channel2['channel_id'] + 100, user2['u_id'])
+        channel_invite(user1['token'], channel2['channel_id'] + 100, user2['u_id'])
 
     # User ID does not refer to a valid user
     with pytest.raises(InputError):
-        channel_invite(user1['token'], test_channel2['channel_id'], user2['u_id'] + 100)
+        channel_invite(user1['token'], channel2['channel_id'], user2['u_id'] + 100)
 
     # Authorised user is not a member of the channel
     with pytest.raises(AccessError):
         user3 = auth_register('user3@gmail.com', 'password3', 'Jim', 'Johnson')
-        channel_invite(user3['token'], test_channel2['channel_id'], user2['u_id'])
+        channel_invite(user3['token'], channel2['channel_id'], user2['u_id'])
 
 
 def test_channel_join():
@@ -96,6 +116,10 @@ def test_channel_join():
     # Checking if a user can join a channel (verified if they can leave the channel)
     channel_join(user['token'], channel1['channel_id'])
     channel_leave(user['token'], channel1['channel_id'])
+
+    # Authorised user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_join('', channel1['channel_id'])
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
@@ -119,7 +143,11 @@ def test_channel_leave():
     channel_leave(user['token'], channel['channel_id'])
     with pytest.raises(AccessError):
         channel_details(user['token'], channel['channel_id'])
-    
+
+    # Authorised user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_leave('', channel['channel_id'])
+
     # Channel ID is not a valid channel
     channel_join(user['token'], channel['channel_id'])
     with pytest.raises(InputError):
@@ -151,6 +179,10 @@ def test_channel_details():
     # Checking if member of channel can check channel details
     channel_join(user['token'], channel['channel_id'])
     channel_details(user['token'], channel['channel_id'])
+
+    # Authorised user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_details('', channel['channel_id'])
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
