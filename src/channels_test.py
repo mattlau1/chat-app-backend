@@ -1,11 +1,12 @@
 # Test file for channels.py
-import pytest
 from channels import channels_list, channels_listall, channels_create
 from error import InputError, AccessError
 from other import clear
 from auth import auth_register
+import pytest
 
 def test_create_long_names():
+    clear()
     # create a channel that has more than 20 characters (max length) in name
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
     long_name = "abcdefghijklmnopqrstuvwxyz"
@@ -17,18 +18,18 @@ def test_create_long_names():
     long_name = "ijxiqwji9xq9iqdjim9dwq89n189819me781neuensa9xaj9xd"
     with pytest.raises(InputError):
         channels_create(user['token'], long_name, False)
-    clear()
 
 def test_create_empty_name():
+    clear()
     # Creating channels with empty names, public and private
     user = auth_register('user1@gmail.com', 'password1', 'John', 'Smith')
     with pytest.raises(InputError):
         channels_create(user['token'], '', True)
     with pytest.raises(InputError):
         channels_create(user['token'], '', False)
-    clear()
 
 def test_create_whitespace_name():
+    clear()
     # Creating channels with whitespace as name
     user = auth_register('petermichaels@gmail.com', 'password', 'Peter', 'Michaels')
     with pytest.raises(InputError):
@@ -39,9 +40,9 @@ def test_create_whitespace_name():
         channels_create(user['token'], '      ', False)
     with pytest.raises(InputError):
         channels_create(user['token'], '    ', True)
-    clear()
 
 def test_hidden_channels():
+    clear()
     # user1 makes 3 channels
     user1 = auth_register('stevengaming@gmail.com', 'ilikeapPlEs', 'Steven', 'Stevenson')
     channels_create(user1['token'], 'Private Channel 1', False)
@@ -69,9 +70,8 @@ def test_hidden_channels():
     # there should be a total of 5 channels
     assert len(channels_listall(user2['token'])['channels']) == 5
 
-    clear()
-
 def test_invalid_tokens():
+    clear()
     # creating channel without a valid token
     with pytest.raises(AccessError):
         channels_create("thisisaninvalidtoken", 'steven lair', True)
@@ -82,9 +82,9 @@ def test_invalid_tokens():
     with pytest.raises(AccessError): 
         channels_listall("this is not valid")
         channels_listall("!@#* !@(*#&")
-    clear()
 
 def test_create_valid_channels():
+    clear()
     # user1 creating 3 channels normally
     user1 = auth_register('andrew42421s23@gmail.com', 'thisisagoodpassword', 'Andrew', 'Smith')
     channels_create(user1['token'], "FirstChannel", True)
@@ -103,5 +103,3 @@ def test_create_valid_channels():
     # user3 creating no channels
     user3 = auth_register('stevensmithson@gmail.com', 'dwfwefhf', 'Steven', 'Smithson')
     assert len(channels_list(user3['token'])['channels']) == 0
-
-    clear()
