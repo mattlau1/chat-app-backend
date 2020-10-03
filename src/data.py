@@ -40,10 +40,6 @@ def valid_email(email):
 def user_email_list():
     return [user['email'] for user in data['users']]
 
-# Retrieves all the active tokens
-def active_tokens():
-    return [user['token'] for user in data['users'] if user['token'] != '']
-
 # Returns the user with specified email address
 def user_with_email(email):
     for user in data['users']:

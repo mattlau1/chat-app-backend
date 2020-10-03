@@ -9,12 +9,16 @@ def channel_invite(token, channel_id, u_id):
     
     # Error check
     if channel is None:
+        # Invalid channel_id
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
     elif invited_user is None:
+        # Invalid u_id
         raise InputError
     elif authorised_user['id'] not in channel['all_members']:
+        # Requested user not a member of channel
         raise AccessError
     
     # Append invited user to all_members
@@ -32,10 +36,13 @@ def channel_details(token, channel_id):
     
     # Error check
     if channel is None:
+        # Invalid channel_id
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
+        # Requested user not a member of channel
         raise AccessError
 
     return {
@@ -65,13 +72,17 @@ def channel_messages(token, channel_id, start):
     
     # Error check
     if channel is None:
-        raise InputError
-    elif start >= len(channel['messages']):
+        # Invalid channel_id
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
+        # Requested user not a member of channel
         raise AccessError
+    elif start >= len(channel['messages']):
+        # Invalid start index
+        raise InputError
     
     # Messages originally ordered chronologically - 
     # reverse and retrieve a maximum of 50 most recent messages
@@ -92,10 +103,13 @@ def channel_leave(token, channel_id):
 
     # Error check
     if channel is None:
+        # Invalid channel_id
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
+        # Requested user not a member of channel
         raise AccessError
 
     # Remove user from all_members
@@ -120,10 +134,13 @@ def channel_join(token, channel_id):
 
     # Error check
     if channel is None:
+        # Invalid channel_id
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
     elif not channel['is_public']:
+        # Private channel
         raise AccessError
 
     # Adds user to channel
@@ -143,14 +160,19 @@ def channel_addowner(token, channel_id, u_id):
 
     # Error check
     if channel is None:
+        # Invalid channel_id
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
     elif new_owner is None:
+        # Invalid u_id
         raise AccessError
     elif authorised_user['id'] not in channel['owner_members']:
+        # Requested user is not an owner of channel
         raise AccessError
     elif new_owner['id'] in channel['owner_members']:
+        # User to be added as an owner is already an owner in the channel
         raise InputError
 
     # Add user as owner
@@ -169,14 +191,19 @@ def channel_removeowner(token, channel_id, u_id):
 
     # Error check
     if channel is None:
+        # Invalid channel_id
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
     elif old_owner is None:
+        # Invalid u_id
         raise AccessError    
     elif authorised_user['id'] not in channel['owner_members']:
+        # Requested user is not an owner of channel
         raise AccessError
     elif old_owner['id'] not in channel['owner_members']:
+        # User to be removed as an owner is not an owner in the channel
         raise InputError
 
     # Remove owner

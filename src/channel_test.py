@@ -1,6 +1,5 @@
 # Test file for channel.py
-
-from channel import channel_invite, channel_details, channel_leave, channel_join, channel_addowner, channel_removeowner
+from channel import channel_invite, channel_details, channel_leave, channel_join, channel_addowner, channel_removeowner, channel_messages
 from channels import channels_create
 from auth import auth_register
 from error import InputError, AccessError
@@ -8,6 +7,7 @@ from other import clear
 import pytest
 
 def test_channel_addowner():
+    clear()
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     work = channels_create(owner['token'], 'work', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
@@ -30,10 +30,9 @@ def test_channel_addowner():
     with pytest.raises(AccessError):
         channel_addowner(user['token'], work['channel_id'], user['u_id'])
 
-    clear()
-
 
 def test_channel_removeowner():
+    clear()
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     work = channels_create(owner['token'], 'work', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
@@ -60,10 +59,9 @@ def test_channel_removeowner():
     # Authorised user can remove owner (since they are now another owner)
     channel_removeowner(user['token'], work['channel_id'], owner['u_id'])
 
-    clear()
-
 
 def test_channel_invite():
+    clear()
     user1 = auth_register('user1@gmail.com', 'password1', 'John', 'Smith')
     user2 = auth_register('user2@gmail.com', 'password2', 'Steve', 'Jackson') 
     # User 1 creates a new channel, and invites User 2
@@ -88,10 +86,9 @@ def test_channel_invite():
         user3 = auth_register('user3@gmail.com', 'password3', 'Jim', 'Johnson')
         channel_invite(user3['token'], test_channel2['channel_id'], user2['u_id'])
 
-    clear()
-
 
 def test_channel_join():
+    clear()
     owner = auth_register('petermichaels@gmail.com', 'password', 'Peter', 'Michaels')
     channel1 = channels_create(owner['token'], 'Channel 1', True)
     user = auth_register('kimwilliams@gmail.com', 'password', 'Kim', 'Williams')
@@ -109,10 +106,9 @@ def test_channel_join():
     with pytest.raises(AccessError):
         channel_join(user['token'], channel2['channel_id'])
 
-    clear()
-
 
 def test_channel_leave():
+    clear()
     owner = auth_register('petermichaels@gmail.com', 'password', 'Peter', 'Michaels')
     channel = channels_create(owner['token'], 'Test Channel', True)
     user = auth_register('kimwilliams@gmail.com', 'password', 'Kim', 'Williams')
@@ -134,10 +130,9 @@ def test_channel_leave():
     with pytest.raises(AccessError):
         channel_leave(user['token'], channel['channel_id'])
 
-    clear()
-
 
 def test_channel_details():
+    clear()
     owner = auth_register('liambrown@gmail.com', 'password', 'Liam', 'Brown')
     channel = channels_create(owner['token'], 'Test Channel', True)
     user = auth_register('victorzhang@gmail.com', 'password', 'Victor', 'Zhang')
@@ -155,8 +150,25 @@ def test_channel_details():
     with pytest.raises(AccessError):
         channel_details(user['token'], channel['channel_id'])
 
-    clear()
 
-# It is not feasible to do testing for channel_messages during iteration one
+# It is not feasible to do valid testing for channel_messages during iteration one
 def test_channel_messages():
     pass
+    # clear()
+    # # Standard error check
+    # user = auth_register('testing@gmail.com', 'password', 'Test', 'User')
+    # channel = channels_create(user['token'], 'Test Channel', True)
+    # message_send(user['token'], channel['channel_id'], 'Test message')
+    # # Invalid channel_id
+    # with pytest.raises(InputError):
+    #     channel_messages(user['token'], channel['channel_id'] + 100, 0)
+    # # Invalid token
+    # with pytest.raises(AccessError):
+    #     channel_messages('', channel['channel_id'], 0)
+    # # Random user
+    # random_user = auth_register('test@gmail.com', 'password', 'Test', 'Mee')
+    # with pytest.raises(AccessError):
+    #     channel_messages(random_user['token'], channel['channel_id'], 0)
+    # # Invalid start index - unable to be tested in iteration one
+    # with pytest.raises(InputError):
+    #     channel_messages(user['token'], channel['channel_id'], 0)
