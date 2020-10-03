@@ -54,7 +54,7 @@ def user_with_email(email):
 # Returns the user with specified token
 def user_with_token(token):
     for user in data['users']:
-        if user['token'] == token:
+        if user['token'] == token and token != '':
             return user
     return None
 

@@ -5,6 +5,7 @@ def channels_list(token):
     authorised_user = user_with_token(token)
     # Error check
     if authorised_user is None:
+        # Invalid token
         raise AccessError
     
     return {
@@ -20,6 +21,7 @@ def channels_list(token):
 def channels_listall(token):
     # Error check
     if user_with_token(token) is None:
+        # Invalid token
         raise AccessError
 
     return {
@@ -36,8 +38,16 @@ def channels_create(token, name, is_public):
     authorised_user = user_with_token(token)
     # Error check
     if len(name) > 20:
+        # Name longer than 20 characters
+        raise InputError
+    elif not name:
+        # Empty name
+        raise InputError
+    elif name.isspace():
+        # Whitespace name
         raise InputError
     elif authorised_user is None:
+        # Invalid token
         raise AccessError
 
     # Register
