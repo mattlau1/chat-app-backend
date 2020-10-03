@@ -139,8 +139,8 @@ def channel_join(token, channel_id):
     elif authorised_user is None:
         # Invalid token
         raise AccessError
-    elif not channel['is_public']:
-        # Private channel
+    elif not channel['is_public'] and authorised_user['id'] != 1:
+        # Private channel and authorised user is not owner of Flockr
         raise AccessError
 
     # Adds user to channel
@@ -168,8 +168,8 @@ def channel_addowner(token, channel_id, u_id):
     elif new_owner is None:
         # Invalid u_id
         raise AccessError
-    elif authorised_user['id'] not in channel['owner_members']:
-        # Authorised user is not an owner of channel
+    elif authorised_user['id'] not in channel['owner_members'] and authorised_user['id'] != 1:
+        # Authorised user is not an owner of channel and not owner of Flockr
         raise AccessError
     elif new_owner['id'] in channel['owner_members']:
         # User to be added as an owner is already an owner in the channel
@@ -199,8 +199,8 @@ def channel_removeowner(token, channel_id, u_id):
     elif old_owner is None:
         # Invalid u_id
         raise AccessError    
-    elif authorised_user['id'] not in channel['owner_members']:
-        # Authorised user is not an owner of channel
+    elif authorised_user['id'] not in channel['owner_members'] and authorised_user['id'] != 1:
+        # Authorised user is not an owner of channel and not owner of Flockr
         raise AccessError
     elif old_owner['id'] not in channel['owner_members']:
         # User to be removed as an owner was not an owner in the channel

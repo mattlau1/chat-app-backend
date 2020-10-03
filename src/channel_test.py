@@ -164,8 +164,9 @@ def test_channel_leave():
     channel_leave(owner['token'], channel['channel_id'])
     with pytest.raises(AccessError):
         channel_details(user['token'], channel['channel_id'])
-    with pytest.raises(AccessError):
-        channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
+    
+    # Flockr owner can remove people even after they leave channel
+    channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
     
     clear()
 
