@@ -172,7 +172,7 @@ def channel_addowner(token, channel_id, u_id):
         # Authorised user is not an owner of channel and not owner of Flockr
         raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user is not a member in the channel (owner of Flocker may not be a member in the channel)
+        # Authorised user is not a member in the channel (owner of Flockr may not be a member in the channel)
         raise AccessError
     elif new_owner['id'] in channel['owner_members']:
         # User to be added as an owner is already an owner in the channel
@@ -206,7 +206,7 @@ def channel_removeowner(token, channel_id, u_id):
         # Authorised user is not an owner of channel and not owner of Flockr
         raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user is not a member in the channel (owner of Flocker may not be a member in the channel)
+        # Authorised user is not a member in the channel (owner of Flockr may not be a member in the channel)
         raise AccessError
     elif old_owner['id'] not in channel['owner_members']:
         # User to be removed as an owner was not an owner in the channel
