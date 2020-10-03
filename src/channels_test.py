@@ -75,12 +75,17 @@ def test_invalid_tokens():
     # creating channel without a valid token
     with pytest.raises(AccessError):
         channels_create("thisisaninvalidtoken", 'steven lair', True)
-        channels_create("!)@(#*)!@*", '    ', False)
+    with pytest.raises(AccessError):
+        channels_create("!)@(#*)!@*", 'steven lair2', False)
+
     with pytest.raises(AccessError):
         channels_list("anotherinvalidtoken")
+    with pytest.raises(AccessError):
         channels_list("!@#(*&%")
+
     with pytest.raises(AccessError): 
         channels_listall("this is not valid")
+    with pytest.raises(AccessError):
         channels_listall("!@#* !@(*#&")
 
 def test_create_valid_channels():
