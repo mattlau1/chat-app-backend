@@ -10,8 +10,6 @@ def channel_invite(token, channel_id, u_id):
     # Error check
     if channel is None:
         raise InputError
-    elif authorised_user is None:
-        raise AccessError
     elif invited_user is None:
         raise InputError
     elif authorised_user['id'] not in channel['all_members']:
@@ -33,8 +31,6 @@ def channel_details(token, channel_id):
     # Error check
     if channel is None:
         raise InputError
-    elif authorised_user is None:
-        raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
         raise AccessError
 
@@ -68,8 +64,6 @@ def channel_messages(token, channel_id, start):
         raise InputError
     elif start >= len(channel['messages']):
         raise InputError
-    elif authorised_user is None:
-        raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
         raise AccessError
     
@@ -93,8 +87,6 @@ def channel_leave(token, channel_id):
     # Error check
     if channel is None:
         raise InputError
-    elif authorised_user is None:
-        raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
         raise AccessError
 
@@ -121,8 +113,6 @@ def channel_join(token, channel_id):
     # Error check
     if channel is None:
         raise InputError
-    elif authorised_user is None:
-        raise AccessError
     elif not channel['is_public']:
         raise AccessError
 
@@ -144,10 +134,6 @@ def channel_addowner(token, channel_id, u_id):
     # Error check
     if channel is None:
         raise InputError
-    elif authorised_user is None:
-        raise AccessError
-    elif new_owner is None:
-        raise AccessError
     elif authorised_user['id'] not in channel['owner_members']:
         raise AccessError
     elif new_owner['id'] in channel['owner_members']:
@@ -170,10 +156,6 @@ def channel_removeowner(token, channel_id, u_id):
     # Error check
     if channel is None:
         raise InputError
-    elif authorised_user is None:
-        raise AccessError
-    elif old_owner is None:
-        raise AccessError    
     elif authorised_user['id'] not in channel['owner_members']:
         raise AccessError
     elif old_owner['id'] not in channel['owner_members']:
