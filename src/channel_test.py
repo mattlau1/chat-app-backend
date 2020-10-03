@@ -9,56 +9,56 @@ import pytest
 
 def test_channel_addowner():
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
-    work = channels_create(owner['token'], 'work', True)
+    channel = channels_create(owner['token'], 'Test channel', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
     
     # Checking if someone can be added (verified if they can be immediately removed)
-    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
-    channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
+    channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
+    channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
     
     # Addding someone who is already the owner
-    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
+    channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     with pytest.raises(InputError):
-        channel_addowner(owner['token'], work['channel_id'], user['u_id'])
-    channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
+        channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
+    channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
-        channel_addowner(owner['token'], work['channel_id'] + 100, user['u_id'])
+        channel_addowner(owner['token'], channel['channel_id'] + 100, user['u_id'])
     
     # Authorised user is not the owner
     with pytest.raises(AccessError):
-        channel_addowner(user['token'], work['channel_id'], user['u_id'])
+        channel_addowner(user['token'], channel['channel_id'], user['u_id'])
 
     clear()
 
 
 def test_channel_removeowner():
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
-    work = channels_create(owner['token'], 'work', True)
+    channel = channels_create(owner['token'], 'Test channel', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
 
     # Checking if someone can be removed (Add then remove)
-    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
-    channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
+    channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
+    channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
 
     # Removing someone who is already removed (no longer an owner)
     with pytest.raises(InputError):
-        channel_removeowner(owner['token'], work['channel_id'], user['u_id'])
+        channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
     
     # Authorised user is not an owner
     with pytest.raises(AccessError):
-        channel_removeowner(user['token'], work['channel_id'], owner['u_id'])
+        channel_removeowner(user['token'], channel['channel_id'], owner['u_id'])
 
     # Addding someone to be removed
-    channel_addowner(owner['token'], work['channel_id'], user['u_id'])
+    channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
-        channel_removeowner(owner['token'], work['channel_id'] + 100, user['u_id'])
+        channel_removeowner(owner['token'], channel['channel_id'] + 100, user['u_id'])
 
     # Authorised user can remove owner (since they are now another owner)
-    channel_removeowner(user['token'], work['channel_id'], owner['u_id'])
+    channel_removeowner(user['token'], channel['channel_id'], owner['u_id'])
 
     clear()
 
@@ -134,6 +134,15 @@ def test_channel_leave():
     with pytest.raises(AccessError):
         channel_leave(user['token'], channel['channel_id'])
 
+    # Checking if an owner can leave (verified if not able to access channel details
+    # and not able to further remove owners)
+    channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
+    channel_leave(owner['token'], channel['channel_id'])
+    with pytest.raises(AccessError):
+        channel_details(user['token'], channel['channel_id'])
+    with pytest.raises(AccessError):
+        channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
+    
     clear()
 
 
