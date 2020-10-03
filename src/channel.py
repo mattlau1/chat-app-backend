@@ -11,6 +11,9 @@ def channel_invite(token, channel_id, u_id):
     if channel is None:
         # Invalid channel_id
         raise InputError
+    elif authorised_user is None:
+        # Invalid token
+        raise AccessError
     elif invited_user is None:
         # Invalid u_id
         raise InputError
@@ -35,6 +38,9 @@ def channel_details(token, channel_id):
     if channel is None:
         # Invalid channel_id
         raise InputError
+    elif authorised_user is None:
+        # Invalid token
+        raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
         # Authorised user not a member of channel
         raise AccessError
@@ -68,6 +74,9 @@ def channel_messages(token, channel_id, start):
     if channel is None:
         # Invalid channel_id
         raise InputError
+    elif authorised_user is None:
+        # Invalid token
+        raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
         # Authorised user not a member of channel
         raise AccessError
@@ -96,6 +105,9 @@ def channel_leave(token, channel_id):
     if channel is None:
         # Invalid channel_id
         raise InputError
+    elif authorised_user is None:
+        # Invalid token
+        raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
         # Authorised user not a member of channel
         raise AccessError
@@ -124,6 +136,9 @@ def channel_join(token, channel_id):
     if channel is None:
         # Invalid channel_id
         raise InputError
+    elif authorised_user is None:
+        # Invalid token
+        raise AccessError
     elif not channel['is_public']:
         # Private channel
         raise AccessError
@@ -147,6 +162,12 @@ def channel_addowner(token, channel_id, u_id):
     if channel is None:
         # Invalid channel_id
         raise InputError
+    elif authorised_user is None:
+        # Invalid token
+        raise AccessError
+    elif new_owner is None:
+        # Invalid u_id
+        raise AccessError
     elif authorised_user['id'] not in channel['owner_members']:
         # Authorised user is not an owner of channel
         raise AccessError
@@ -172,6 +193,12 @@ def channel_removeowner(token, channel_id, u_id):
     if channel is None:
         # Invalid channel_id
         raise InputError
+    elif authorised_user is None:
+        # Invalid token
+        raise AccessError
+    elif old_owner is None:
+        # Invalid u_id
+        raise AccessError    
     elif authorised_user['id'] not in channel['owner_members']:
         # Authorised user is not an owner of channel
         raise AccessError
