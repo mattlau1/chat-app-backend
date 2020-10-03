@@ -11,8 +11,9 @@ def test_channel_addowner():
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     channel = channels_create(owner['token'], 'Test channel', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
-    
-    # Checking if someone can be added (verified if they can be immediately removed)
+    channel_join(user['token'], channel['channel_id'])
+
+    # Checking if someone can be added as an owner (verified if they can be immediately removed)
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
     
@@ -44,6 +45,7 @@ def test_channel_removeowner():
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     channel = channels_create(owner['token'], 'Test channel', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
+    channel_join(user['token'], channel['channel_id'])
 
     # Checking if someone can be removed (Add then remove)
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
@@ -160,15 +162,11 @@ def test_channel_leave():
 
     # Checking if an owner can leave (verified if not able to access channel details
     # and not able to further remove owners)
+    channel_join(user['token'], channel['channel_id'])
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     channel_leave(owner['token'], channel['channel_id'])
     with pytest.raises(AccessError):
-        channel_details(user['token'], channel['channel_id'])
-    
-    # Flockr owner can remove people even after they leave channel
-    channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
-    
-    clear()
+        channel_details(owner['token'], channel['channel_id'])
 
 
 def test_channel_details():
