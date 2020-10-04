@@ -2,6 +2,7 @@
 from channel import channel_invite, channel_details, channel_leave, channel_join, channel_addowner, channel_removeowner, channel_messages
 from channels import channels_create
 from auth import auth_register
+from message import message_send
 from error import InputError, AccessError
 from other import clear
 import pytest
@@ -87,6 +88,43 @@ def test_channel_removeowner():
 
     # Authorised user can remove owner (since they are now another owner)
     channel_removeowner(user['token'], channel['channel_id'], owner['u_id'])
+
+def test_flockr_owner():
+    clear()
+    flockr_owner = auth_register('big@man.com', 'password', 'Big', 'Boss')
+    admin = auth_register('admin@com.com', 'password', 'Channel', 'Boss')
+    user = auth_register('normie@normal.com', 'password', 'Average', 'Jonas')
+
+    # Admin creates channel
+    private_channel = channels_create(admin['token'], 'Test Channel', False)
+
+    # Flockr owner has to join as member first, like normal user
+    with pytest.raises(AccessError):
+        channel_addowner(admin['token'], private_channel['channel_id'], user['u_id'])
+
+    with pytest.raises(AccessError):
+        channel_addowner(admin['token'], private_channel['channel_id'], flockr_owner['u_id'])
+
+    # Flockr owner can't invite or add/remove owner if they haven't joined the channel as a member
+    with pytest.raises(AccessError):
+        channel_invite(flockr_owner['token'], private_channel['channel_id'], user['u_id'])
+    channel_invite(admin['token'], private_channel['channel_id'], user['u_id'])
+    with pytest.raises(AccessError):
+        channel_addowner(flockr_owner['token'], private_channel['channel_id'], user['u_id'])
+    channel_addowner(admin['token'], private_channel['channel_id'], user['u_id'])
+    with pytest.raises(AccessError):
+        channel_removeowner(flockr_owner['token'], private_channel['channel_id'], user['u_id'])
+    channel_leave(user['token'], private_channel['channel_id'])
+
+    # Flockr owner can join private channels, but regular users can't
+    with pytest.raises(AccessError):
+        channel_join(user['token'], private_channel['channel_id'])
+    channel_join(flockr_owner['token'], private_channel['channel_id'])
+
+    # Flockr owner can invite/add_owner/remove_owner once joined
+    channel_invite(flockr_owner['token'], private_channel['channel_id'], user['u_id'])
+    channel_addowner(flockr_owner['token'], private_channel['channel_id'], user['u_id'])
+    channel_removeowner(flockr_owner['token'], private_channel['channel_id'], user['u_id'])
 
 
 def test_channel_invite():
@@ -230,22 +268,51 @@ def test_channel_details():
 
 # It is not feasible to do valid testing for channel_messages during iteration one
 def test_channel_messages():
-    pass
-    # clear()
-    # # Standard error check
-    # user = auth_register('testing@gmail.com', 'password', 'Test', 'User')
-    # channel = channels_create(user['token'], 'Test Channel', True)
-    # message_send(user['token'], channel['channel_id'], 'Test message')
-    # # Invalid channel_id
-    # with pytest.raises(InputError):
-    #     channel_messages(user['token'], channel['channel_id'] + 100, 0)
-    # # Invalid token
-    # with pytest.raises(AccessError):
-    #     channel_messages('', channel['channel_id'], 0)
-    # # Random user
-    # random_user = auth_register('test@gmail.com', 'password', 'Test', 'Mee')
-    # with pytest.raises(AccessError):
-    #     channel_messages(random_user['token'], channel['channel_id'], 0)
-    # # Invalid start index - unable to be tested in iteration one
-    # with pytest.raises(InputError):
-    #     channel_messages(user['token'], channel['channel_id'], 0)
+    clear()
+    # Standard error check
+    user = auth_register('testing@gmail.com', 'password', 'Test', 'User')
+    channel = channels_create(user['token'], 'Test Channel', True)
+    message_send(user['token'], channel['channel_id'], 'Test message')
+    # Invalid channel_id
+    with pytest.raises(InputError):
+        channel_messages(user['token'], channel['channel_id'] + 100, 0)
+    # Invalid token
+    with pytest.raises(AccessError):
+        channel_messages('', channel['channel_id'], 0)
+    # Random user
+    random_user = auth_register('test@gmail.com', 'password', 'Test', 'Mee')
+    with pytest.raises(AccessError):
+        channel_messages(random_user['token'], channel['channel_id'], 0)
+    
+    # Invalid start index
+    messages = channel_messages(user['token'], channel['channel_id'], 0)
+    assert len(messages['messages']) == 1
+    assert messages['start'] == 0
+    assert messages['end'] == -1
+    with pytest.raises(InputError):
+        channel_messages(user['token'], channel['channel_id'], 1)
+    # Send 48 more messages - 49 total
+    for i in range(2, 50):
+        message_send(user['token'], channel['channel_id'], 'Test message')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)
+    assert len(messages['messages']) == 49
+    assert messages['start'] == 0
+    assert messages['end'] == -1
+    # 50 total messages
+    message_send(user['token'], channel['channel_id'], 'Test message')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)
+    assert len(messages['messages']) == 50
+    assert messages['start'] == 0
+    assert messages['end'] == -1
+    # 51 total messages
+    # Start from index 0
+    message_send(user['token'], channel['channel_id'], 'Test message')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)
+    assert len(messages['messages']) == 50
+    assert messages['start'] == 0
+    assert messages['end'] == 50
+    # Start from index 1
+    messages = channel_messages(user['token'], channel['channel_id'], 1)
+    assert len(messages['messages']) == 50
+    assert messages['start'] == 1
+    assert messages['end'] == -1
