@@ -12,6 +12,7 @@
 - User accounts cannot be deleted (as in data entries deleted) in order to maintain sequential unique id ordering - could add a deactivation status in the future if necessary
 
 ### channel.py:
+- Flockr owner (person with u_id == 1) has owner permissions for channel_join, channel_addowner, channel_removeowner (they can only add and remove owners while they are members of the channel)
 - All members can invite (not restricted to owners)
 - Inviting someone who has already been invited does nothing (no exceptions thrown, no duplicate entries added)
 - Joining a channel that a user is already in does nothing (no exceptions thrown, no duplicate entries added)
