@@ -13,7 +13,7 @@
 
 ### channel.py:
 - Flockr owner (person with u_id == 1) has owner permissions for channel_join, channel_addowner, channel_removeowner (they can only add and remove owners while they are members of the channel)
-- All members can invite (not restricted to owners)
+- All members can invite (not restricted to owners) - keyword members excludes Flockr owners who haven't joined yet
 - Inviting someone who has already been invited does nothing (no exceptions thrown, no duplicate entries added)
 - Joining a channel that a user is already in does nothing (no exceptions thrown, no duplicate entries added)
 - channel_messages start index only allows valid indices: i.e. index 0 and 1 but not 2 if there are two messages in channel (start index < number of messages)
