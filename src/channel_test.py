@@ -13,7 +13,6 @@ def test_channel_addowner():
     channel = channels_create(owner['token'], 'Test channel', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
     channel_join(user['token'], channel['channel_id'])
-    channel_join(flockr_owner['token'], channel['channel_id'])
 
     # Checking if someone can be added as an owner 
     # (verified if number of owners becomes 2 and if they can be immediately removed)
@@ -24,6 +23,8 @@ def test_channel_addowner():
     assert(len(details['owner_members']) == 2)
     channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
 
+
+    channel_join(flockr_owner['token'], channel['channel_id'])
     # Checking if owner of Flockr can be added as a channel owner
     details = channel_details(owner['token'], channel['channel_id'])
     assert(len(details['owner_members']) == 1)
@@ -48,6 +49,11 @@ def test_channel_addowner():
     assert(len(details['owner_members']) == 2)
     channel_removeowner(flockr_owner['token'], channel['channel_id'], flockr_owner['u_id'])     
 
+    # Checking if owner of Flockr (while not a member) can add someone as owner
+    channel_leave(flockr_owner['token'], channel['channel_id'])
+    with pytest.raises(AccessError):
+        channel_addowner(flockr_owner['token'], channel['channel_id'], user['u_id'])        
+    
     # Adding someone who is already the owner
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     with pytest.raises(InputError):
@@ -111,6 +117,11 @@ def test_channel_removeowner():
     channel_removeowner(flockr_owner['token'], channel['channel_id'], flockr_owner['u_id'])  
     details = channel_details(flockr_owner['token'], channel['channel_id'])
     assert(len(details['owner_members']) == 1)
+    
+    # Checking if owner of Flockr (while not a member) can remove someone as owner
+    channel_leave(flockr_owner['token'], channel['channel_id'])
+    with pytest.raises(AccessError):
+        channel_removeowner(flockr_owner['token'], channel['channel_id'], owner['u_id']) 
 
     # Removing someone who is already removed (no longer an owner)
     with pytest.raises(InputError):
