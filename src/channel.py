@@ -29,6 +29,7 @@ def channel_invite(token, channel_id, u_id):
     return {
     }
 
+
 def channel_details(token, channel_id):
     # Retrieve data
     authorised_user = user_with_token(token)
@@ -65,6 +66,7 @@ def channel_details(token, channel_id):
         ],
     }
 
+
 def channel_messages(token, channel_id, start):
     # Retrieve data
     authorised_user = user_with_token(token)
@@ -95,6 +97,7 @@ def channel_messages(token, channel_id, start):
         'start': start,
         'end': end,
     }
+
 
 def channel_leave(token, channel_id):
     # Retrieve data
@@ -127,6 +130,7 @@ def channel_leave(token, channel_id):
     return {
     }
 
+
 def channel_join(token, channel_id):
     # Retrieve data
     channel = channel_with_id(channel_id)
@@ -151,6 +155,7 @@ def channel_join(token, channel_id):
     
     return {
     }
+
 
 def channel_addowner(token, channel_id, u_id):
     # Retrieve data
@@ -185,6 +190,7 @@ def channel_addowner(token, channel_id, u_id):
 
     return {
     }
+
 
 def channel_removeowner(token, channel_id, u_id):
     # Retrieve data
