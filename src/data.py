@@ -31,7 +31,7 @@ data = {
 """ General helper functions """
 # Checks to see if an email is in a valid email format
 def valid_email(email):
-    regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+    regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
     return re.search(regex, email)
 
 
