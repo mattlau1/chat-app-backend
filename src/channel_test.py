@@ -8,20 +8,51 @@ import pytest
 
 def test_channel_addowner():
     clear()
+    flockr_owner = auth_register('andrewxie@gmail.com', 'password', 'Andrew', 'Xie')
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     channel = channels_create(owner['token'], 'Test channel', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
     channel_join(user['token'], channel['channel_id'])
 
-    details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['owner_members']) == 1)
-
     # Checking if someone can be added as an owner 
     # (verified if number of owners becomes 2 and if they can be immediately removed)
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 1)
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(owner['token'], channel['channel_id'])
     assert(len(details['owner_members']) == 2)
     channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
+
+
+    channel_join(flockr_owner['token'], channel['channel_id'])
+    # Checking if owner of Flockr can be added as a channel owner
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 1)
+    channel_addowner(owner['token'], channel['channel_id'], flockr_owner['u_id'])
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 2)
+    channel_removeowner(owner['token'], channel['channel_id'], flockr_owner['u_id'])    
+
+    # Checking if owner of Flockr (as a member) can add someone as an owner
+    details = channel_details(flockr_owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 1)
+    channel_addowner(flockr_owner['token'], channel['channel_id'], user['u_id'])
+    details = channel_details(flockr_owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 2)
+    channel_removeowner(flockr_owner['token'], channel['channel_id'], user['u_id'])    
+
+    # Checking if owner of Flockr can add themselves as an owner
+    details = channel_details(flockr_owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 1)
+    channel_addowner(flockr_owner['token'], channel['channel_id'], flockr_owner['u_id'])
+    details = channel_details(flockr_owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 2)
+    channel_removeowner(flockr_owner['token'], channel['channel_id'], flockr_owner['u_id'])     
+
+    # Checking if owner of Flockr (while not a member) can add someone as owner
+    channel_leave(flockr_owner['token'], channel['channel_id'])
+    with pytest.raises(AccessError):
+        channel_addowner(flockr_owner['token'], channel['channel_id'], user['u_id'])        
     
     # Adding someone who is already the owner
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
@@ -48,19 +79,49 @@ def test_channel_addowner():
 
 def test_channel_removeowner():
     clear()
+    flockr_owner = auth_register('andrewxie@gmail.com', 'password', 'Andrew', 'Xie')
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     channel = channels_create(owner['token'], 'Test channel', True)
     user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
     channel_join(user['token'], channel['channel_id'])
+    channel_join(flockr_owner['token'], channel['channel_id'])
 
     # Checking if someone can be removed (verified if number of owners becomes 1 afterwards)
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(owner['token'], channel['channel_id'])
     assert(len(details['owner_members']) == 2)
-
     channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(owner['token'], channel['channel_id'])
     assert(len(details['owner_members']) == 1)
+
+    # Checking if owner of Flockr can be removed as a channel owner
+    channel_addowner(owner['token'], channel['channel_id'], flockr_owner['u_id'])
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 2)
+    channel_removeowner(owner['token'], channel['channel_id'], flockr_owner['u_id'])
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 1)
+
+    # Checking if owner of Flockr (as a member) can remove someone as an owner
+    channel_addowner(owner['token'], channel['channel_id'], user['u_id']) 
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 2) 
+    channel_removeowner(flockr_owner['token'], channel['channel_id'], user['u_id'])  
+    details = channel_details(flockr_owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 1)
+
+    # Checking if owner of Flockr can remove themselves as an owner
+    channel_addowner(owner['token'], channel['channel_id'], flockr_owner['u_id'])
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 2)    
+    channel_removeowner(flockr_owner['token'], channel['channel_id'], flockr_owner['u_id'])  
+    details = channel_details(flockr_owner['token'], channel['channel_id'])
+    assert(len(details['owner_members']) == 1)
+    
+    # Checking if owner of Flockr (while not a member) can remove someone as owner
+    channel_leave(flockr_owner['token'], channel['channel_id'])
+    with pytest.raises(AccessError):
+        channel_removeowner(flockr_owner['token'], channel['channel_id'], owner['u_id']) 
 
     # Removing someone who is already removed (no longer an owner)
     with pytest.raises(InputError):
@@ -122,32 +183,39 @@ def test_channel_invite():
 
 def test_channel_join():
     clear()
+    flockr_owner = auth_register('andrewxie@gmail.com', 'password', 'Andrew', 'Xie')
     owner = auth_register('petermichaels@gmail.com', 'password', 'Peter', 'Michaels')
-    channel1 = channels_create(owner['token'], 'Channel 1', True)
+    public_channel = channels_create(owner['token'], 'Public Channel', True)
+    private_channel = channels_create(owner['token'], 'Private Channel', False)
     user = auth_register('kimwilliams@gmail.com', 'password', 'Kim', 'Williams')
 
-    details = channel_details(owner['token'], channel1['channel_id'])
-    assert(len(details['all_members']) == 1)
-
-    # Checking if a user can join a channel 
+    # Checking if a user can join a public channel 
     # (verified if number of members becomes 2 and if they can leave the channel)
-    channel_join(user['token'], channel1['channel_id'])
-    details = channel_details(user['token'], channel1['channel_id'])
+    details = channel_details(owner['token'], public_channel['channel_id'])
+    assert(len(details['all_members']) == 1)
+    channel_join(user['token'], public_channel['channel_id'])
+    details = channel_details(user['token'], public_channel['channel_id'])
     assert(len(details['all_members']) == 2)
-    channel_leave(user['token'], channel1['channel_id'])
+    channel_leave(user['token'], public_channel['channel_id'])
+
+    # Checking if owner of Flockr can join a private channel
+    details = channel_details(owner['token'], private_channel['channel_id'])
+    assert(len(details['all_members']) == 1)  
+    channel_join(flockr_owner['token'], private_channel['channel_id'])
+    details = channel_details(flockr_owner['token'], private_channel['channel_id'])
+    assert(len(details['all_members']) == 2)
 
     # Authorised user does not have a valid token
     with pytest.raises(AccessError):
-        channel_join('', channel1['channel_id'])
+        channel_join('', public_channel['channel_id'])
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
-        channel_join(user['token'], channel1['channel_id'] + 100)
+        channel_join(user['token'], public_channel['channel_id'] + 100)
 
     # Channel ID is a private channel (authorised user is not a global owner)
-    channel2 = channels_create(owner['token'], 'Channel 2', False)
     with pytest.raises(AccessError):
-        channel_join(user['token'], channel2['channel_id'])
+        channel_join(user['token'], private_channel['channel_id'])
 
 
 def test_channel_leave():
