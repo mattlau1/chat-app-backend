@@ -98,7 +98,7 @@ def test_channel_messages():
     with pytest.raises(InputError):
         channel_messages(user['token'], channel['channel_id'], 1)
     # Send 48 more messages - 49 total
-    for i in range(2, 50):
+    for _ in range(2, 50):
         message_send(user['token'], channel['channel_id'], 'Test message')
     messages = channel_messages(user['token'], channel['channel_id'], 0)
     assert len(messages['messages']) == 49
