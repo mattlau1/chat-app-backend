@@ -1,4 +1,7 @@
+import jwt
 import re
+
+PRIVATE_KEY = 'V2hhdCB0aGUgZnVjayBkaWQgeW91IGp1c3QgZnVja2luZyBzYXkgYWJvdXQgbWUsIHlvdSBsaXR0bGUgc2hpdD8gSSdsbCBoYXZlIHlvdSBrbm93IEkgZ3JhZHVhdGVkIHRvcCBvZiBteSBjbGFzcyBpbiB0aGUgTmF2eSBTZWFscy4='
 
 # Database
 data = {
@@ -40,17 +43,14 @@ def valid_email(email):
 def user_email_list():
     return [user['email'] for user in data['users']]
 
+# Returns a list of user handles
+def user_handle_list():
+    return [user['handle'] for user in data['users'] if user['handle'] != '']
+
 # Returns the user with specified email address
 def user_with_email(email):
     for user in data['users']:
         if user['email'] == email:
-            return user
-    return None
-
-# Returns the user with specified token
-def user_with_token(token):
-    for user in data['users']:
-        if user['token'] == token and token != '':
             return user
     return None
 
@@ -61,17 +61,20 @@ def user_with_id(id):
             return user
     return None
 
-# Returns a list of user handles
-def user_handle_list():
-    return [user['handle'] for user in data['users'] if user['handle'] != '']
+# Returns the user with specified token
+def user_with_token(token):
+    try:
+        # Decode token and pass user id to user_with_id()
+        payload = jwt.decode(token.encode('utf-8'), PRIVATE_KEY, algorithms=['HS256'])
+        return user_with_id(payload['u_id'])
+    except:
+        return None
 
 # Updates the token for a specified user
 def user_update_token(id, new_token):
     for user in data['users']:
         if user['id'] == id:
             user['token'] = new_token
-            return {'update_success': True}
-    return {'update_success': False}
 
 
 """ Helper functions for channels """
@@ -81,4 +84,3 @@ def channel_with_id(id):
         if channel['id'] == id:
             return channel
     return None
-
