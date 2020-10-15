@@ -1,9 +1,9 @@
+import hashlib
+import jwt
 from data import (
     PRIVATE_KEY, data, valid_email, user_with_email, user_with_token,
     user_email_list, user_handle_list, user_update_token,
 )
-import hashlib
-import jwt
 from error import InputError, AccessError
 
 # Generates a token for a registered user
@@ -48,7 +48,7 @@ def auth_login(email, password):
     elif user['password'] != encrypted_password:
         # Incorrect password
         raise InputError
-    
+
     # Update token
     token = generate_token(user['id'])
     user_update_token(user['id'], token)
@@ -70,11 +70,11 @@ def auth_logout(token):
     # Check for valid token
     if user is None:
         raise AccessError
-    
+
     # Update user token
     user_update_token(user['id'], '')
     assert user_with_email(user['email'])['token'] == ''
-    
+
     return {
         'is_success': True,
     }
@@ -104,22 +104,22 @@ def auth_register(email, password, name_first, name_last):
         raise InputError
 
     # Register new user
-    id = len(data['users']) + 1
-    token = generate_token(id)
+    u_id = len(data['users']) + 1
+    token = generate_token(u_id)
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
 
     # Append user information to data
     data['users'].append({
-        'id': id,
+        'id': u_id,
         'email': email,
         'password': encrypted_password,
         'name_first': name_first,
         'name_last': name_last,
-        'handle': generate_handle(id, name_first, name_last),
+        'handle': generate_handle(u_id, name_first, name_last),
         'token': token,
     })
-    
+
     return {
-        'u_id': id,
+        'u_id': u_id,
         'token': token,
     }
