@@ -106,6 +106,10 @@ def channel_messages(token, channel_id, start):
     first_message_reached = any(message['message_id'] == first_message_id for message in messages)
     end = -1 if first_message_reached else start + 50
 
+    # THIS NEEDS TO BE REVIEWED
+    # THIS NEEDS TO BE REVIEWED
+    # THIS NEEDS TO BE REVIEWED
+
     return {
         'messages': messages,
         'start': start,
