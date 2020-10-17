@@ -107,6 +107,7 @@ def auth_register(email, password, name_first, name_last):
     u_id = len(data['users']) + 1
     token = generate_token(u_id)
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
+    permission_id = 1 if len(data['users']) == 0 else 2
 
     # Append user information to data
     data['users'].append({
@@ -116,6 +117,7 @@ def auth_register(email, password, name_first, name_last):
         'name_first': name_first,
         'name_last': name_last,
         'handle': generate_handle(u_id, name_first, name_last),
+        'permission_id': permission_id,
         'token': token,
     })
 
