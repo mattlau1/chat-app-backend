@@ -37,7 +37,7 @@ def message_send(token, channel_id, message):
         if channel['id'] == channel_id:
             channel['messages'].append({
                 'message_id': message_id,
-                'sender': auth_user['id'],
+                'u_id': auth_user['id'],
                 'time_created': datetime.timestamp(datetime.now()),
                 'message': message,
             })
