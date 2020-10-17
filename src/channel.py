@@ -1,12 +1,19 @@
+''' Import required modules '''
 from data import data, user_with_token, user_with_id, channel_with_id
 from error import InputError, AccessError
 
 def channel_invite(token, channel_id, u_id):
+    '''
+    Invites a user (with user id u_id) to join a channel with ID channel_id.
+    Once invited the user is added to the channel immediately
+    Input: token (str), channel_id (int), u_id (int)
+    Output: empty dict
+    '''
     # Retrieve data
     authorised_user = user_with_token(token)
     channel = channel_with_id(channel_id)
     invited_user = user_with_id(u_id)
-    
+
     # Error check
     if channel is None:
         # Invalid channel_id
@@ -20,21 +27,27 @@ def channel_invite(token, channel_id, u_id):
     elif authorised_user['id'] not in channel['all_members']:
         # Authorised user not a member of channel
         raise AccessError
-    
+
     # Append invited user to all_members
     for channel in data['channels']:
         if channel['id'] == channel_id and invited_user['id'] not in channel['all_members']:
             channel['all_members'].append(invited_user['id'])
-    
+
     return {
     }
 
 
 def channel_details(token, channel_id):
+    '''
+    Given a Channel with ID channel_id that the authorised user is part of,
+    provide basic details about the channel
+    Input: token (str), channel_id (int)
+    Output: dict
+    '''
     # Retrieve data
     authorised_user = user_with_token(token)
     channel = channel_with_id(channel_id)
-    
+
     # Error check
     if channel is None:
         # Invalid channel_id
@@ -68,10 +81,20 @@ def channel_details(token, channel_id):
 
 
 def channel_messages(token, channel_id, start):
+    '''
+    Given a Channel with ID channel_id that the authorised user is part of,
+    return up to 50 messages between index "start" and "start + 50".
+    Message with index 0 is the most recent message in the channel.
+    This function returns a new index "end" which is the value of "start + 50", or,
+    if this function has returned the least recent messages in the channel,
+    returns -1 in "end" to indicate there are no more messages to load after this return.
+    Input: token (str), channel_id (int), start (int)
+    Ouput: dict
+    '''
     # Retrieve data
     authorised_user = user_with_token(token)
     channel = channel_with_id(channel_id)
-    
+
     # Error check
     if channel is None:
         # Invalid channel_id
@@ -85,8 +108,8 @@ def channel_messages(token, channel_id, start):
     elif start >= len(channel['messages']):
         # Invalid start index
         raise InputError
-    
-    # Messages originally ordered chronologically - 
+
+    # Messages originally ordered chronologically -
     # reverse and retrieve a maximum of 50 most recent messages
     messages = list(reversed(channel['messages']))[start : start + 50]
     # The end is reached if the first message (message index 1) is included in messages
@@ -100,6 +123,11 @@ def channel_messages(token, channel_id, start):
 
 
 def channel_leave(token, channel_id):
+    '''
+    Given a channel ID, the user removed as a member of this channel
+    Input: token (str), channel_id (int)
+    Output: empty dict
+    '''
     # Retrieve data
     authorised_user = user_with_token(token)
     channel = channel_with_id(channel_id)
@@ -119,19 +147,24 @@ def channel_leave(token, channel_id):
     for channel in data['channels']:
         if channel['id'] == channel_id:
             channel['all_members'].remove(authorised_user['id'])
-    
-    # Attempt to remove user from owner_members 
+
+    # Attempt to remove user from owner_members
     if authorised_user['id'] in channel['owner_members']:
         # Remove if user is also an owner
         for channel in data['channels']:
             if channel['id'] == channel_id:
                 channel['owner_members'].remove(authorised_user['id'])
-    
+
     return {
     }
 
 
 def channel_join(token, channel_id):
+    '''
+    Given a channel_id of a channel that the authorised user can join, adds them to that channel
+    Input: token (str), channel_id (int)
+    Output: empty dict
+    '''
     # Retrieve data
     channel = channel_with_id(channel_id)
     authorised_user = user_with_token(token)
@@ -152,14 +185,19 @@ def channel_join(token, channel_id):
         # Check that user not already in channel (don't want to add duplicate users to list)
         if channel['id'] == channel_id and authorised_user['id'] not in channel['all_members']:
             channel['all_members'].append(authorised_user['id'])
-    
+
     return {
     }
 
 
 def channel_addowner(token, channel_id, u_id):
+    '''
+    Make user with user id u_id an owner of this channel
+    Input: token (str), channel_id (int), u_id (int)
+    Output: empty dict
+    '''
     # Retrieve data
-    authorised_user = user_with_token(token)    
+    authorised_user = user_with_token(token)
     channel = channel_with_id(channel_id)
     new_owner = user_with_id(u_id)
 
@@ -174,10 +212,10 @@ def channel_addowner(token, channel_id, u_id):
         # Invalid u_id or user is not a member in the channel
         raise AccessError
     elif authorised_user['id'] not in channel['owner_members'] and authorised_user['id'] != 1:
-        # Authorised user is not an owner of channel and not owner of Flockr
+        # Authorised user is not an owner of channel and not Flockr owner
         raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user is not a member in the channel (owner of Flockr may not be a member in the channel)
+        # Authorised user is not a member in the channel (Flockr owner may not be a channel member)
         raise AccessError
     elif new_owner['id'] in channel['owner_members']:
         # User to be added as an owner is already an owner in the channel
@@ -193,6 +231,11 @@ def channel_addowner(token, channel_id, u_id):
 
 
 def channel_removeowner(token, channel_id, u_id):
+    '''
+    Remove user with user id u_id an owner of this channel
+    Input: token (str), channel_id (int), u_id (int)
+    Output: empty dict
+    '''
     # Retrieve data
     authorised_user = user_with_token(token)
     channel = channel_with_id(channel_id)
@@ -207,12 +250,12 @@ def channel_removeowner(token, channel_id, u_id):
         raise AccessError
     elif old_owner is None:
         # Invalid u_id
-        raise AccessError    
+        raise AccessError
     elif authorised_user['id'] not in channel['owner_members'] and authorised_user['id'] != 1:
-        # Authorised user is not an owner of channel and not owner of Flockr
+        # Authorised user is not an owner of channel and not Flockr owner
         raise AccessError
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user is not a member in the channel (owner of Flockr may not be a member in the channel)
+        # Authorised user is not a member in the channel (Flockr owner may not be a channel member)
         raise AccessError
     elif old_owner['id'] not in channel['owner_members']:
         # User to be removed as an owner was not an owner in the channel
