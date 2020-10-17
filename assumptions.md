@@ -6,6 +6,7 @@
 
 ### auth.py:
 - Valid emails: emails are case sensitive (i.e. TEST@GMAIL.COM won't work), and only one period is allowed for the domain (no .gov.au)
+- Names cannot be whitespace (even if more than 3 characters in length) - handle might break otherwise
 - User is automatically logged in once registered (hence token generated)
 - A user can access auth_login() even if they are already logged in (new token generated for them)
 - An invalid or revoked token is indicated by an empty string ''

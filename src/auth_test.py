@@ -124,6 +124,11 @@ def test_register_name_invalid():
         auth_register('femail@sample.com', 'password', invalid_string3, invalid_string4)
     with pytest.raises(InputError):
         auth_register('tmail@sample.com', 'password', invalid_string1, invalid_string1)
+    # Empty name
+    with pytest.raises(InputError):
+        auth_register('valid@email.com', 'password', '   ', 'Last')
+    with pytest.raises(InputError):
+        auth_register('valid@email.com', 'password', 'First', '    ')
     
 # Test valid first and last names
 def test_register_name_valid():
