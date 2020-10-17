@@ -1,3 +1,4 @@
+''' Import required modules '''
 import re
 import jwt
 

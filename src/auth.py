@@ -1,3 +1,4 @@
+''' Import required modules '''
 import hashlib
 import jwt
 from data import (
