@@ -15,18 +15,14 @@ def channel_invite(token, channel_id, u_id):
     invited_user = user_with_id(u_id)
 
     # Error check
-    if channel is None:
-        # Invalid channel_id
-        raise InputError
-    elif authorised_user is None:
-        # Invalid token
-        raise AccessError
+    if authorised_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
     elif invited_user is None:
-        # Invalid u_id
-        raise InputError
+        raise InputError('Invalid u_id')
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user not a member of channel
-        raise AccessError
+        raise AccessError('Authorised user not a member of channel')
 
     # Append invited user to all_members
     for channel in data['channels']:
@@ -49,15 +45,12 @@ def channel_details(token, channel_id):
     channel = channel_with_id(channel_id)
 
     # Error check
-    if channel is None:
-        # Invalid channel_id
-        raise InputError
-    elif authorised_user is None:
-        # Invalid token
-        raise AccessError
+    if authorised_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user not a member of channel
-        raise AccessError
+        raise AccessError('Authorised user not a member of channel')
 
     return {
         'name': channel['name'],
@@ -96,18 +89,14 @@ def channel_messages(token, channel_id, start):
     channel = channel_with_id(channel_id)
 
     # Error check
-    if channel is None:
-        # Invalid channel_id
-        raise InputError
-    elif authorised_user is None:
-        # Invalid token
-        raise AccessError
+    if authorised_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user not a member of channel
-        raise AccessError
+        raise AccessError('Authorised user not a member of channel')
     elif start >= len(channel['messages']):
-        # Invalid start index
-        raise InputError
+        raise InputError('Invalid start index')
 
     # Messages originally ordered chronologically -
     # reverse and retrieve a maximum of 50 most recent messages
@@ -133,15 +122,12 @@ def channel_leave(token, channel_id):
     channel = channel_with_id(channel_id)
 
     # Error check
-    if channel is None:
-        # Invalid channel_id
-        raise InputError
-    elif authorised_user is None:
-        # Invalid token
-        raise AccessError
+    if authorised_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user not a member of channel
-        raise AccessError
+        raise AccessError('Authorised user not a member of channel')
 
     # Remove user from all_members
     for channel in data['channels']:
@@ -170,15 +156,12 @@ def channel_join(token, channel_id):
     authorised_user = user_with_token(token)
 
     # Error check
-    if channel is None:
-        # Invalid channel_id
-        raise InputError
-    elif authorised_user is None:
-        # Invalid token
-        raise AccessError
+    if authorised_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
     elif not channel['is_public'] and authorised_user['id'] != 1:
-        # Private channel and authorised user is not owner of Flockr
-        raise AccessError
+        raise AccessError('Private channel and authorised user is not Flockr owner')
 
     # Adds user to channel
     for channel in data['channels']:
@@ -202,24 +185,19 @@ def channel_addowner(token, channel_id, u_id):
     new_owner = user_with_id(u_id)
 
     # Error check
-    if channel is None:
-        # Invalid channel_id
-        raise InputError
-    elif authorised_user is None:
-        # Invalid token
-        raise AccessError
+    if authorised_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
     elif new_owner is None or new_owner['id'] not in channel['all_members']:
-        # Invalid u_id or user is not a member in the channel
-        raise AccessError
+        raise AccessError('Invalid u_id or user is not a member in the channel')
     elif authorised_user['id'] not in channel['owner_members'] and authorised_user['id'] != 1:
-        # Authorised user is not an owner of channel and not Flockr owner
-        raise AccessError
+        raise AccessError('Authorised user is not an owner of channel and not Flockr owner')
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user is not a member in the channel (Flockr owner may not be a channel member)
-        raise AccessError
+        # Note that Flockr owner may not be a channel member
+        raise AccessError('Authorised user is not a member in the channel')
     elif new_owner['id'] in channel['owner_members']:
-        # User to be added as an owner is already an owner in the channel
-        raise InputError
+        raise InputError('User to be added as an owner is already an owner in the channel')
 
     # Add user as owner
     for channel in data['channels']:
@@ -242,24 +220,19 @@ def channel_removeowner(token, channel_id, u_id):
     old_owner = user_with_id(u_id)
 
     # Error check
-    if channel is None:
-        # Invalid channel_id
-        raise InputError
-    elif authorised_user is None:
-        # Invalid token
-        raise AccessError
+    if authorised_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
     elif old_owner is None:
-        # Invalid u_id
-        raise AccessError
+        raise AccessError('Invalid u_id')
     elif authorised_user['id'] not in channel['owner_members'] and authorised_user['id'] != 1:
-        # Authorised user is not an owner of channel and not Flockr owner
-        raise AccessError
+        raise AccessError('Authorised user is not an owner of channel and not Flockr owner')
     elif authorised_user['id'] not in channel['all_members']:
-        # Authorised user is not a member in the channel (Flockr owner may not be a channel member)
-        raise AccessError
+        # Flockr owner may not be a channel member
+        raise AccessError('Authorised user is not a member in the channel')
     elif old_owner['id'] not in channel['owner_members']:
-        # User to be removed as an owner was not an owner in the channel
-        raise InputError
+        raise InputError('User to be removed as an owner was not an owner in the channel')
 
     # Remove owner
     for channel in data['channels']:
