@@ -41,13 +41,13 @@ def auth_login(email, password):
     # Error check
     if not valid_email(email):
         # Invalid email format
-        raise InputError
+        raise InputError('Invalid email format')
     elif user is None:
         # Unregistered email
-        raise InputError
+        raise InputError('Unregistered email')
     elif user['password'] != encrypted_password:
         # Incorrect password
-        raise InputError
+        raise InputError('Incorrect password')
 
     # Update token
     token = generate_token(user['id'])
@@ -69,7 +69,7 @@ def auth_logout(token):
     user = user_with_token(token)
     # Check for valid token
     if user is None:
-        raise AccessError
+        raise AccessError('Invalid token')
 
     # Update user token
     user_update_token(user['id'], '')
@@ -89,24 +89,31 @@ def auth_register(email, password, name_first, name_last):
     # Error check
     if not valid_email(email):
         # Invalid email format
-        raise InputError
+        raise InputError('Invalid email')
     elif email in user_email_list():
         # Email in use
-        raise InputError
+        raise InputError('Email already taken')
     elif len(password) < 6:
         # Password length
-        raise InputError
+        raise InputError('Password too short')
     elif len(name_first) not in range(1, 51):
         # name_first length
-        raise InputError
+        raise InputError('First name should be between 1 and 50 characters inclusive')
+    elif name_first.isspace():
+        # name_first invalid
+        raise InputError('First name cannot be empty')
     elif len(name_last) not in range(1, 51):
         # name_last length
-        raise InputError
+        raise InputError('Last name should be between 1 and 50 characters inclusive')
+    elif name_last.isspace():
+        # name_last invalid
+        raise InputError('Last name cannot be empty')
 
     # Register new user
     u_id = len(data['users']) + 1
     token = generate_token(u_id)
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
+    permission_id = 1 if len(data['users']) == 0 else 2
 
     # Append user information to data
     data['users'].append({
@@ -116,6 +123,7 @@ def auth_register(email, password, name_first, name_last):
         'name_first': name_first,
         'name_last': name_last,
         'handle': generate_handle(u_id, name_first, name_last),
+        'permission_id': permission_id,
         'token': token,
     })
 

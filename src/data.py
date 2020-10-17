@@ -15,6 +15,7 @@ data = {
     #   password - string,
     #   name_first - string,
     #   name_last - string,
+    #   permission_id - int,
     #   token - string,
     # }
     'users': [],
