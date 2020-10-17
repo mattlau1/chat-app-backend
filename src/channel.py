@@ -101,8 +101,10 @@ def channel_messages(token, channel_id, start):
     # Messages originally ordered chronologically -
     # reverse and retrieve a maximum of 50 most recent messages
     messages = list(reversed(channel['messages']))[start : start + 50]
-    # The end is reached if the first message (message index 1) is included in messages
-    end = -1 if any(message['message_id'] == 1 for message in messages) else start + 50
+    # The end is reached if the first message (id) is included in messages
+    first_message_id = channel['messages'][0]['message_id']
+    first_message_reached = any(message['message_id'] == first_message_id for message in messages)
+    end = -1 if first_message_reached else start + 50
 
     return {
         'messages': messages,
