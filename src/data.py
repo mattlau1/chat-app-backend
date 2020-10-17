@@ -15,6 +15,7 @@ data = {
     #   password - string,
     #   name_first - string,
     #   name_last - string,
+    #   handle - string,
     #   permission_id - int,
     #   token - string,
     # }
@@ -28,11 +29,13 @@ data = {
     #   messages - array of dictionaries {
     #       message_id - unique integer,
     #       u_id - integer corresponding to the sender's user id,
-    #       time_created - datetime object,
+    #       time_created - UNIX timestamp (float),
     #       message - string,
     #   },
     # }
     'channels': [],
+    # Stores the latest message_id used across all channels
+    'latest_message_id': 0,
 }
 
 
@@ -112,4 +115,26 @@ def channel_with_id(c_id):
     for channel in data['channels']:
         if channel['id'] == c_id:
             return channel
+    return None
+
+def channel_with_message_id(message_id):
+    '''
+    Tries to return the channel (channel info dict) containing the
+    message with specified message_id (int), returning None if not found
+    '''
+    for channel in data['channels']:
+        for message in channel['messages']:
+            if message['message_id'] == message_id:
+                return channel
+    return None
+
+def message_with_id(message_id):
+    '''
+    Tries to return the message (message info dict) corresponding
+    to a given message_id (int), returning None if not found
+    '''
+    for channel in data['channels']:
+        for message in channel['messages']:
+            if message['message_id'] == message_id:
+                return message
     return None
