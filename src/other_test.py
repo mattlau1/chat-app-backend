@@ -70,6 +70,9 @@ def test_search_valid_substring():
         # random_user searched
         messages = search(random_user['token'], 'A')['messages']
         assert len(messages) == multiple * 2
+        # Caps-sensitive
+        messages = search(f_owner['token'], 'a')['messages']
+        assert len(messages) == 0
 
 def test_search_valid_global():
     '''

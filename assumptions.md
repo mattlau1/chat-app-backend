@@ -41,3 +41,4 @@
 - Flockr owners not in channel as a member cannot send messages, but can edit/delete messages
 - Message remove/edit must be called by original message sender, channel owner or Flockr owner
 - Flockr owners not in a channel cannot search messages from that channel (matches reference implementation)
+- Substring for search is caps-sensitive
