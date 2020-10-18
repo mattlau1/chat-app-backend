@@ -13,7 +13,7 @@
 - User accounts cannot be deleted (as in data entries deleted) in order to maintain sequential unique id ordering - could add a deactivation status in the future if necessary
 
 ### channel.py:
-- Flockr owner (person with permission_id == 1) has owner permissions for channel_join, channel_addowner, channel_removeowner (they can only add and remove owners while they are members of the channel)
+- Flockr owner (person with u_id == 1) has owner permissions for channel_join, channel_addowner, channel_removeowner (they can only add and remove owners while they are members of the channel)
 - All members can invite (not restricted to owners) - keyword members excludes Flockr owners who haven't joined yet
 - Inviting someone who has already been invited does nothing (no exceptions thrown, no duplicate entries added)
 - Joining a channel that a user is already in does nothing (no exceptions thrown, no duplicate entries added)
@@ -31,14 +31,3 @@
 - Channel names full of whitespace characters are invalid
 - Empty channel names are also invalid
 - All members include owners
-
-### message.py
-- message_id's are unique across all channels
-- Not allowed to send empty messages (message_edit removes a message if new message is '')
-- White space is allowed for messages
-- Message length has to be less than or equal to 1000 characters
-- channel_id as parameter must be valid, or else an InputError is raised
-- message_id as parameter must be valid, or else an InputError is raised
-- Flockr owners not in channel as a member cannot send messages, but can edit/delete messages
-- Message remove/edit must be called by original message sender, channel owner or Flockr owner
-- Flockr owners not in a channel cannot search messages from that channel (matches reference implementation)
