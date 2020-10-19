@@ -302,3 +302,4 @@ def test_taken_handle():
 
     with pytest.raises(InputError):
         user_profile_sethandle(user1['token'], 'goodbye world')
+    
