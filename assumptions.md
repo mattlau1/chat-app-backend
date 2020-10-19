@@ -31,3 +31,9 @@
 - Channel names full of whitespace characters are invalid
 - Empty channel names are also invalid
 - All members include owners
+
+### user.py:
+- User's email length can be 3-20 **inclusive** (i.e 1234567890@123456.com [20 characters])
+- User cannot use set\_profile\_name to change the name to itself (i.e changing Rebecca to Rebecca)
+- User cannot use set\_email\_name to change the email to itself (i.e changing Andrew@google.com to Andrew@google.com)
+- Emails and names with only whitespace count as 'empty' emails/names (i.e '    ' is empty)

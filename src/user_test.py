@@ -2,7 +2,10 @@
 Tests written to test user.py
 '''
 import pytest
-from user import user_profile
+from user import (
+    user_profile, user_profile_setname,
+    user_profile_setemail, user_profile_sethandle,
+)
 from other import clear
 from auth import auth_register
 from error import InputError, AccessError
@@ -148,17 +151,44 @@ def test_invalid_setnames();
 # user_profile_setemail(token, email) tests
 def test_empty_email():
     '''
-    
-    
+    Registers valid users and attempts to change their email to an empty email
+    or one with whitespace only.
     '''
-    pass
+    clear()
+    user = auth_register('stvnnguyen69@hotmail.com', 'password', 'Steven', 'Nguyen')
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], '')
+        
+    user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], '          ')
 
 def test_invalid_email():
-    pass
+    '''
+    
+    '''    
+    clear()
+
+def test_taken_email():
+    '''
+    
+    '''
+    clear()
+
 
 # user_profile_sethandle(token, handle_str) tests
 def test_handle_length():
-    pass
+    '''
+
+    
+    '''
+    clear()
+
 
 def test_taken_handle():    
-    pass
+    '''
+
+    
+    '''
+    clear()
+    
