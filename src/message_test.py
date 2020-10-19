@@ -7,6 +7,7 @@ from message import message_send, message_remove, message_edit
 from error import InputError, AccessError
 from other import clear
 
+
 def test_message_send_invalid():
     '''
     Test invalid message sending
@@ -40,6 +41,7 @@ def test_message_send_invalid():
     with pytest.raises(InputError):
         message_send(f_owner['token'], f_channel['channel_id'], message + 'x')
 
+
 def test_message_send_valid():
     '''
     Valid message sending
@@ -59,6 +61,7 @@ def test_message_send_valid():
     for multiple in range(1, 1001):
         message_send(f_owner['token'], f_channel['channel_id'], multiple * message)
         message_send(random_user['token'], f_channel['channel_id'], multiple * message)
+
 
 def test_message_remove():
     '''
@@ -99,6 +102,7 @@ def test_message_remove():
     # Flockr owner can remove their own message
     message_remove(f_owner['token'], m_id1)
     assert count(f_channel['messages']) == 0
+
 
 def test_message_edit():
     '''
@@ -153,7 +157,7 @@ def test_message_edit():
     message_edit(random_user2['token'], m_id6, '')
     # Flockr owner can delete anyone's message by editing it to an empty message
     message_edit(f_owner['token'], m_id5, '')
-    # Flockr owner can edit their own message by editing it to an empty message
+    # Flockr owner can delete their own message by editing it to an empty message
     message_edit(f_owner['token'], m_id4, '')
     
     assert len(f_channel['messages']) == 3    
