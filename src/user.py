@@ -1,3 +1,5 @@
+from error import InputError, AccessError
+from data import valid_email
 def user_profile(token, u_id):
     return {
         'user': {
@@ -14,6 +16,10 @@ def user_profile_setname(token, name_first, name_last):
     }
 
 def user_profile_setemail(token, email):
+    if not valid_email(email):
+        # Invalid email format
+        raise InputError('Invalid email format')
+
     return {
     }
 
