@@ -10,7 +10,7 @@ from other import clear
 from auth import auth_register
 from error import InputError, AccessError
 
-''' user_profile tests '''
+# user_profile tests
 def test_valid_user():
     '''
     Create a valid user
@@ -75,7 +75,7 @@ def test_invalid_user():
     with pytest.raises(AccessError):
         user_profile('*%&^', 3)
 
-''' user_profile_setname tests '''
+# user_profile_setname tests
 def test_valid_setnames():
     '''
     Change name of the user with valid name and check that the id stays the same
@@ -154,7 +154,24 @@ def test_invalid_setnames():
     with pytest.raises(InputError):
         user_profile_setname(user2['token'], '  ', '  ')
 
-''' user_profile_setemail tests '''
+# user_profile_setemail tests
+def test_valid_email():
+    '''
+    Registers a user and sets their email to a valid email.
+    '''
+    clear()
+    user = auth_register('hellothere44@gmail.com', 'ifajfiod1ad133', 'Matthew', 'Matthewson')
+    profile = user_profile(user['token'], user['u_id'])
+
+    # Check if email is still the same
+    assert profile['user']['email'] == 'hellothere44@gmail.com'
+
+    # Change user's email
+    user_profile_setemail(user['token'], 'goodbye21@gmail.com')
+
+    # Check if email has changed
+    assert profile['user']['email'] == 'goodbye21@gmail.com'
+
 def test_empty_email():
     '''
     Registers valid users and attempts to change their email to an empty email
@@ -165,7 +182,7 @@ def test_empty_email():
     user = auth_register('stvnnguyen69@hotmail.com', 'password', 'Steven', 'Nguyen')
     with pytest.raises(InputError):
         user_profile_setemail(user['token'], '')
-        
+
     # Setting email full of whitespaces
     user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
     with pytest.raises(InputError):
@@ -186,7 +203,7 @@ def test_invalid_email():
     # Alphanumeric string with @
     with pytest.raises(InputError):
         user_profile_setemail(user['token'], 'ew9ijifewji90ejwiffjiifji1j2j@')
-  
+
     # No string with @ and domain
     with pytest.raises(InputError):
         user_profile_setemail(user['token'], '@.com')
@@ -224,13 +241,12 @@ def test_same_email():
     user1 = auth_register('mmmonkey97@hotmail.com', 'password', 'John', 'Johnson')
     with pytest.raises(InputError):
         user_profile_setemail(user1['token'], 'mmmonkey97@hotmail.com')
-  
+
     user2 = auth_register('monkeymaster22@gmail.com', 'ilovebanaNas', 'Banana', 'Bananason')
     with pytest.raises(InputError):
         user_profile_setemail(user2['token'], 'monkeymaster22@gmail.com')
 
-''' user_profile_sethandle tests '''
-# user_profile_sethandle(token, handle_str) tests
+# user_profile_sethandle tests
 def test_handle_length():
     '''
 
