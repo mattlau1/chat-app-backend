@@ -33,5 +33,6 @@
 - All members include owners
 
 ### user.py:
-- User cannot use set_profile_name to change the name to itself (for example changing Rebecca to Rebecca)
-- User cannot use set_email_name to change the email to itself
+- User's email length can be 3-20 **inclusive** (i.e 1234567890@123456.com [20 characters])
+- User cannot use set\_profile\_name to change the name to itself (i.e changing Rebecca to Rebecca)
+- User cannot use set\_email\_name to change the email to itself
