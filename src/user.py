@@ -1,5 +1,7 @@
 from error import InputError, AccessError
-from data import valid_email
+from data import (
+    valid_email, user_email_list, user_handle_list
+)
 def user_profile(token, u_id):
     return {
         'user': {
@@ -19,10 +21,21 @@ def user_profile_setemail(token, email):
     if not valid_email(email):
         # Invalid email format
         raise InputError('Invalid email format')
+    elif email in user_email_list():
+        # Email in use
+        raise InputError('Email already taken')
 
     return {
     }
 
 def user_profile_sethandle(token, handle_str):
+    handle_len = len(handle_str)
+    if handle_len <= 3 or handle_len >= 20:
+        # Invalid handle length (too short or too long)
+        raise InputError('handle_str must be between 3 and 20 characters')
+    elif handle_str in user_handle_list():
+        # Handle in use
+        raise InputError('handle is already used by another user')
+
     return {
     }
