@@ -1,9 +1,10 @@
+''' Import required modules '''
 from data import data, user_with_id, user_with_token
 from error import InputError, AccessError
 
 def clear():
     '''
-    Resets the internal data of the application to it's initial state (no input/output)
+    Resets the internal data of the application to its initial state (no input/output)
     '''
     data['users'] = []
     data['channels'] = []
