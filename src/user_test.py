@@ -25,7 +25,7 @@ def test_valid_user():
     assert profile['user']['name_last'] == "Nguyen"
     assert profile['user']['u_id'] == 1
     assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
-    assert profile['user']['handle'] == '1stevennguyen'
+    assert profile['user']['handle_str'] == '1stevennguyen'
 
     # user with long name to check handle name
     user2 = auth_register(
@@ -37,7 +37,7 @@ def test_valid_user():
     assert profile['user']['name_last'] == "Verylonglastname"
     assert profile['user']['u_id'] == 2
     assert profile['user']['email'] == 'madeulook100@gmail.com'
-    assert profile['user']['handle'] == '2verylongfirstnameve'
+    assert profile['user']['handle_str'] == '2verylongfirstnameve'
 
 def test_invalid_user():
     '''
@@ -256,10 +256,10 @@ def test_valid_handle():
     profile = user_profile(user['token'], user['u_id'])
 
     user_profile_sethandle(user['token'], 'Real Bruce Lee')
-    assert profile['user']['handle'] == 'Real Bruce Lee'
+    assert profile['user']['handle_str'] == 'Real Bruce Lee'
 
     user_profile_sethandle(user['token'], 'Actual Bruce Lee')
-    assert profile['user']['handle'] == 'Actual Bruce Lee'
+    assert profile['user']['handle_str'] == 'Actual Bruce Lee'
 
 def test_handle_length():
     '''
@@ -280,7 +280,7 @@ def test_handle_length():
 
     # Make sure handle is still the same (default handle)
     user_profile_sethandle(user['token'], 'dog')
-    assert len(profile['user']['handle']) == 3
+    assert len(profile['user']['handle_str']) == 3
 
 def test_taken_handle():
     '''
