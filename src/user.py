@@ -46,6 +46,7 @@ def user_profile_setemail(token, email):
 
 def user_profile_sethandle(token, handle_str):
     handle_len = len(handle_str)
+    print(user_handle_list())
     if handle_len not in range(3, 21):
         # Invalid handle length (too short or too long)
         raise InputError('handle_str must be between 3 and 20 characters')

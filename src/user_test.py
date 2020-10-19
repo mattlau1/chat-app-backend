@@ -256,10 +256,10 @@ def test_valid_handle():
     profile = user_profile(user['token'], user['u_id'])
 
     user_profile_sethandle(user['token'], 'Real Bruce Lee')
-    assert profile['user']['handle_str'] == 'Real Bruce Lee'
+    assert profile['user']['handle'] == 'Real Bruce Lee'
 
     user_profile_sethandle(user['token'], 'Actual Bruce Lee')
-    assert profile['user']['handle_str'] == 'Actual Bruce Lee'
+    assert profile['user']['handle'] == 'Actual Bruce Lee'
 
 def test_handle_length():
     '''
@@ -276,10 +276,11 @@ def test_handle_length():
 
     # User tries to change to long handle
     with pytest.raises(InputError):
-        user_profile_sethandle(user['token'], 'thisistwentychars!!!')
+        user_profile_sethandle(user['token'], 'thisistwentyonechars!')
 
     # Make sure handle is still the same (default handle)
-    assert len(profile['user']['handle_str']) == 20
+    user_profile_sethandle(user['token'], 'dog')
+    assert len(profile['user']['handle']) == 3
 
 def test_taken_handle():
     '''
