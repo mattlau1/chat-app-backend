@@ -1,40 +1,44 @@
 ''' Test file for other.py '''
 import pytest
 from auth import auth_register
-from channel import channel_invite, channel_details
-from channels import channels_create, channels_list
+from channel import channel_invite
+from channels import channels_create
 from message import message_send, message_remove, message_edit
-from other import clear, search
+from other import clear, search, users_all
 from error import InputError, AccessError
 
 
-def test_clear():
+def test_users_all():
     '''
-    Test that clear removes the users[], channels[] and resets the latest_message_id
+    Test that users_all correctly shows the details of all users
     '''
-    f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
-    f_channel = channels_create(f_owner['token'], 'Channel 1', True)
-
-    details = channel_details(f_owner['token'], f_channel['channel_id'])
-    assert len(details['all_members']) == 1
-    assert len(details['owner_members']) == 1
-
-    # random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
-    # channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
-    # assert len(details['all_members']) == 2
-    # assert len(details['owner_members']) == 1
-    
-    assert len(channels_list(f_owner['token'])['channels']) == 1
-    
-    m_id = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
-    
-    assert m_id['message_id'] == 1
-    
     clear()
-    # assert len(details['all_members']) == 0
-    # assert len(details['owner_members']) == 0
-    # assert len(channels_list(f_owner['token'])['channels']) == 0
-    # assert m_id['message_id'] == 0
+    # Register three users
+    f_owner = auth_register('markzuckerberg@gmail.com', 'password', 'Mark', 'Zuckerberg')
+    random_user1 = auth_register('brianpaul@gmail.com', 'password', 'Brian', 'Paul')
+    random_user2 = auth_register('gregstevens@gmail.com', 'password', 'Greg', 'Stevens')
+
+    # Check users_all correctly returns details of all three users
+    users_details = users_all(f_owner['token'])
+    assert len(users_details['users']) == 3
+    # Check details of first user
+    assert users_details['users'][0]['u_id'] == 1
+    assert users_details['users'][0]['email'] == 'markzuckerberg@gmail.com'
+    assert users_details['users'][0]['name_first'] == 'Mark'
+    assert users_details['users'][0]['name_last'] == 'Zuckerberg'
+    assert users_details['users'][0]['handle_str'] == 'markzuckerberg'
+    # Check details of second user
+    assert users_details['users'][1]['u_id'] == 2
+    assert users_details['users'][1]['email'] == 'brianpaul@gmail.com'
+    assert users_details['users'][1]['name_first'] == 'Brian'
+    assert users_details['users'][1]['name_last'] == 'Paul'
+    assert users_details['users'][1]['handle_str'] == 'brianpaul'
+    # Check details of third user
+    assert users_details['users'][2]['u_id'] == 3
+    assert users_details['users'][2]['email'] == 'gregstevens@gmail.com'
+    assert users_details['users'][2]['name_first'] == 'Greg'
+    assert users_details['users'][2]['name_last'] == 'Stevens'
+    assert users_details['users'][2]['handle_str'] == 'gregstevens'
 
 
 def test_search_invalid():
