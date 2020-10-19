@@ -29,7 +29,7 @@ def user_profile_setname(token, name_first, name_last):
         raise InputError('First name should be between 1 and 50 characters inclusive')
     if len(name_last) not in range(1, 51):
         raise InputError('Last name should be between 1 and 50 characters inclusive')
-    
+
     return {
     }
 
@@ -46,7 +46,7 @@ def user_profile_setemail(token, email):
 
 def user_profile_sethandle(token, handle_str):
     handle_len = len(handle_str)
-    if handle_len <= 3 or handle_len >= 20:
+    if handle_len not in range(3, 21):
         # Invalid handle length (too short or too long)
         raise InputError('handle_str must be between 3 and 20 characters')
     elif handle_str in user_handle_list():
