@@ -1,7 +1,6 @@
 '''
-Tests written to test user.py 
+Tests written to test user.py
 '''
-
 import pytest
 from user import user_profile
 from other import clear
@@ -68,10 +67,18 @@ def test_invalid_user():
 
 # user_profile_setemail(token, email) tests
 def test_empty_email():
+    '''
+    
+    
+    '''
     pass
 
 def test_invalid_email():
     pass
 
 # user_profile_sethandle(token, handle_str) tests
+def test_handle_length():
+    pass
 
+def test_taken_handle():    
+    pass
