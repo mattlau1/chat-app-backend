@@ -31,3 +31,7 @@
 - Channel names full of whitespace characters are invalid
 - Empty channel names are also invalid
 - All members include owners
+
+### user.py:
+- User cannot use set_profile_name to change the name to itself (for example changing Rebecca to Rebecca)
+- User cannot use set_email_name to change the email to itself
