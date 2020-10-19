@@ -25,7 +25,7 @@ def test_valid_user():
     assert profile['user']['name_last'] == "Nguyen"
     assert profile['user']['u_id'] == 1
     assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
-    assert profile['user']['handle_str'] == '1stevennguyen'
+    assert profile['user']['handle_str'] == 'stevennguyen'
 
     # user with long name to check handle name
     user2 = auth_register(
@@ -37,7 +37,7 @@ def test_valid_user():
     assert profile['user']['name_last'] == "Verylonglastname"
     assert profile['user']['u_id'] == 2
     assert profile['user']['email'] == 'madeulook100@gmail.com'
-    assert profile['user']['handle_str'] == '2verylongfirstnameve'
+    assert profile['user']['handle_str'] == 'verylongfirstnamever'
 
 def test_invalid_user():
     '''
