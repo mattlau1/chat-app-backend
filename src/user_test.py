@@ -10,6 +10,7 @@ from other import clear
 from auth import auth_register
 from error import InputError, AccessError
 
+''' user_profile tests '''
 def test_valid_user():
     '''
     Create a valid user
@@ -74,6 +75,7 @@ def test_invalid_user():
     with pytest.raises(AccessError):
         user_profile('*%&^', 3)
 
+''' user_profile_setname tests '''
 def test_valid_setnames():
     '''
     Change name of the user with valid name and check that the id stays the same
@@ -108,7 +110,7 @@ def test_valid_setnames():
     assert profile['user']['name_last'] == "Michaelson"
     assert profile['user']['u_id'] == 2
 
-    # changing name with 1 character 
+    # changing name with 1 character
     user3 = auth_register('mmmonkey97@hotmail.com', 'password', 'John', 'Johnson')
     profile = user_profile(user3['token'], user3['u_id'])
     assert profile['user']['name_first'] == "John"
@@ -152,47 +154,93 @@ def test_invalid_setnames():
     with pytest.raises(InputError):
         user_profile_setname(user2['token'], '  ', '  ')
 
-# user_profile_setemail(token, email) tests
+''' user_profile_setemail tests '''
 def test_empty_email():
     '''
     Registers valid users and attempts to change their email to an empty email
     or one with whitespace only.
     '''
     clear()
+    # Setting empty email
     user = auth_register('stvnnguyen69@hotmail.com', 'password', 'Steven', 'Nguyen')
     with pytest.raises(InputError):
         user_profile_setemail(user['token'], '')
         
+    # Setting email full of whitespaces
     user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
     with pytest.raises(InputError):
         user_profile_setemail(user['token'], '          ')
 
 def test_invalid_email():
     '''
-    
-    '''    
+    Registers valid users and attempts to change their email to strings
+    that aren't emails.
+    '''
     clear()
+    user = auth_register('ilovescience10@hotmail.com', '7654321', 'Bill', 'Nye')
+
+    # Alphanumeric string, no @ or domain
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], 'dkid12eid')
+
+    # Alphanumeric string with @
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], 'ew9ijifewji90ejwiffjiifji1j2j@')
+  
+    # No string with @ and domain
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], '@.com')
+
+    # No string or @ with domain
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], 'gmail.cn')
+
+    # No string with @
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], '@')
 
 def test_taken_email():
     '''
-    
+    Registers two valid users and tries to set both their emails to each other's
+    emails.
     '''
     clear()
+    user1 = auth_register('blastfire97@gmail.com', 'p@ssw0rd', 'Apple', 'Appleson')
+    user2 = auth_register('samsunggalaxy01@gmail.com', 'password', 'Orange', 'Orangeson')
 
+    # user1 tries to set email to user2's email
+    with pytest.raises(InputError):
+        user_profile_setemail(user1['token'], 'samsunggalaxy01@gmail.com')
 
+    # user2 tries to set email to user1's email
+    with pytest.raises(InputError):
+        user_profile_setemail(user2['token'], 'blastfire97@gmail.com')
+
+def test_same_email():
+    '''
+    Registers two users and tries to set their emails to their current emails.
+    '''
+    clear()
+    user1 = auth_register('mmmonkey97@hotmail.com', 'password', 'John', 'Johnson')
+    with pytest.raises(InputError):
+        user_profile_setemail(user1['token'], 'mmmonkey97@hotmail.com')
+  
+    user2 = auth_register('monkeymaster22@gmail.com', 'ilovebanaNas', 'Banana', 'Bananason')
+    with pytest.raises(InputError):
+        user_profile_setemail(user2['token'], 'monkeymaster22@gmail.com')
+
+''' user_profile_sethandle tests '''
 # user_profile_sethandle(token, handle_str) tests
 def test_handle_length():
     '''
 
-    
     '''
     clear()
 
 
-def test_taken_handle():    
+def test_taken_handle():
     '''
 
-    
     '''
     clear()
     
