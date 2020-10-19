@@ -172,22 +172,6 @@ def test_valid_email():
     # Check if email has changed
     assert profile['user']['email'] == 'goodbye21@gmail.com'
 
-def test_empty_email():
-    '''
-    Registers valid users and attempts to change their email to an empty email
-    or one with whitespace only.
-    '''
-    clear()
-    # Setting empty email
-    user = auth_register('stvnnguyen69@hotmail.com', 'password', 'Steven', 'Nguyen')
-    with pytest.raises(InputError):
-        user_profile_setemail(user['token'], '')
-
-    # Setting email full of whitespaces
-    user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
-    with pytest.raises(InputError):
-        user_profile_setemail(user['token'], '          ')
-
 def test_invalid_email():
     '''
     Registers valid users and attempts to change their email to strings
@@ -215,6 +199,22 @@ def test_invalid_email():
     # No string with @
     with pytest.raises(InputError):
         user_profile_setemail(user['token'], '@')
+
+def test_empty_email():
+    '''
+    Registers valid users and attempts to change their email to an empty email
+    or one with whitespace only.
+    '''
+    clear()
+    # Setting empty email
+    user = auth_register('stvnnguyen69@hotmail.com', 'password', 'Steven', 'Nguyen')
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], '')
+
+    # Setting email full of whitespaces
+    user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
+    with pytest.raises(InputError):
+        user_profile_setemail(user['token'], '          ')
 
 def test_taken_email():
     '''
@@ -247,16 +247,57 @@ def test_same_email():
         user_profile_setemail(user2['token'], 'monkeymaster22@gmail.com')
 
 # user_profile_sethandle tests
-def test_handle_length():
+def test_valid_handle():
     '''
-
+    User registers and changes handle to normal handle
     '''
     clear()
+    user = auth_register('therealbrucelee@gmail.com', 'gghgdshh', 'Bruce', 'Lee')
+    profile = user_profile(user['token'], user['u_id'])
 
+    user_profile_sethandle(user['token'], 'Real Bruce Lee')
+    assert profile['user']['handle_str'] == 'Real Bruce Lee'
+
+    user_profile_sethandle(user['token'], 'Actual Bruce Lee')
+    assert profile['user']['handle_str'] == 'Actual Bruce Lee'
+
+def test_handle_length():
+    '''
+    User registers and tries to change handle to 2 character and 27 character
+    handles.
+    '''
+    clear()
+    user = auth_register('peterpeterson222@hotmail.com', 'uaefhuasfnf', 'Peter', 'Peterson')
+    profile = user_profile(user['token'], user['u_id'])
+
+    # User tries to change to short handle
+    with pytest.raises(InputError):
+        user_profile_sethandle(user['token'], 'hi')
+
+    # User tries to change to long handle
+    with pytest.raises(InputError):
+        user_profile_sethandle(user['token'], 'thisistwentychars!!!')
+
+    # Make sure handle is still the same (default handle)
+    assert len(profile['user']['handle_str']) == 20
 
 def test_taken_handle():
     '''
-
+    Two users register and try to change to the same valid handle.
     '''
     clear()
-    
+    user1 = auth_register('blastfire97@gmail.com', 'p@ssw0rd', 'Apple', 'Appleson')
+    user2 = auth_register('samsunggalaxy01@gmail.com', 'password', 'Orange', 'Orangeson')
+
+    # user1 changes handle to hello world
+    user_profile_sethandle(user1['token'], 'hello world')
+
+    # user2 tries to also change to hello world
+    with pytest.raises(InputError):
+        user_profile_sethandle(user2['token'], 'hello world')
+
+    # user1 changes handle again
+    user_profile_sethandle(user2['token'], 'goodbye world')
+
+    with pytest.raises(InputError):
+        user_profile_sethandle(user1['token'], 'goodbye world')
