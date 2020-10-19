@@ -1,8 +1,15 @@
 from error import InputError, AccessError
 from data import (
-    valid_email, user_email_list, user_handle_list
+    valid_email, user_email_list, user_handle_list, user_with_id, user_with_token
 )
 def user_profile(token, u_id):
+    # invalid token
+    if user_with_token(token) is None :
+        raise AccessError('Invalid token')
+    # invalid id
+    if user_with_id(u_id) is None:
+        raise AccessError('Invalid ID')
+
     return {
         'user': {
         	'u_id': 1,
@@ -14,6 +21,15 @@ def user_profile(token, u_id):
     }
 
 def user_profile_setname(token, name_first, name_last):
+    # invalid token
+    if user_with_token(token) is None :
+        raise AccessError('Invalid token')
+    # invalid name length
+    if len(name_first) not in range(1, 51):
+        raise InputError('First name should be between 1 and 50 characters inclusive')
+    if len(name_last) not in range(1, 51):
+        raise InputError('Last name should be between 1 and 50 characters inclusive')
+    
     return {
     }
 

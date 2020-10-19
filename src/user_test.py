@@ -41,9 +41,11 @@ def test_invalid_user():
     '''
     # retrieving information without registering
     with pytest.raises(AccessError):
-        user_profile = user_profile('@#*&$^', 11)
-        user_profile = user_profile(')(!*#$', 12)
-        user_profile = user_profile('*%&^', 13)
+        user_profile('@#*&$^', 11)
+    with pytest.raises(AccessError):
+        user_profile(')(!*#$', 12)
+    with pytest.raises(AccessError):
+        user_profile('*%&^', 13)
 
     # retrieving information with correct token but wrong id
     user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
@@ -51,17 +53,21 @@ def test_invalid_user():
     user3 = auth_register('roariscool64@gmail.com', 'password123', 'Taylor', 'Series')
     with pytest.raises(AccessError):
         # actual id is 1
-        user_profile = user_profile(user['token'], 5)
+        user_profile(user['token'], 5)
+    with pytest.raises(AccessError):
         # actual id is 2
-        user_profile = user_profile(use2['token'], 7)
+        user_profile(user2['token'], 7)
+    with pytest.raises(AccessError):
         # actual id is 3
-        user_profile = user_profile(use3['token'], 7)
+        user_profile(user3['token'], 7)
 
     # retrieving information with wrong token but correct id
     with pytest.raises(AccessError):
-        user_profile = user_profile('@#*&$^', 1)
-        user_profile = user_profile(')(!*#$', 2)
-        user_profile = user_profile('*%&^', 3)
+        user_profile('@#*&$^', 1)
+    with pytest.raises(AccessError):
+        user_profile(')(!*#$', 2)
+    with pytest.raises(AccessError):
+        user_profile('*%&^', 3)
 
     clear()
 
