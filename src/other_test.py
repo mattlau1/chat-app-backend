@@ -1,10 +1,41 @@
+''' Test file for other.py '''
 import pytest
 from auth import auth_register
-from channel import channel_invite
-from channels import channels_create
+from channel import channel_invite, channel_details
+from channels import channels_create, channels_list
 from message import message_send, message_remove, message_edit
 from other import clear, search
 from error import InputError, AccessError
+
+
+def test_clear():
+    '''
+    Test that clear removes the users[], channels[] and resets the latest_message_id
+    '''
+    f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
+    f_channel = channels_create(f_owner['token'], 'Channel 1', True)
+
+    details = channel_details(f_owner['token'], f_channel['channel_id'])
+    assert len(details['all_members']) == 1
+    assert len(details['owner_members']) == 1
+
+    # random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
+    # channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
+    # assert len(details['all_members']) == 2
+    # assert len(details['owner_members']) == 1
+    
+    assert len(channels_list(f_owner['token'])['channels']) == 1
+    
+    m_id = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
+    
+    assert m_id['message_id'] == 1
+    
+    clear()
+    # assert len(details['all_members']) == 0
+    # assert len(details['owner_members']) == 0
+    # assert len(channels_list(f_owner['token'])['channels']) == 0
+    # assert m_id['message_id'] == 0
+
 
 def test_search_invalid():
     '''
@@ -24,6 +55,7 @@ def test_search_invalid():
         message_send(f_owner['token'], f_channel['channel_id'], '')
         messages = search(f_owner['token'], '')
         assert len(messages) == 0
+
 
 def test_search_valid_substring():
     '''
@@ -73,6 +105,7 @@ def test_search_valid_substring():
         # Caps-sensitive
         messages = search(f_owner['token'], 'a')['messages']
         assert len(messages) == 0
+
 
 def test_search_valid_global():
     '''
