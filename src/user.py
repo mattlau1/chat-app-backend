@@ -4,20 +4,30 @@ from data import (
     user_with_token, data
 )
 def user_profile(token, u_id):
-    # invalid token
-    if user_with_token(token) is None :
+    '''
+    Returns information about a specified user.
+    Input: token (str), u_id (int)
+    Output: dict containing user's id, email, first name, last name, and handle
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
+    target_user = user_with_id(u_id)
+
+    # Error check
+    if auth_user is None:
+        # Invalid token
         raise AccessError('Invalid token')
-    # invalid id
-    if user_with_id(u_id) is None:
-        raise AccessError('Invalid ID')
+    elif target_user is None:
+        # Invalid u_id
+        raise InputError('Invalid user')
 
     return {
         'user': {
-        	'u_id': 1,
-        	'email': 'cs1531@cse.unsw.edu.au',
-        	'name_first': 'Hayden',
-        	'name_last': 'Jacobs',
-        	'handle_str': 'hjacobs',
+        	'u_id': target_user['id'],
+        	'email': target_user['email'],
+        	'name_first': target_user['name_first'],
+        	'name_last': target_user['name_last'],
+        	'handle_str': target_user['handle'],
         },
     }
 

@@ -20,24 +20,26 @@ def test_valid_user():
     clear()
     # standard user
     user = auth_register('stvnnguyen69@hotmail.com', 'password', 'Steven', 'Nguyen')
+    user_profile_sethandle(user['token'], 'Stevenson')
     profile = user_profile(user['token'], user['u_id'])
     assert profile['user']['name_first'] == "Steven"
     assert profile['user']['name_last'] == "Nguyen"
-    assert profile['user']['u_id'] == 1
+    assert profile['user']['u_id'] == user['u_id']
     assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
-    assert profile['user']['handle_str'] == 'stevennguyen'
+    assert profile['user']['handle_str'] == 'Stevenson'
 
-    # user with long name to check handle name
+    # another regular user
     user2 = auth_register(
         'madeulook100@gmail.com', 'madeulook',
         'Verylongfirstname', 'Verylonglastname'
     )
+    user_profile_sethandle(user2['token'], 'LongHandleName')
     profile = user_profile(user2['token'], user2['u_id'])
     assert profile['user']['name_first'] == "Verylongfirstname"
     assert profile['user']['name_last'] == "Verylonglastname"
-    assert profile['user']['u_id'] == 2
+    assert profile['user']['u_id'] == user2['u_id']
     assert profile['user']['email'] == 'madeulook100@gmail.com'
-    assert profile['user']['handle_str'] == 'verylongfirstnamever'
+    assert profile['user']['handle_str'] == 'LongHandleName'
 
 def test_invalid_user():
     '''
@@ -57,23 +59,20 @@ def test_invalid_user():
     user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
     user2 = auth_register('ilovescience10@hotmail.com', '7654321', 'Bill', 'Nye')
     user3 = auth_register('roariscool64@gmail.com', 'password123', 'Taylor', 'Series')
-    with pytest.raises(AccessError):
-        # actual id is 1
+    with pytest.raises(InputError):
         user_profile(user['token'], 5)
-    with pytest.raises(AccessError):
-        # actual id is 2
+    with pytest.raises(InputError):
         user_profile(user2['token'], 7)
-    with pytest.raises(AccessError):
-        # actual id is 3
+    with pytest.raises(InputError):
         user_profile(user3['token'], 7)
 
     # retrieving information with wrong token but correct id
     with pytest.raises(AccessError):
-        user_profile('@#*&$^', 1)
+        user_profile('@#*&$^', user['u_id'])
     with pytest.raises(AccessError):
-        user_profile(')(!*#$', 2)
+        user_profile(')(!*#$', user2['u_id'])
     with pytest.raises(AccessError):
-        user_profile('*%&^', 3)
+        user_profile('*%&^', user3['u_id'])
 
 # user_profile_setname tests
 def test_valid_setnames():
@@ -87,28 +86,28 @@ def test_valid_setnames():
     profile = user_profile(user['token'], user['u_id'])
     assert profile['user']['name_first'] == "Apple"
     assert profile['user']['name_last'] == "Appleson"
-    assert profile['user']['u_id'] == 1
+    assert profile['user']['u_id'] == user['u_id']
 
     # same token, id but different username
     user_profile_setname(user['token'], 'Banana', 'Bananason')
     assert profile['user']['name_first'] == "Banana"
     assert profile['user']['name_last'] == "Bananason"
-    assert profile['user']['u_id'] == 1
+    assert profile['user']['u_id'] == user['u_id']
 
     # change name multiple times under the same token
     user2 = auth_register('samsunggalaxy01@gmail.com', 'password', 'Orange', 'Orangeson')
     profile = user_profile(user2['token'], user2['u_id'])
     assert profile['user']['name_first'] == "Orange"
     assert profile['user']['name_last'] == "Orangeson"
-    assert profile['user']['u_id'] == 2
+    assert profile['user']['u_id'] == user2['u_id']
     user_profile_setname(user2['token'], 'Strawberry', 'Strawberryson')
     assert profile['user']['name_first'] == "Strawberry"
     assert profile['user']['name_last'] == "Strawberryson"
-    assert profile['user']['u_id'] == 2
+    assert profile['user']['u_id'] == user2['u_id']
     user_profile_setname(user2['token'], 'Michael', 'Michaelson')
     assert profile['user']['name_first'] == "Michael"
     assert profile['user']['name_last'] == "Michaelson"
-    assert profile['user']['u_id'] == 2
+    assert profile['user']['u_id'] == user2['u_id']
 
     # changing name with 1 character
     user3 = auth_register('mmmonkey97@hotmail.com', 'password', 'John', 'Johnson')
