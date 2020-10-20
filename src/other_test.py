@@ -4,7 +4,7 @@ from auth import auth_register
 from channel import channel_invite, channel_details, channel_messages, channel_join, channel_leave
 from channels import channels_create, channels_list
 from message import message_send, message_remove, message_edit
-from other import clear, search, admin_userpermission_change
+from other import clear, users_all, admin_userpermission_change, search
 from error import InputError, AccessError
 
 
