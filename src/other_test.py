@@ -1,7 +1,7 @@
 ''' Test file for other.py '''
 import pytest
 from auth import auth_register
-from channel import channel_invite, channel_details, channel_join, channel_leave
+from channel import channel_invite, channel_details, channel_messages, channel_join, channel_leave
 from channels import channels_create, channels_list
 from message import message_send, message_remove, message_edit
 from other import clear, search, admin_userpermission_change
@@ -60,6 +60,29 @@ def test_clear_channels_messages():
     assert len(messages['messages']) == 0
 
 
+def test_admin_userpermission_change_to_owner():
+    '''
+    Test that admin_userpermission_change can set permissions of the user with the given user ID
+    from member to owner permissions.
+    '''
+    clear()
+    user1 = auth_register('billgates@gmail.com', 'password', 'Bill', 'Gates')
+    user2 = auth_register('steveballmer@gmail.com', 'password', 'Steve', 'Ballmer')
+
+    # First user (a Flockr owner) creates a private channel
+    f_channel = channels_create(user1['token'], 'Private Channel', False)
+    # Second user is unable to join the private channel as they are not a Flockr owner
+    with pytest.raises(AccessError):
+        channel_join(user2['token'], f_channel['channel_id'])
+
+    # First user changes permissions of second user to make them a Flockr owner
+    admin_userpermission_change(user1['token'], user2['u_id'], 1)
+
+    # Check that second user is now a Flockr owner 
+    # (verified by now being able to join the private channel)
+    channel_join(user2['token'], f_channel['channel_id'])
+
+
 def test_admin_userpermission_change_to_member():
     '''
     Test that admin_userpermission_change can set permissions of the user with the given user ID
@@ -95,8 +118,13 @@ def test_admin_userpermission_change_invalid_user_id():
     clear()
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     with pytest.raises(InputError):
-        admin_userpermission_change(f_owner['token'], f_owner['u_id'] + 1, 1)
-    admin_userpermission_change(f_owner['token'], f_owner['u_id'], 1)
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] + 1, 2)
+    with pytest.raises(InputError):
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] + 100, 2)
+    with pytest.raises(InputError):
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] - 13, 2)
+    with pytest.raises(InputError):
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] - 100, 2)
 
 
 def test_admin_userpermission_change_invalid_permission_id():
