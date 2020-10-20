@@ -18,6 +18,11 @@ def users_all(token):
     Input: token (str)
     Output: dict where 'user' key maps to a list of dictionaries containing user information
     '''
+    # Error check
+    if user_with_token(token) is None:
+        # Invalid token
+        raise AccessError('Invalid token')
+    
     return {
         'users': [
             {
