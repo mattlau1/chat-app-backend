@@ -118,13 +118,13 @@ def test_admin_userpermission_change_invalid_user_id():
     clear()
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     with pytest.raises(InputError):
-        admin_userpermission_change(f_owner['token'], 2, 1)
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] + 1, 2)
     with pytest.raises(InputError):
-        admin_userpermission_change(f_owner['token'], 0, 1)
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] + 100, 2)
     with pytest.raises(InputError):
-        admin_userpermission_change(f_owner['token'], 100, 1)
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] - 13, 2)
     with pytest.raises(InputError):
-        admin_userpermission_change(f_owner['token'], -5, 1)
+        admin_userpermission_change(f_owner['token'], f_owner['u_id'] - 100, 2)
 
 
 def test_admin_userpermission_change_invalid_permission_id():
