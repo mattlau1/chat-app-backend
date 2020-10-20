@@ -49,3 +49,6 @@
 - User cannot use set\_profile\_name to change the name to itself (i.e changing Rebecca to Rebecca)
 - User cannot use set\_email\_name to change the email to itself (i.e changing Andrew@google.com to Andrew@google.com)
 - Emails and names with only whitespace count as 'empty' emails/names (i.e '    ' is empty)
+
+### other.py:
+- A Flockr owner cannot change their own permissions using admin\_userpermission\_change to prevent there being no Flockr owners.
