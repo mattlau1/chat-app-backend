@@ -5,6 +5,7 @@ from channel import channel_invite, channel_details, channel_join, channel_leave
 from channels import channels_create, channels_list
 from message import message_send, message_remove, message_edit
 from other import clear, search, admin_userpermission_change
+from user import user_profile_sethandle
 from error import InputError, AccessError
 
 
