@@ -1,24 +1,28 @@
 ''' Test file for channel.py '''
 import pytest
-from auth import auth_register
-from channel import channel_invite, channel_details, channel_leave, channel_join, channel_addowner, channel_removeowner, channel_messages
+from channel import (channel_invite, channel_details, channel_messages, channel_leave,
+                     channel_join, channel_addowner, channel_removeowner)
 from channels import channels_create
+from auth import auth_register
 from message import message_send
 from error import InputError, AccessError
 from other import clear
 
 
 def test_channel_invite():
+    '''
+    Testing the channel_invite function
+    '''
     clear()
     user1 = auth_register('user1@gmail.com', 'password1', 'John', 'Smith')
-    user2 = auth_register('user2@gmail.com', 'password2', 'Steve', 'Jackson') 
+    user2 = auth_register('user2@gmail.com', 'password2', 'Steve', 'Jackson')
     # User 1 creates a new channel, and invites User 2
     channel1 = channels_create(user1['token'], 'Test Channel 1', True)
     channel_invite(user1['token'], channel1['channel_id'], user2['u_id'])
 
     # Checking if User 2 is a member of the channel (whether they can access channel details)
     channel_details(user2['token'], channel1['channel_id'])
-    
+
     channel2 = channels_create(user1['token'], 'Test Channel 2', True)
 
     # Authorised user does not have a valid token
@@ -40,6 +44,9 @@ def test_channel_invite():
 
 
 def test_channel_details():
+    '''
+    Testing the channel_details function
+    '''
     clear()
     owner = auth_register('liambrown@gmail.com', 'password', 'Liam', 'Brown')
     channel = channels_create(owner['token'], 'Test Channel', True)
@@ -47,16 +54,16 @@ def test_channel_details():
 
     # Checking if owner of channel can check channel details, and if they are correct
     details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['all_members']) == 1)
-    assert(len(details['owner_members']) == 1)
+    assert len(details['all_members']) == 1
+    assert len(details['owner_members']) == 1
 
     # Checking if member of channel can check channel details, and if they are correct
     channel_join(user['token'], channel['channel_id'])
     details = channel_details(user['token'], channel['channel_id'])
-    assert(len(details['all_members']) == 2)
+    assert len(details['all_members']) == 2
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(user['token'], channel['channel_id'])
-    assert(len(details['owner_members']) == 2)    
+    assert len(details['owner_members']) == 2
 
     # Authorised user does not have a valid token
     with pytest.raises(AccessError):
@@ -74,6 +81,9 @@ def test_channel_details():
 
 # It is not feasible to do valid testing for channel_messages during iteration one
 def test_channel_messages():
+    '''
+    Testing the channel_messages function
+    '''
     clear()
     # Standard error check
     user = auth_register('testing@gmail.com', 'password', 'Test', 'User')
@@ -89,8 +99,8 @@ def test_channel_messages():
     random_user = auth_register('test@gmail.com', 'password', 'Test', 'Mee')
     with pytest.raises(AccessError):
         channel_messages(random_user['token'], channel['channel_id'], 0)
-    
-    # Invalid start index     ------   ################################################ keep this version
+
+    # Invalid start index
     messages = channel_messages(user['token'], channel['channel_id'], 0)
     assert len(messages['messages']) == 1
     assert messages['start'] == 0
@@ -129,6 +139,9 @@ def test_channel_messages():
 
 
 def test_channel_leave():
+    '''
+    Testing the channel_leave function
+    '''
     clear()
     owner = auth_register('petermichaels@gmail.com', 'password', 'Peter', 'Michaels')
     channel = channels_create(owner['token'], 'Test Channel', True)
@@ -142,13 +155,13 @@ def test_channel_leave():
         channel_details(user['token'], channel['channel_id'])
 
     # Checking if a user can leave (verified if number of members becomes 1 afterwards)
-    channel_join(user['token'], channel['channel_id'])  
+    channel_join(user['token'], channel['channel_id'])
     details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['all_members']) == 2)
+    assert len(details['all_members']) == 2
 
-    channel_leave(user['token'], channel['channel_id']) 
+    channel_leave(user['token'], channel['channel_id'])
     details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['all_members']) == 1)
+    assert len(details['all_members']) == 1
 
     # Authorised user does not have a valid token
     with pytest.raises(AccessError):
@@ -158,7 +171,7 @@ def test_channel_leave():
     channel_join(user['token'], channel['channel_id'])
     with pytest.raises(InputError):
         channel_leave(user['token'], channel['channel_id'] + 100)
-    
+
     # Authorised user is not a member of the channel (leaving channel twice)
     channel_leave(user['token'], channel['channel_id'])
     with pytest.raises(AccessError):
@@ -174,19 +187,22 @@ def test_channel_leave():
 
 
 def test_channel_join():
+    '''
+    Testing the channel_join function
+    '''
     clear()
     owner = auth_register('petermichaels@gmail.com', 'password', 'Peter', 'Michaels')
     channel1 = channels_create(owner['token'], 'Channel 1', True)
     user = auth_register('kimwilliams@gmail.com', 'password', 'Kim', 'Williams')
 
     details = channel_details(owner['token'], channel1['channel_id'])
-    assert(len(details['all_members']) == 1)
+    assert len(details['all_members']) == 1
 
-    # Checking if a user can join a channel 
+    # Checking if a user can join a channel
     # (verified if number of members becomes 2 and if they can leave the channel)
     channel_join(user['token'], channel1['channel_id'])
     details = channel_details(user['token'], channel1['channel_id'])
-    assert(len(details['all_members']) == 2)
+    assert len(details['all_members']) == 2
     channel_leave(user['token'], channel1['channel_id'])
 
     # Authorised user does not have a valid token
@@ -204,6 +220,9 @@ def test_channel_join():
 
 
 def test_channel_addowner():
+    '''
+    Testing the channel_addowner function
+    '''
     clear()
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     channel = channels_create(owner['token'], 'Test channel', True)
@@ -211,15 +230,15 @@ def test_channel_addowner():
     channel_join(user['token'], channel['channel_id'])
 
     details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['owner_members']) == 1)
+    assert len(details['owner_members']) == 1
 
-    # Checking if someone can be added as an owner 
+    # Checking if someone can be added as an owner
     # (verified if number of owners becomes 2 and if they can be immediately removed)
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['owner_members']) == 2)
+    assert len(details['owner_members']) == 2
     channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
-    
+
     # Adding someone who is already the owner
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     with pytest.raises(InputError):
@@ -229,21 +248,24 @@ def test_channel_addowner():
     # Authorised user does not have a valid token
     with pytest.raises(AccessError):
         channel_addowner('', channel['channel_id'], user['u_id'])
-    
+
     # New owner does not have a valid token
     with pytest.raises(AccessError):
-        channel_addowner(owner['token'], channel['channel_id'], '')
+        channel_addowner(owner['token'], channel['channel_id'], 100)
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
         channel_addowner(owner['token'], channel['channel_id'] + 100, user['u_id'])
-    
+
     # Authorised user is not the owner
     with pytest.raises(AccessError):
         channel_addowner(user['token'], channel['channel_id'], user['u_id'])
 
 
 def test_channel_removeowner():
+    '''
+    Testing the channel_removeowner function
+    '''
     clear()
     owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
     channel = channels_create(owner['token'], 'Test channel', True)
@@ -253,11 +275,11 @@ def test_channel_removeowner():
     # Checking if someone can be removed (verified if number of owners becomes 1 afterwards)
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['owner_members']) == 2)
+    assert len(details['owner_members']) == 2
 
     channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(owner['token'], channel['channel_id'])
-    assert(len(details['owner_members']) == 1)
+    assert len(details['owner_members']) == 1
 
     # Removing someone who is already removed (no longer an owner)
     with pytest.raises(InputError):
@@ -276,7 +298,7 @@ def test_channel_removeowner():
 
     # Old owner does not have a valid token
     with pytest.raises(AccessError):
-        channel_removeowner(owner['token'], channel['channel_id'], '')
+        channel_removeowner(owner['token'], channel['channel_id'], 100)
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
@@ -287,6 +309,9 @@ def test_channel_removeowner():
 
 
 def test_flockr_owner():
+    '''
+    Testing functionality for Flockr owner
+    '''
     clear()
     flockr_owner = auth_register('big@man.com', 'password', 'Big', 'Boss')
     admin = auth_register('admin@com.com', 'password', 'Channel', 'Boss')
