@@ -300,7 +300,6 @@ def test_taken_handle():
 
     # user1 changes handle to hello world
     user_profile_sethandle(user1['token'], 'hello world')
-    profile = user_profile(user1['token'], user1['u_id'])
 
     # user2 tries to also change to hello world
     with pytest.raises(InputError):
@@ -308,7 +307,6 @@ def test_taken_handle():
 
     # user1 changes handle again
     user_profile_sethandle(user2['token'], 'goodbye world')
-    profile = user_profile(user2['token'], user2['u_id'])
 
     with pytest.raises(InputError):
         user_profile_sethandle(user1['token'], 'goodbye world')
