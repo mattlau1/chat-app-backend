@@ -11,8 +11,8 @@ from error import InputError, AccessError
 def generate_token(u_id):
     '''
     Generates a JSON Web Token (JWT) encoded token for a given user id
-    Params: u_id (int)
-    Returns: JWT-encoded token (str)
+    Input: u_id (int)
+    Output: JWT-encoded token (str)
     '''
     return jwt.encode({'u_id': u_id}, PRIVATE_KEY, algorithm='HS256').decode('utf-8')
 
@@ -20,8 +20,8 @@ def generate_token(u_id):
 def generate_handle(u_id, name_first, name_last):
     '''
     Generates a unique handle for a given user
-    Params: id (int), name_first (str), name_last (str)
-    Returns: handle_string (str)
+    Input: id (int), name_first (str), name_last (str)
+    Output: handle_string (str)
     '''
     # First 20 characters of concatenation of name_first and name_last
     handle_string = (name_first.lower() + name_last.lower())[:20]
@@ -34,8 +34,8 @@ def generate_handle(u_id, name_first, name_last):
 def auth_login(email, password):
     '''
     Logs a user in
-    Params: email (str), password (str)
-    Returns: u_id (int) and token (str) as a dict
+    Input: email (str), password (str)
+    Output: u_id (int) and token (str) as a dict
     '''
     user = user_with_email(email)
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
@@ -64,8 +64,8 @@ def auth_login(email, password):
 def auth_logout(token):
     '''
     Logs a user out
-    Params: token (str)
-    Returns: is_success (bool) as a dict
+    Input: token (str)
+    Output: is_success (bool) as a dict
     '''
     user = user_with_token(token)
     # Check for valid token
@@ -84,8 +84,8 @@ def auth_logout(token):
 def auth_register(email, password, name_first, name_last):
     '''
     Registers a user
-    Params: email (str), password (str), name_first (str), name_last (str)
-    Returns: u_id generated (int) and token generated (str) as a dict
+    Input: email (str), password (str), name_first (str), name_last (str)
+    Output: u_id generated (int) and token generated (str) as a dict
     '''
     # Error check
     if not valid_email(email):
