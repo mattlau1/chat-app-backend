@@ -62,6 +62,7 @@ def user_profile_setname(token, name_first, name_last):
     return {
     }
 
+
 def user_profile_setemail(token, email):
     '''
     Update the authorised user's email address

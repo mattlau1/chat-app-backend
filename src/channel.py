@@ -95,23 +95,20 @@ def channel_messages(token, channel_id, start):
         raise InputError('Invalid channel_id')
     elif auth_user['u_id'] not in channel['all_members']:
         raise AccessError('Authorised user not a member of channel')
-    elif start > len(channel['messages']):
+    elif start < 0 or start > len(channel['messages']):
         raise InputError('Invalid start index')
 
     # Messages originally ordered chronologically -
     # reverse and retrieve a maximum of 50 most recent messages
     messages = list(reversed(channel['messages']))[start : start + 50]
-    # The end is reached if the first message (id) is included in messages
     if len(messages) == 0:
+        # The end is reached there are no messages
         end = -1
     else:
+        # The end is also reached if the first message (id) is included in messages
         first_message_id = channel['messages'][0]['message_id']
         first_message_reached = any(message['message_id'] == first_message_id for message in messages)
         end = -1 if first_message_reached else start + 50
-
-    # THIS NEEDS TO BE REVIEWED
-    # THIS NEEDS TO BE REVIEWED
-    # THIS NEEDS TO BE REVIEWED
 
     return {
         'messages': messages,
