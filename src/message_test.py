@@ -92,16 +92,20 @@ def test_message_remove():
     with pytest.raises(AccessError):
         message_remove(random_user2['token'], m_id2)
 
-    assert count(f_channel['messages']) == 3
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    assert len(messages) == 3
     # Message sender can remove their own message
     message_remove(random_user2['token'], m_id3)
-    assert count(f_channel['messages']) == 2
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    assert len(messages) == 2
     # Flockr owner can remove anyone's message
     message_remove(f_owner['token'], m_id2)
-    assert count(f_channel['messages']) == 1
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    assert len(messages) == 1
     # Flockr owner can remove their own message
     message_remove(f_owner['token'], m_id1)
-    assert count(f_channel['messages']) == 0
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    assert len(messages) == 0
 
 
 def test_message_edit():
@@ -145,7 +149,8 @@ def test_message_edit():
     m_id5 = message_send(random_user['token'], f_channel['channel_id'], 'Fifth message')['message_id']
     m_id6 = message_send(random_user2['token'], f_channel['channel_id'], 'Sixth message')['message_id']
 
-    assert len(f_channel['messages']) == 6
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    assert len(messages) == 6
     
     # Authorised user did not send the message is not channel or Flockr owner
     with pytest.raises(AccessError):
@@ -160,4 +165,5 @@ def test_message_edit():
     # Flockr owner can delete their own message by editing it to an empty message
     message_edit(f_owner['token'], m_id4, '')
     
-    assert len(f_channel['messages']) == 3    
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    assert len(messages) == 3
