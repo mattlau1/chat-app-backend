@@ -5,6 +5,7 @@ from channel import channel_invite, channel_details
 from channels import channels_create, channels_list
 from message import message_send, message_remove, message_edit
 from other import clear, search, users_all
+from user import user_profile_sethandle
 from error import InputError, AccessError
 
 
@@ -47,27 +48,32 @@ def test_users_all():
     random_user1 = auth_register('brianpaul@gmail.com', 'password', 'Brian', 'Paul')
     random_user2 = auth_register('gregstevens@gmail.com', 'password', 'Greg', 'Stevens')
 
+    # Set handles of the users
+    user_profile_sethandle(f_owner['token'], 'MARKZUCKERBERG')
+    user_profile_sethandle(random_user1['token'], 'BRIANPAUL')
+    user_profile_sethandle(random_user2['token'], 'GREGSTEVENS')
+
     # Check users_all correctly returns details of all three users
     users_details = users_all(f_owner['token'])
     assert len(users_details['users']) == 3
     # Check details of first user
-    assert users_details['users'][0]['u_id'] == 1
+    assert users_details['users'][0]['u_id'] == f_owner['u_id']
     assert users_details['users'][0]['email'] == 'markzuckerberg@gmail.com'
     assert users_details['users'][0]['name_first'] == 'Mark'
     assert users_details['users'][0]['name_last'] == 'Zuckerberg'
-    assert users_details['users'][0]['handle_str'] == 'markzuckerberg'
+    assert users_details['users'][0]['handle_str'] == 'MARKZUCKERBERG'
     # Check details of second user
-    assert users_details['users'][1]['u_id'] == 2
+    assert users_details['users'][1]['u_id'] == random_user1['u_id']
     assert users_details['users'][1]['email'] == 'brianpaul@gmail.com'
     assert users_details['users'][1]['name_first'] == 'Brian'
     assert users_details['users'][1]['name_last'] == 'Paul'
-    assert users_details['users'][1]['handle_str'] == 'brianpaul'
+    assert users_details['users'][1]['handle_str'] == 'BRIANPAUL'
     # Check details of third user
-    assert users_details['users'][2]['u_id'] == 3
+    assert users_details['users'][2]['u_id'] == random_user2['u_id']
     assert users_details['users'][2]['email'] == 'gregstevens@gmail.com'
     assert users_details['users'][2]['name_first'] == 'Greg'
     assert users_details['users'][2]['name_last'] == 'Stevens'
-    assert users_details['users'][2]['handle_str'] == 'gregstevens'
+    assert users_details['users'][2]['handle_str'] == 'GREGSTEVENS'
 
 
 def test_search_invalid():
