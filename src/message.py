@@ -19,7 +19,7 @@ def message_send(token, channel_id, message):
     elif channel is None:
         # Invalid channel_id
         raise InputError('Invalid channel')
-    elif auth_user['id'] not in channel['all_members']:
+    elif auth_user['u_id'] not in channel['all_members']:
         # User not a channel member
         raise AccessError('User not in channel')
     elif not message:
@@ -33,14 +33,12 @@ def message_send(token, channel_id, message):
     message_id = data['latest_message_id'] + 1
     data['latest_message_id'] += 1
 
-    for channel in data['channels']:
-        if channel['id'] == channel_id:
-            channel['messages'].append({
-                'message_id': message_id,
-                'u_id': auth_user['id'],
-                'time_created': datetime.timestamp(datetime.now()),
-                'message': message,
-            })
+    channel['messages'].append({
+        'message_id': message_id,
+        'u_id': auth_user['u_id'],
+        'time_created': datetime.timestamp(datetime.now()),
+        'message': message,
+    })
 
     return {
         'message_id': message_id,

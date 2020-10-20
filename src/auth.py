@@ -3,7 +3,7 @@ import hashlib
 import jwt
 from data import (
     PRIVATE_KEY, data, valid_email, user_with_email, user_with_token,
-    user_email_list, user_handle_list, user_update_token,
+    user_email_list, user_handle_list,
 )
 from error import InputError, AccessError
 
@@ -51,12 +51,11 @@ def auth_login(email, password):
         raise InputError('Incorrect password')
 
     # Update token
-    token = generate_token(user['id'])
-    user_update_token(user['id'], token)
-    assert user_with_email(email)['token'] == token
+    token = generate_token(user['u_id'])
+    user['token'] = token
 
     return {
-        'u_id': user['id'],
+        'u_id': user['u_id'],
         'token': token,
     }
 
@@ -72,8 +71,8 @@ def auth_logout(token):
     if user is None:
         raise AccessError('Invalid token')
 
-    # Update user token
-    user_update_token(user['id'], '')
+    # Invalidate user token - session stuff in future iterations?
+    user['token'] = ''
     assert user_with_email(user['email'])['token'] == ''
 
     return {
@@ -111,14 +110,15 @@ def auth_register(email, password, name_first, name_last):
         raise InputError('Last name cannot be empty')
 
     # Register new user
-    u_id = len(data['users']) + 1
+    u_id = len(data['users'])
     token = generate_token(u_id)
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
+    # First user to register receives Flockr owner permissions
     permission_id = 1 if len(data['users']) == 0 else 2
 
     # Append user information to data
     data['users'].append({
-        'id': u_id,
+        'u_id': u_id,
         'email': email,
         'password': encrypted_password,
         'name_first': name_first,
