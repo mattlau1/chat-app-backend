@@ -75,9 +75,9 @@ def test_message_remove():
     random_user2 = auth_register('randomguy@gmail.com', 'password', 'Random2', 'Guy2')
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
     
-    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
-    m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second message')
-    m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')
+    m_id1['message_id'] = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
+    m_id2['message_id'] = message_send(random_user['token'], f_channel['channel_id'], 'Second message')
+    m_id3['message_id'] = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')
 
     # Invalid token
     with pytest.raises(AccessError):
@@ -116,9 +116,9 @@ def test_message_edit():
     random_user2 = auth_register('randomguy@gmail.com', 'password', 'Random2', 'Guy2')
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
     
-    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
-    m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second message')
-    m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')
+    m_id1['message_id'] = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
+    m_id2['message_id'] = message_send(random_user['token'], f_channel['channel_id'], 'Second message')
+    m_id3['message_id'] = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')
 
     # Invalid token
     with pytest.raises(AccessError):
@@ -141,9 +141,9 @@ def test_message_edit():
     message_edit(f_owner['token'], m_id1, 'Edited first message')
     
     # If the edited message becomes an empty string, it should be deleted
-    m_id4 = message_send(f_owner['token'], f_channel['channel_id'], 'Fourth message')
-    m_id5 = message_send(random_user['token'], f_channel['channel_id'], 'Fifth message')
-    m_id6 = message_send(random_user2['token'], f_channel['channel_id'], 'Sixth message')
+    m_id4['message_id'] = message_send(f_owner['token'], f_channel['channel_id'], 'Fourth message')
+    m_id5['message_id'] = message_send(random_user['token'], f_channel['channel_id'], 'Fifth message')
+    m_id6['message_id'] = message_send(random_user2['token'], f_channel['channel_id'], 'Sixth message')
 
     assert len(f_channel['messages']) == 6
     
