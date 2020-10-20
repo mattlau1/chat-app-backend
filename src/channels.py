@@ -16,10 +16,10 @@ def channels_list(token):
     return {
         'channels': [
             {
-                'channel_id': channel['id'],
+                'channel_id': channel['channel_id'],
                 'name': channel['name'],
             }
-            for channel in data['channels'] if auth_user['id'] in channel['all_members']
+            for channel in data['channels'] if auth_user['u_id'] in channel['all_members']
         ],
     }
 
@@ -36,7 +36,7 @@ def channels_listall(token):
     return {
         'channels': [
             {
-                'channel_id': channel['id'],
+                'channel_id': channel['channel_id'],
                 'name': channel['name'],
             }
             for channel in data['channels']
@@ -61,13 +61,13 @@ def channels_create(token, name, is_public):
         raise InputError('Whitespace name')
 
     # Register
-    channel_id = len(data['channels']) + 1
+    channel_id = len(data['channels'])
     data['channels'].append({
-        'id': channel_id,
+        'channel_id': channel_id,
         'name': name,
         'is_public': is_public,
-        'owner_members': [auth_user['id'],],
-        'all_members': [auth_user['id'],],
+        'owner_members': [auth_user['u_id'],],
+        'all_members': [auth_user['u_id'],],
         'messages': [],
     })
 

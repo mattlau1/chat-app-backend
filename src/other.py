@@ -45,7 +45,7 @@ def search(token, query_str):
     messages = []
     for channel in data['channels']:
         # Channels the auth_user is a member of
-        if auth_user['id'] in channel['all_members']:
+        if auth_user['u_id'] in channel['all_members']:
             for message in channel['messages']:
                 # query_str is a substring of message
                 if query_str in message['message']:

@@ -11,7 +11,7 @@ PRIVATE_KEY = 'aHR0cHM6Ly95b3V0dS5iZS9kUXc0dzlXZ1hjUQ=='
 ################
 data = {
     # Users - array of dictionaries {
-    #   id - unique integer,
+    #   u_id - unique integer (stored sequentially starting from index 0),
     #   email - string,
     #   password - string,
     #   name_first - string,
@@ -22,7 +22,7 @@ data = {
     # }
     'users': [],
     # Channels - array of dictionaries {
-    #   id - unique integer,
+    #   channel_id - unique integer (stored sequentially starting from index 0),
     #   name - string,
     #   is_public - boolean,
     #   owner_members - array of u_id (integer corresponding to a user id),
@@ -80,9 +80,8 @@ def user_with_id(u_id):
     '''
     Tries to return user (dict) with specified user id (int), returning None if not found
     '''
-    for user in data['users']:
-        if user['id'] == u_id:
-            return user
+    if u_id < len(data['users']):
+        return data['users'][u_id]
     return None
 
 def user_with_token(token):
@@ -92,30 +91,25 @@ def user_with_token(token):
     try:
         # Decode token and pass user id to user_with_id()
         payload = jwt.decode(token.encode('utf-8'), PRIVATE_KEY, algorithms=['HS256'])
-        return user_with_id(payload['u_id'])
+        u_id = payload['u_id']
+        # Check for valid session (future iterations?)
+        if data['users'][u_id]['token'] != '':
+            return user_with_id(payload['u_id'])
+        return None
     except:
         return None
-
-def user_update_token(u_id, new_token):
-    '''
-    Updates the token for a given user id (int) with new_token (str)
-    '''
-    for user in data['users']:
-        if user['id'] == u_id:
-            user['token'] = new_token
 
 
 #####################################
 ### Helper functions for channels ###
 #####################################
-def channel_with_id(c_id):
+def channel_with_id(channel_id):
     '''
     Extracts information about a specified channel (by id)
     Tries to return channel (dict) with specified channel id (int), returning None if not found
     '''
-    for channel in data['channels']:
-        if channel['id'] == c_id:
-            return channel
+    if channel_id < len(data['channels']):
+        return data['channels'][channel_id]
     return None
 
 def channel_with_message_id(message_id):

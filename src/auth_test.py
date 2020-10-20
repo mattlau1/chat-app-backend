@@ -1,13 +1,14 @@
-# Test file for auth.py
+''' Test file for auth.py '''
+import pytest
 from auth import auth_login, auth_logout, auth_register
+from channels import channels_create
 from error import InputError, AccessError
 from other import clear
-import pytest
 
-""" Tests for auth_register """
-
-# Invalid email format
 def test_register_email_invalid():
+    '''
+    Testing invalid email formats for auth_register
+    '''
     clear()
     with pytest.raises(InputError):
         auth_register('', 'password', 'Ben', 'Bill')
@@ -30,8 +31,10 @@ def test_register_email_invalid():
     with pytest.raises(InputError):
         auth_register('d.o.t@double.com', 'password', 'Double', 'Dot')
 
-# Valid email format
 def test_register_email_valid():
+    '''
+    Testing valid email formats for auth_register
+    '''
     clear()
     long_email = "abcdefghijklmnopqrstuvwxyz@gmail.com"
     auth_register(long_email, 'password', 'Stephen', 'Long')
@@ -42,8 +45,10 @@ def test_register_email_valid():
     auth_register('email@example.co', 'password', 'Forgotten', 'Surname')
     auth_register('5py@unitedstates.ru', 'gudpassword', 'Donald', 'Trump')
 
-# Email already in use
 def test_register_existing_email():
+    '''
+    Testing already taken emails for auth_register
+    '''
     clear()
     # Successfully register user 1
     user1_email = "test@gmail.com"
@@ -60,13 +65,15 @@ def test_register_existing_email():
     # Login with user 1's email using user 1's password should work
     user1 = auth_login(user1_email, user1_password)
     # Testing logged out user 1
-    assert auth_logout(user1['token'])['is_success'] == True
+    assert auth_logout(user1['token'])['is_success'] is True
     # Trying to register using user 1's email if user 1 is logged out
     with pytest.raises(InputError):
         auth_register(user1_email, 'sample', 'Agent', 'Unknown')
 
-# Test invalid passwords
 def test_register_password_invalid():
+    '''
+    Testing invalid passwords for auth_register
+    '''
     clear()
     with pytest.raises(InputError):
         auth_register('google@gmail.com', '12345', 'Bob', 'Chen')
@@ -79,8 +86,10 @@ def test_register_password_invalid():
     with pytest.raises(InputError):
         auth_register('valid@email.com', 'pass', 'Whois', 'Bob')
 
-# Test valid passwords
 def test_register_password_valid():
+    '''
+    Testing valid passwords for auth_register
+    '''
     clear()
     auth_register('google@google.co', '123456', 'IveRun', 'OfNames')
     pwd = "aaaaaaaaa@@@@@@@@@@@@aaaaaaaaaaaaa@@@@@@@@@@@aaaaaaaaaaa"
@@ -90,8 +99,10 @@ def test_register_password_valid():
     auth_register('empty@space.com', '      ', 'Limit', 'Testing')
     auth_register('seven@seven.com', '1234567', 'S7v7n', 'Teen')
 
-# Test invalid first and last names
 def test_register_name_invalid():
+    '''
+    Testing invalid first and last names for auth_register
+    '''
     clear()
     invalid_string1 = ''
     # 52 characters
@@ -129,9 +140,11 @@ def test_register_name_invalid():
         auth_register('valid@email.com', 'password', '   ', 'Last')
     with pytest.raises(InputError):
         auth_register('valid@email.com', 'password', 'First', '    ')
-    
-# Test valid first and last names
+
 def test_register_name_valid():
+    '''
+    Testing valid first and last names for auth_register
+    '''
     clear()
     auth_register('bob@gmail.com', 'password', 'Just', 'bob')
     auth_register('cc@gmail.com', 'password', 'c', 'c')
@@ -149,10 +162,11 @@ def test_register_name_valid():
     auth_register('dot.dot@dot.com', 'password', 'Dot', 'Dot')
     auth_register('sc_re@under.com', 'password', 'Under', 'Score')
 
-""" Tests for auth_login """
 
-# test_login_email_invalid same as test_register_email_invalid
 def test_login_email_invalid():
+    '''
+    Testing invalid emails for auth_login
+    '''
     clear()
     with pytest.raises(InputError):
         auth_login('!@#$@gmail.com', 'password')
@@ -161,8 +175,10 @@ def test_login_email_invalid():
     with pytest.raises(InputError):
         auth_login('', 'password')
 
-# Tests login attempts for unregistered users
 def test_login_unregistered_email():
+    '''
+    Testing unregistered emails for auth_login
+    '''
     clear()
     with pytest.raises(InputError):
         auth_login('admin@gmail.com', 'password')
@@ -174,8 +190,10 @@ def test_login_unregistered_email():
     with pytest.raises(InputError):
         auth_login('google@gmail.com', 'password')
 
-# Tests incorrect password for login attempts
 def test_login_incorrect_password():
+    '''
+    Testing incorrect passwords for auth_login
+    '''
     clear()
     auth_register('user1@gmail.com', 'iuser1', 'User', 'One')
     with pytest.raises(InputError):
@@ -194,8 +212,10 @@ def test_login_incorrect_password():
     with pytest.raises(InputError):
         auth_login('user2@gmail.com', 'user1')
 
-# Tests successful registered user login
 def test_login_success():
+    '''
+    Testing successful auth_login
+    '''
     clear()
     auth_register('user1@gmail.com', 'iuser1', 'User', 'One')
     auth_login('user1@gmail.com', 'iuser1')
@@ -206,10 +226,11 @@ def test_login_success():
     # Assume login works even if user already logged in
     auth_login('user1@gmail.com', 'iuser1')
 
-""" Tests for auth_logout """
 
-# Trying to logout with invalid tokens
 def test_logout_invalid_token():
+    '''
+    Testing invalid tokens for auth_logout
+    '''
     clear()
     # User not logged in
     with pytest.raises(AccessError):
@@ -224,18 +245,29 @@ def test_logout_invalid_token():
     with pytest.raises(AccessError):
         auth_logout(' ' + token)
 
-# Successful logout
 def test_logout_success():
+    '''
+    Testing successful auth_logout
+    '''
     clear()
     # Logout from register token
     user1 = auth_register('test1@gmail.com', 'password', 'Testing', '123')
-    assert auth_logout(user1['token'])['is_success'] == True
+    assert auth_logout(user1['token'])['is_success'] is True
     # Logout from login token
     user2 = auth_register('test2@gmail.com', 'password', 'User', 'Two')
     user2 = auth_login('test2@gmail.com', 'password')
-    assert auth_logout(user2['token'])['is_success'] == True
+    assert auth_logout(user2['token'])['is_success'] is True
     # After logging in again
     user2 = auth_login('test2@gmail.com', 'password')
-    assert auth_logout(user2['token'])['is_success'] == True
+    assert auth_logout(user2['token'])['is_success'] is True
     user1 = auth_login('test1@gmail.com', 'password')
-    assert auth_logout(user1['token'])['is_success'] == True
+    assert auth_logout(user1['token'])['is_success'] is True
+    # User now unable to use token normally
+    with pytest.raises(AccessError):
+        channels_create(user1['token'], 'Test Channel', True)
+    with pytest.raises(AccessError):
+        channels_create(user2['token'], 'Test Channel', True)
+    with pytest.raises(AccessError):
+        auth_logout(user1['token'])
+    with pytest.raises(AccessError):
+        auth_logout(user2['token'])
