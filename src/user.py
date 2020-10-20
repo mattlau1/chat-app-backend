@@ -73,14 +73,31 @@ def user_profile_setemail(token, email):
     }
 
 def user_profile_sethandle(token, handle_str):
-    handle_len = len(handle_str)
-    print(user_handle_list())
-    if handle_len not in range(3, 21):
+    '''
+    Update the authorised user's handle (i.e. display name)
+    Input: token (str), handle_str (str)
+    Output: empty dict
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
+
+    if auth_user is None:
+        # Invalid token
+        raise AccessError('Invalid token')
+    elif len(handle_str) not in range(3, 21):
         # Invalid handle length (too short or too long)
-        raise InputError('handle_str must be between 3 and 20 characters')
+        raise InputError('Handle must be between 3 and 20 characters')
+    elif handle_str.isspace():
+        # Invalid handle
+        raise InputError('Invalid handle')
     elif handle_str in user_handle_list():
         # Handle in use
-        raise InputError('handle is already used by another user')
+        raise InputError('Handle already taken')
+
+    # Update handle
+    for user in data['channels']:
+        if user['id'] == auth_user['id']:
+            user['handle_str'] = handle_str
 
     return {
     }
