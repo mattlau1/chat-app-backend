@@ -26,7 +26,34 @@ def users_all(token):
     }
 
 def admin_userpermission_change(token, u_id, permission_id):
-    pass
+    '''
+    Given a User by their user ID, set their permissions to new permissions described by permission_id
+    Input: token (str), u_id (int), permission_id (int)
+    Output: empty dict
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
+    target_user = user_with_id(u_id)
+
+    # Error check
+    if auth_user is None:
+        # Invalid token
+        raise AccessError('Invalid token')
+    elif auth_user['permission_id'] != 1:
+        # Requested user not a Flockr owner
+        raise AccessError('Invalid permission')
+    elif target_user is None:
+        # Invalid user
+        raise InputError('Invalid user')
+    elif permission_id not in [1, 2]:
+        # Invalid permission
+        raise InputError('Invalid Permission ID')
+
+    # Edit target_user's permissions
+    target_user['permission_id'] = permission_id
+
+    return {
+    }  
 
 def search(token, query_str):
     '''
