@@ -118,9 +118,9 @@ def user_profile_sethandle(token, handle_str):
         raise InputError('Handle already taken')
 
     # Update handle
-    for user in data['channels']:
+    for user in data['users']:
         if user['id'] == auth_user['id']:
-            user['handle_str'] = handle_str
+            user['handle'] = handle_str
 
     return {
     }

@@ -90,6 +90,7 @@ def test_valid_setnames():
 
     # same token, id but different username
     user_profile_setname(user['token'], 'Banana', 'Bananason')
+    profile = user_profile(user['token'], user['u_id'])
     assert profile['user']['name_first'] == "Banana"
     assert profile['user']['name_last'] == "Bananason"
     assert profile['user']['u_id'] == user['u_id']
@@ -101,10 +102,12 @@ def test_valid_setnames():
     assert profile['user']['name_last'] == "Orangeson"
     assert profile['user']['u_id'] == user2['u_id']
     user_profile_setname(user2['token'], 'Strawberry', 'Strawberryson')
+    profile = user_profile(user2['token'], user2['u_id'])
     assert profile['user']['name_first'] == "Strawberry"
     assert profile['user']['name_last'] == "Strawberryson"
     assert profile['user']['u_id'] == user2['u_id']
     user_profile_setname(user2['token'], 'Michael', 'Michaelson')
+    profile = user_profile(user2['token'], user2['u_id'])
     assert profile['user']['name_first'] == "Michael"
     assert profile['user']['name_last'] == "Michaelson"
     assert profile['user']['u_id'] == user2['u_id']
@@ -115,6 +118,7 @@ def test_valid_setnames():
     assert profile['user']['name_first'] == "John"
     assert profile['user']['name_last'] == "Johnson"
     user_profile_setname(user3['token'], "A", "B")
+    profile = user_profile(user3['token'], user3['u_id'])
     assert profile['user']['name_first'] == "A"
     assert profile['user']['name_last'] == "B"
 
@@ -126,6 +130,7 @@ def test_valid_setnames():
     assert profile['user']['name_first'] == "Austin"
     assert profile['user']['name_last'] == "Austinson"
     user_profile_setname(user4['token'], long_first, long_last)
+    profile = user_profile(user4['token'], user4['u_id'])
     assert profile['user']['name_first'] == long_first
     assert profile['user']['name_last'] == long_last
 
@@ -167,6 +172,7 @@ def test_valid_email():
 
     # Change user's email
     user_profile_setemail(user['token'], 'goodbye21@gmail.com')
+    profile = user_profile(user['token'], user['u_id'])
 
     # Check if email has changed
     assert profile['user']['email'] == 'goodbye21@gmail.com'
@@ -255,9 +261,11 @@ def test_valid_handle():
     profile = user_profile(user['token'], user['u_id'])
 
     user_profile_sethandle(user['token'], 'Real Bruce Lee')
+    profile = user_profile(user['token'], user['u_id'])
     assert profile['user']['handle_str'] == 'Real Bruce Lee'
 
     user_profile_sethandle(user['token'], 'Actual Bruce Lee')
+    profile = user_profile(user['token'], user['u_id'])
     assert profile['user']['handle_str'] == 'Actual Bruce Lee'
 
 def test_handle_length():
@@ -279,6 +287,7 @@ def test_handle_length():
 
     # Make sure handle is still the same (default handle)
     user_profile_sethandle(user['token'], 'dog')
+    profile = user_profile(user['token'], user['u_id'])
     assert len(profile['user']['handle_str']) == 3
 
 def test_taken_handle():
@@ -291,6 +300,7 @@ def test_taken_handle():
 
     # user1 changes handle to hello world
     user_profile_sethandle(user1['token'], 'hello world')
+    profile = user_profile(user1['token'], user1['u_id'])
 
     # user2 tries to also change to hello world
     with pytest.raises(InputError):
@@ -298,6 +308,7 @@ def test_taken_handle():
 
     # user1 changes handle again
     user_profile_sethandle(user2['token'], 'goodbye world')
+    profile = user_profile(user2['token'], user2['u_id'])
 
     with pytest.raises(InputError):
         user_profile_sethandle(user1['token'], 'goodbye world')
