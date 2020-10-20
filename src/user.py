@@ -32,17 +32,40 @@ def user_profile(token, u_id):
     }
 
 def user_profile_setname(token, name_first, name_last):
-    # invalid token
-    if user_with_token(token) is None :
-        raise AccessError('Invalid token')
-    # invalid name length
-    if len(name_first) not in range(1, 51):
-        raise InputError('First name should be between 1 and 50 characters inclusive')
-    if len(name_last) not in range(1, 51):
-        raise InputError('Last name should be between 1 and 50 characters inclusive')
+    '''
+    Update the authorised user's first and last name
+    Input: token (str), name_first (str), name_last (str)
+    Output: empty dict
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
 
+    # Error check
+    if auth_user is None:
+        # Invalid token
+        raise AccessError('Invalid token')
+    elif len(name_first) not in range(1, 51):
+        # name_first length
+        raise InputError('First name should be between 1 and 50 characters inclusive')
+    elif name_first.isspace():
+        # name_first invalid
+        raise InputError('First name cannot be empty')
+    elif len(name_last) not in range(1, 51):
+        # name_last length
+        raise InputError('Last name should be between 1 and 50 characters inclusive')
+    elif name_last.isspace():
+        # name_last invalid
+        raise InputError('Last name cannot be empty')
+
+    # Update name
+    for user in data['users']:
+        if user['id'] == auth_user['id']:
+            user['name_first'] = name_first
+            user['name_last'] = name_last
+    
     return {
     }
+
 
 def user_profile_setemail(token, email):
     '''
