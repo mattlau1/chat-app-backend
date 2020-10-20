@@ -1,6 +1,7 @@
 from error import InputError, AccessError
 from data import (
-    valid_email, user_email_list, user_handle_list, user_with_id, user_with_token
+    valid_email, user_email_list, user_handle_list, user_with_id, 
+    user_with_token, data
 )
 def user_profile(token, u_id):
     # invalid token
@@ -34,12 +35,29 @@ def user_profile_setname(token, name_first, name_last):
     }
 
 def user_profile_setemail(token, email):
-    if not valid_email(email):
+    '''
+    Update the authorised user's email address
+    Input: token (str), email (str)
+    Output: empty dict
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
+
+    # Error check
+    if auth_user is None:
+        # Invalid token
+        raise AccessError('Invalid token')
+    elif not valid_email(email):
         # Invalid email format
-        raise InputError('Invalid email format')
+        raise InputError('Invalid email')
     elif email in user_email_list():
         # Email in use
         raise InputError('Email already taken')
+
+    # Update email
+    for user in data['users']:
+        if user['id'] == auth_user['id']:
+            user['email'] = email
 
     return {
     }
