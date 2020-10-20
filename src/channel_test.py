@@ -248,7 +248,7 @@ def test_channel_addowner():
 
     # New owner does not have a valid token
     with pytest.raises(AccessError):
-        channel_addowner(owner['token'], channel['channel_id'], '')
+        channel_addowner(owner['token'], channel['channel_id'], 100)
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
@@ -295,7 +295,7 @@ def test_channel_removeowner():
 
     # Old owner does not have a valid token
     with pytest.raises(AccessError):
-        channel_removeowner(owner['token'], channel['channel_id'], '')
+        channel_removeowner(owner['token'], channel['channel_id'], 100)
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
