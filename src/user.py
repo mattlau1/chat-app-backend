@@ -1,8 +1,6 @@
+from data import data, valid_email, user_with_id, user_with_token, user_email_list, user_handle_list
 from error import InputError, AccessError
-from data import (
-    valid_email, user_email_list, user_handle_list, user_with_id, 
-    user_with_token, data
-)
+
 def user_profile(token, u_id):
     '''
     Returns information about a specified user.
@@ -23,7 +21,7 @@ def user_profile(token, u_id):
 
     return {
         'user': {
-        	'u_id': target_user['id'],
+        	'u_id': target_user['u_id'],
         	'email': target_user['email'],
         	'name_first': target_user['name_first'],
         	'name_last': target_user['name_last'],
@@ -58,10 +56,8 @@ def user_profile_setname(token, name_first, name_last):
         raise InputError('Last name cannot be empty')
 
     # Update name
-    for user in data['users']:
-        if user['id'] == auth_user['id']:
-            user['name_first'] = name_first
-            user['name_last'] = name_last
+    data['users'][auth_user['u_id']]['name_first'] = name_first
+    data['users'][auth_user['u_id']]['name_last'] = name_last
     
     return {
     }
@@ -88,9 +84,7 @@ def user_profile_setemail(token, email):
         raise InputError('Email already taken')
 
     # Update email
-    for user in data['users']:
-        if user['id'] == auth_user['id']:
-            user['email'] = email
+    data['users'][auth_user['u_id']]['email'] = email
 
     return {
     }
@@ -104,11 +98,12 @@ def user_profile_sethandle(token, handle_str):
     # Retrieve data
     auth_user = user_with_token(token)
 
+    # Error check
     if auth_user is None:
         # Invalid token
         raise AccessError('Invalid token')
     elif len(handle_str) not in range(3, 21):
-        # Invalid handle length (too short or too long)
+        # Handle length
         raise InputError('Handle must be between 3 and 20 characters')
     elif handle_str.isspace():
         # Invalid handle
@@ -118,9 +113,7 @@ def user_profile_sethandle(token, handle_str):
         raise InputError('Handle already taken')
 
     # Update handle
-    for user in data['users']:
-        if user['id'] == auth_user['id']:
-            user['handle'] = handle_str
+    data['users'][auth_user['u_id']]['handle'] = handle_str
 
     return {
     }
