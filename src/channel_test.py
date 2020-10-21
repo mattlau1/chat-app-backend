@@ -1,8 +1,7 @@
 ''' Test file for channel.py '''
 import pytest
 from channel import (channel_invite, channel_details, channel_messages, channel_leave,
-                     channel_join, channel_addowner, channel_removeowner
-                    )
+                     channel_join, channel_addowner, channel_removeowner)
 from channels import channels_create
 from auth import auth_register
 from message import message_send
@@ -106,8 +105,12 @@ def test_channel_messages():
     assert len(messages['messages']) == 1
     assert messages['start'] == 0
     assert messages['end'] == -1
+    messages = channel_messages(user['token'], channel['channel_id'], 1)
+    assert len(messages['messages']) == 0
+    assert messages['start'] == 1
+    assert messages['end'] == -1
     with pytest.raises(InputError):
-        channel_messages(user['token'], channel['channel_id'], 1)
+        channel_messages(user['token'], channel['channel_id'], 2)
     # Send 48 more messages - 49 total
     for _ in range(2, 50):
         message_send(user['token'], channel['channel_id'], 'Test message')
@@ -248,7 +251,7 @@ def test_channel_addowner():
 
     # New owner does not have a valid token
     with pytest.raises(AccessError):
-        channel_addowner(owner['token'], channel['channel_id'], '')
+        channel_addowner(owner['token'], channel['channel_id'], 100)
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
@@ -295,7 +298,7 @@ def test_channel_removeowner():
 
     # Old owner does not have a valid token
     with pytest.raises(AccessError):
-        channel_removeowner(owner['token'], channel['channel_id'], '')
+        channel_removeowner(owner['token'], channel['channel_id'], 100)
 
     # Channel ID is not a valid channel
     with pytest.raises(InputError):

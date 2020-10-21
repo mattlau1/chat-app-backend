@@ -1,18 +1,19 @@
 ''' Test file for other.py '''
 import pytest
 from auth import auth_register
-from channel import channel_invite, channel_details, channel_join, channel_leave
+from channel import channel_invite, channel_details, channel_messages, channel_join, channel_leave
 from channels import channels_create, channels_list
 from message import message_send, message_remove, message_edit
-from other import clear, search, admin_userpermission_change
+from other import clear, users_all, admin_userpermission_change, search
 from user import user_profile_sethandle
 from error import InputError, AccessError
 
 
-def test_clear():
+def test_clear_users():
     '''
-    Test that clear removes the users[], channels[] and resets the latest_message_id
+    Test that clear() removes the users[]
     '''
+    # Test basic functionality initially
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     f_channel = channels_create(f_owner['token'], 'Channel 1', True)
 
@@ -20,22 +21,44 @@ def test_clear():
     assert len(details['all_members']) == 1
     assert len(details['owner_members']) == 1
 
-    # random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
-    # channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
-    # assert len(details['all_members']) == 2
-    # assert len(details['owner_members']) == 1
+    random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
+    channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
+    details = channel_details(f_owner['token'], f_channel['channel_id'])
+    assert len(details['all_members']) == 2
+    assert len(details['owner_members']) == 1
     
-    assert len(channels_list(f_owner['token'])['channels']) == 1
-    
-    m_id = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
-    
+    # Cannot register the someone that's already a Flockr member
+    clear()
+    with pytest.raises(AccessError):
+        details = channel_details(f_owner['token'], f_channel['channel_id'])
+
+    auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
+    with pytest.raises(InputError):
+        auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
+    clear()
+    auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
+
+
+def test_clear_channels_messages():
+    '''
+    Test that clear() removes channels[] and resets the messages[]
+    '''
+    clear()
+    f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
+    channel1 = channels_create(f_owner['token'], 'Channel 1', True)
+    m_id = message_send(f_owner['token'], channel1['channel_id'], 'First message')
+    messages = channel_messages(f_owner['token'], channel1['channel_id'], 0)
+    assert len(messages['messages']) == 1
     assert m_id['message_id'] == 1
+    channel2 = channels_create(f_owner['token'], 'Channel 2', True)
+    assert len(channels_list(f_owner['token'])['channels']) == 2
     
     clear()
-    # assert len(details['all_members']) == 0
-    # assert len(details['owner_members']) == 0
-    # assert len(channels_list(f_owner['token'])['channels']) == 0
-    # assert m_id['message_id'] == 0
+    f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
+    channel1 = channels_create(f_owner['token'], 'Channel 1', True)
+    assert len(channels_list(f_owner['token'])['channels']) == 1
+    messages = channel_messages(f_owner['token'], channel1['channel_id'], 0)
+    assert len(messages['messages']) == 0
 
 
 def test_admin_userpermission_change_to_owner():
@@ -137,6 +160,44 @@ def test_admin_userpermission_change_user_not_owner():
         admin_userpermission_change(member1['token'], f_owner['u_id'], 2)
     with pytest.raises(AccessError):
         admin_userpermission_change(member2['token'], member1['u_id'], 1)
+
+
+def test_users_all():
+    '''
+    Test that users_all correctly shows the details of all users
+    '''
+    clear()
+    # Register three users
+    f_owner = auth_register('markzuckerberg@gmail.com', 'password', 'Mark', 'Zuckerberg')
+    random_user1 = auth_register('brianpaul@gmail.com', 'password', 'Brian', 'Paul')
+    random_user2 = auth_register('gregstevens@gmail.com', 'password', 'Greg', 'Stevens')
+
+    # Set handles of the users
+    user_profile_sethandle(f_owner['token'], 'MARKZUCKERBERG')
+    user_profile_sethandle(random_user1['token'], 'BRIANPAUL')
+    user_profile_sethandle(random_user2['token'], 'GREGSTEVENS')
+
+    # Check users_all correctly returns details of all three users
+    users_details = users_all(f_owner['token'])
+    assert len(users_details['users']) == 3
+    # Check details of first user
+    assert users_details['users'][0]['u_id'] == f_owner['u_id']
+    assert users_details['users'][0]['email'] == 'markzuckerberg@gmail.com'
+    assert users_details['users'][0]['name_first'] == 'Mark'
+    assert users_details['users'][0]['name_last'] == 'Zuckerberg'
+    assert users_details['users'][0]['handle_str'] == 'MARKZUCKERBERG'
+    # Check details of second user
+    assert users_details['users'][1]['u_id'] == random_user1['u_id']
+    assert users_details['users'][1]['email'] == 'brianpaul@gmail.com'
+    assert users_details['users'][1]['name_first'] == 'Brian'
+    assert users_details['users'][1]['name_last'] == 'Paul'
+    assert users_details['users'][1]['handle_str'] == 'BRIANPAUL'
+    # Check details of third user
+    assert users_details['users'][2]['u_id'] == random_user2['u_id']
+    assert users_details['users'][2]['email'] == 'gregstevens@gmail.com'
+    assert users_details['users'][2]['name_first'] == 'Greg'
+    assert users_details['users'][2]['name_last'] == 'Stevens'
+    assert users_details['users'][2]['handle_str'] == 'GREGSTEVENS'
 
 
 def test_search_invalid():
