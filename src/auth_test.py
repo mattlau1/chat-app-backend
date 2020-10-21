@@ -271,3 +271,17 @@ def test_logout_success():
         auth_logout(user1['token'])
     with pytest.raises(AccessError):
         auth_logout(user2['token'])
+
+def test_token_tampering():
+    clear()
+    # Assumes token is JWT-encoded
+    user1_token = auth_register('admin@gmail.com', 'password', 'User', 'One')['token']
+    user1_payload = user1_token.split('.')[1]
+    user2_token = auth_register('test@gmail.com', 'password', 'User', 'One')['token']
+    user2_token_components = user2_token.split('.')
+    # User 2 tries to sign in with token including User 1's payload
+    fake_user1_token_components = user2_token_components
+    fake_user1_token_components[1] = user1_payload
+    fake_user1_token = '.'.join(fake_user1_token_components)
+    with pytest.raises(AccessError):
+        channels_create(fake_user1_token, 'Attempt', True)
