@@ -15,19 +15,14 @@ def message_send(token, channel_id, message):
 
     # Error check
     if auth_user is None:
-        # Invalid token
         raise AccessError('Invalid token')
     elif channel is None:
-        # Invalid channel_id
         raise InputError('Invalid channel')
     elif auth_user['u_id'] not in channel['all_members']:
-        # User not a channel member
         raise AccessError('User not in channel')
     elif not message:
-        # Empty message (whitespace allowed)
         raise InputError('Empty message not allowed')
     elif len(message) > 1000:
-        # Message longer than 1000 characters
         raise InputError('Message should be 1000 characters or less')
 
     # Store message
