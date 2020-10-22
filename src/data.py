@@ -80,7 +80,7 @@ def user_with_id(u_id):
     '''
     Tries to return user (dict) with specified user id (int), returning None if not found
     '''
-    if u_id < len(data['users']):
+    if 0 <= u_id < len(data['users']):
         return data['users'][u_id]
     return None
 
@@ -108,20 +108,21 @@ def channel_with_id(channel_id):
     Extracts information about a specified channel (by id)
     Tries to return channel (dict) with specified channel id (int), returning None if not found
     '''
-    if channel_id < len(data['channels']):
+    if 0 <= channel_id < len(data['channels']):
         return data['channels'][channel_id]
     return None
 
 def channel_with_message_id(message_id):
     '''
-    Tries to return the channel (channel info dict) containing the
-    message with specified message_id (int), returning None if not found
+    Tries to return a tuple of the channel (channel info dict) containing the
+    message with specified message_id (int) and the index that the message is stored
+    under the channel, both returning None if not found
     '''
     for channel in data['channels']:
-        for message in channel['messages']:
+        for message_index, message in enumerate(channel['messages']):
             if message['message_id'] == message_id:
-                return channel
-    return None
+                return (channel, message_index)
+    return (None, None)
 
 def message_with_id(message_id):
     '''

@@ -24,10 +24,9 @@ def channel_invite(token, channel_id, u_id):
     elif auth_user['u_id'] not in channel['all_members']:
         raise AccessError('Authorised user not a member of channel')
 
-    # Append invited user to all_members
-    for channel in data['channels']:
-        if channel['channel_id'] == channel_id and invited_user['u_id'] not in channel['all_members']:
-            channel['all_members'].append(invited_user['u_id'])
+    # Append invited user to all_members (if they're not already a member)
+    if invited_user['u_id'] not in channel['all_members']:
+        data['channels'][channel_id]['all_members'].append(invited_user['u_id'])
 
     return {
     }

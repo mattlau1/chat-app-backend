@@ -50,7 +50,7 @@ def message_remove(token, message_id):
     # Retrieve data
     auth_user = user_with_token(token)
     message = message_with_id(message_id)
-    channel_with_message = channel_with_message_id(message_id)
+    channel_with_message, _ = channel_with_message_id(message_id)
 
     # Error check
     if auth_user is None:
@@ -61,15 +61,14 @@ def message_remove(token, message_id):
     sender = message['u_id']
     user_is_channel_owner = (auth_user['u_id'] in channel_with_message['owner_members'])
     user_is_flockr_owner = (auth_user['permission_id'] == 1)
-    
+
     if auth_user['u_id'] != sender and not user_is_channel_owner and not user_is_flockr_owner:
         raise AccessError('Invalid permissions')
 
     # Remove message
-    for message in channel_with_message['messages']:
-        if message['message_id'] == message_id:
-            channel_with_message['messages'].remove(message)
-    
+    channel_id = channel_with_message['channel_id']
+    data['channels'][channel_id]['messages'].remove(message)
+
     return {
     }
 
@@ -84,18 +83,18 @@ def message_edit(token, message_id, message):
     # Remove message if empty ('')
     if not message:
         return message_remove(token, message_id)
-    
+
     # Retrieve data
     auth_user = user_with_token(token)
     message = message_with_id(message_id)
-    channel_with_message = channel_with_message_id(message_id)
+    channel_with_message, message_index = channel_with_message_id(message_id)
 
     # Error check
     if auth_user is None:
         raise AccessError('Invalid token')
     elif channel_with_message is None:
         raise InputError('Invalid Message ID')
-    
+
     sender = message['u_id']
     user_is_channel_owner = (auth_user['u_id'] in channel_with_message['owner_members'])
     user_is_flockr_owner = (auth_user['permission_id'] == 1)
@@ -104,9 +103,8 @@ def message_edit(token, message_id, message):
         raise AccessError('Invalid permissions')
 
     # Update message
-    for message in channel_with_message['messages']:
-        if message['message_id'] == message_id:
-            message['message'] = message
+    channel_id = channel_with_message['channel_id']
+    data['channels'][channel_id]['messages'][message_index]['message'] = message
 
     return {
     }

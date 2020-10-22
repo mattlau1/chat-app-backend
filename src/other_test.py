@@ -14,6 +14,7 @@ def test_clear_users():
     Test that clear() removes the users[]
     '''
     # Test basic functionality initially
+    clear()
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     f_channel = channels_create(f_owner['token'], 'Channel 1', True)
 
@@ -26,8 +27,8 @@ def test_clear_users():
     details = channel_details(f_owner['token'], f_channel['channel_id'])
     assert len(details['all_members']) == 2
     assert len(details['owner_members']) == 1
-    
-    # Cannot register the someone that's already a Flockr member
+
+    # Cannot register someone who's already a Flockr member
     clear()
     with pytest.raises(AccessError):
         details = channel_details(f_owner['token'], f_channel['channel_id'])
@@ -50,9 +51,9 @@ def test_clear_channels_messages():
     messages = channel_messages(f_owner['token'], channel1['channel_id'], 0)
     assert len(messages['messages']) == 1
     assert m_id['message_id'] == 1
-    channel2 = channels_create(f_owner['token'], 'Channel 2', True)
+    channels_create(f_owner['token'], 'Channel 2', True)
     assert len(channels_list(f_owner['token'])['channels']) == 2
-    
+
     clear()
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     channel1 = channels_create(f_owner['token'], 'Channel 1', True)
@@ -76,10 +77,15 @@ def test_admin_userpermission_change_to_owner():
     with pytest.raises(AccessError):
         channel_join(user2['token'], f_channel['channel_id'])
 
+    # Invalid token
+    with pytest.raises(AccessError):
+        admin_userpermission_change('', user2['u_id'], 1)
+    
+    
     # First user changes permissions of second user to make them a Flockr owner
     admin_userpermission_change(user1['token'], user2['u_id'], 1)
 
-    # Check that second user is now a Flockr owner 
+    # Check that second user is now a Flockr owner
     # (verified by now being able to join the private channel)
     channel_join(user2['token'], f_channel['channel_id'])
 
@@ -113,7 +119,7 @@ def test_admin_userpermission_change_to_member():
 
 def test_admin_userpermission_change_invalid_user_id():
     '''
-    Test that an InputError is raised when admin_userpermission_change 
+    Test that an InputError is raised when admin_userpermission_change
     is given a u_id that does not refer to a valid user
     '''
     clear()
@@ -130,7 +136,7 @@ def test_admin_userpermission_change_invalid_user_id():
 
 def test_admin_userpermission_change_invalid_permission_id():
     '''
-    Test that an InputError is raised when admin_userpermission_change 
+    Test that an InputError is raised when admin_userpermission_change
     is given a permission_id that does not refer to a valid permission
     '''
     clear()
@@ -155,7 +161,7 @@ def test_admin_userpermission_change_user_not_owner():
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     member1 = auth_register('timhall@gmail.com', 'password', 'Tim', 'Hall')
     member2 = auth_register('kimsean@gmail.com', 'password', 'Kim', 'Sean')
-    
+
     with pytest.raises(AccessError):
         admin_userpermission_change(member1['token'], f_owner['u_id'], 2)
     with pytest.raises(AccessError):
@@ -167,6 +173,10 @@ def test_users_all():
     Test that users_all correctly shows the details of all users
     '''
     clear()
+    # Invalid token
+    with pytest.raises(AccessError):
+        users_all('')
+    
     # Register three users
     f_owner = auth_register('markzuckerberg@gmail.com', 'password', 'Mark', 'Zuckerberg')
     random_user1 = auth_register('brianpaul@gmail.com', 'password', 'Brian', 'Paul')

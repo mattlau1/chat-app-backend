@@ -19,6 +19,8 @@ def test_channel_invite():
     # User 1 creates a new channel, and invites User 2
     channel1 = channels_create(user1['token'], 'Test Channel 1', True)
     channel_invite(user1['token'], channel1['channel_id'], user2['u_id'])
+    # Already invited
+    channel_invite(user1['token'], channel1['channel_id'], user2['u_id'])
 
     # Checking if User 2 is a member of the channel (whether they can access channel details)
     channel_details(user2['token'], channel1['channel_id'])
@@ -217,6 +219,10 @@ def test_channel_join():
     channel2 = channels_create(owner['token'], 'Channel 2', False)
     with pytest.raises(AccessError):
         channel_join(user['token'], channel2['channel_id'])
+
+    # User joining multiple times - doesn't raise error
+    channel_join(user['token'], channel1['channel_id'])
+    channel_join(user['token'], channel1['channel_id'])
 
 
 def test_channel_addowner():

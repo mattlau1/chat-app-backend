@@ -22,7 +22,7 @@ def users_all(token):
     if user_with_token(token) is None:
         # Invalid token
         raise AccessError('Invalid token')
-    
+
     return {
         'users': [
             {
@@ -38,7 +38,7 @@ def users_all(token):
 
 def admin_userpermission_change(token, u_id, permission_id):
     '''
-    Given a User by their user ID, set their permissions to new permissions described by permission_id
+    Given a User by user ID, set their permissions to new permissions described by permission_id
     Input: token (str), u_id (int), permission_id (int)
     Output: empty dict
     '''
@@ -64,7 +64,7 @@ def admin_userpermission_change(token, u_id, permission_id):
     target_user['permission_id'] = permission_id
 
     return {
-    }  
+    }
 
 def search(token, query_str):
     '''
