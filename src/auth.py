@@ -3,7 +3,7 @@ import hashlib
 import jwt
 from data import (
     PRIVATE_KEY, data, valid_email, user_with_email, user_with_token,
-    user_email_list, user_handle_list, user_update_token,
+    user_email_list, user_handle_list,
 )
 from error import InputError, AccessError
 
@@ -11,8 +11,8 @@ from error import InputError, AccessError
 def generate_token(u_id):
     '''
     Generates a JSON Web Token (JWT) encoded token for a given user id
-    Params: u_id (int)
-    Returns: JWT-encoded token (str)
+    Input: u_id (int)
+    Output: JWT-encoded token (str)
     '''
     return jwt.encode({'u_id': u_id}, PRIVATE_KEY, algorithm='HS256').decode('utf-8')
 
@@ -20,8 +20,8 @@ def generate_token(u_id):
 def generate_handle(u_id, name_first, name_last):
     '''
     Generates a unique handle for a given user
-    Params: id (int), name_first (str), name_last (str)
-    Returns: handle_string (str)
+    Input: id (int), name_first (str), name_last (str)
+    Output: handle_string (str)
     '''
     # First 20 characters of concatenation of name_first and name_last
     handle_string = (name_first.lower() + name_last.lower())[:20]
@@ -34,8 +34,8 @@ def generate_handle(u_id, name_first, name_last):
 def auth_login(email, password):
     '''
     Logs a user in
-    Params: email (str), password (str)
-    Returns: u_id (int) and token (str) as a dict
+    Input: email (str), password (str)
+    Output: u_id (int) and token (str) as a dict
     '''
     user = user_with_email(email)
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
@@ -51,12 +51,11 @@ def auth_login(email, password):
         raise InputError('Incorrect password')
 
     # Update token
-    token = generate_token(user['id'])
-    user_update_token(user['id'], token)
-    assert user_with_email(email)['token'] == token
+    token = generate_token(user['u_id'])
+    user['token'] = token
 
     return {
-        'u_id': user['id'],
+        'u_id': user['u_id'],
         'token': token,
     }
 
@@ -64,16 +63,16 @@ def auth_login(email, password):
 def auth_logout(token):
     '''
     Logs a user out
-    Params: token (str)
-    Returns: is_success (bool) as a dict
+    Input: token (str)
+    Output: is_success (bool) as a dict
     '''
     user = user_with_token(token)
     # Check for valid token
     if user is None:
         raise AccessError('Invalid token')
 
-    # Update user token
-    user_update_token(user['id'], '')
+    # Invalidate user token - session stuff in future iterations?
+    user['token'] = ''
     assert user_with_email(user['email'])['token'] == ''
 
     return {
@@ -84,8 +83,8 @@ def auth_logout(token):
 def auth_register(email, password, name_first, name_last):
     '''
     Registers a user
-    Params: email (str), password (str), name_first (str), name_last (str)
-    Returns: u_id generated (int) and token generated (str) as a dict
+    Input: email (str), password (str), name_first (str), name_last (str)
+    Output: u_id generated (int) and token generated (str) as a dict
     '''
     # Error check
     if not valid_email(email):
@@ -111,14 +110,15 @@ def auth_register(email, password, name_first, name_last):
         raise InputError('Last name cannot be empty')
 
     # Register new user
-    u_id = len(data['users']) + 1
+    u_id = len(data['users'])
     token = generate_token(u_id)
     encrypted_password = hashlib.sha256(password.encode()).hexdigest()
+    # First user to register receives Flockr owner permissions
     permission_id = 1 if len(data['users']) == 0 else 2
 
     # Append user information to data
     data['users'].append({
-        'id': u_id,
+        'u_id': u_id,
         'email': email,
         'password': encrypted_password,
         'name_first': name_first,
