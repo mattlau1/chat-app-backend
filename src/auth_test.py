@@ -273,6 +273,9 @@ def test_logout_success():
         auth_logout(user2['token'])
 
 def test_token_tampering():
+    '''
+    Tests for JWT token tampering
+    '''
     clear()
     # Assumes token is JWT-encoded
     user1_token = auth_register('admin@gmail.com', 'password', 'User', 'One')['token']

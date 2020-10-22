@@ -80,8 +80,7 @@ def test_admin_userpermission_change_to_owner():
     # Invalid token
     with pytest.raises(AccessError):
         admin_userpermission_change('', user2['u_id'], 1)
-    
-    
+
     # First user changes permissions of second user to make them a Flockr owner
     admin_userpermission_change(user1['token'], user2['u_id'], 1)
 
@@ -176,7 +175,7 @@ def test_users_all():
     # Invalid token
     with pytest.raises(AccessError):
         users_all('')
-    
+
     # Register three users
     f_owner = auth_register('markzuckerberg@gmail.com', 'password', 'Mark', 'Zuckerberg')
     random_user1 = auth_register('brianpaul@gmail.com', 'password', 'Brian', 'Paul')
