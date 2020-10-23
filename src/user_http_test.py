@@ -31,7 +31,7 @@ def url():
 
 
 # user_profile tests
-def test_valid_user():
+def test_valid_user(url):
     '''
     Create a valid user
     Return the user detail associated with
@@ -50,7 +50,7 @@ def test_valid_user():
     assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
     assert profile['user']['handle_str'] == 'Stevenson'
 
-def test_invalid_user():
+def test_invalid_user(url):
     '''
     Raise exception when providing token and u_id that has not been created yet.
     Create valid users but call user detail with incorrrect u_id and token
@@ -77,10 +77,22 @@ def test_invalid_user():
         user_profile('@#*&$^', user['u_id'])
 
 # user_profile_setname tests
-def test_valid_setnames():
-    
+def test_valid_setnames(url):
+    '''
+    Change name of the user with valid name and check that the id stays the same
+    Use edge case to change into new name such as 1 character or exactly 50 characters
+    '''
     requests.post(url + reset)
 
-    user = auth_register('stvnnguyen69@hotmail.com', 'password', 'Steven', 'Nguyen')
-    requests.put(url+"profile/sethandle", params = {'token': user['token'],'handle_str': 'Stevenson'})
+    user = auth_register('zippityzap97@zapmail.com', 'loudthunder', 'Zack', 'Zackson')
     r = requests.get(url+"profile", params = {'token': user['token'],'u_id': user['u_id']})
+    profile = r.json()
+    assert profile['user']['name_first'] == "Zack"
+    assert profile['user']['name_last'] == "Zackson"
+    assert profile['user']['u_id'] == user['u_id']
+    requests.put(url+"profile/setname", params = {'token': user['token'], 'name_first': "Zippity", 'name_last': "Zap"})
+    r = requests.get(url+"profile", params = {'token': user['token'],'u_id': user['u_id']})
+    profile = r.json()
+    assert profile['user']['name_first'] == "Zippity"
+    assert profile['user']['name_last'] == "Zap"
+    assert profile['user']['u_id'] == user['u_id']
