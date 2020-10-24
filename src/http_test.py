@@ -278,30 +278,30 @@ def test_http_channel_invite(url):
     '''
     assert requests.delete(url + 'clear').status_code == 200
     
-    # Register user 1
+    # Register owner
     resp = requests.post(url + 'auth/register', json={
-        'email': 'user1@gmail.com',
-        'password': 'password1',
+        'email': 'owner@gmail.com',
+        'password': 'password',
         'name_first': 'John',
         'name_last': 'Smith',
     })
     assert resp.status_code == 200
-    user1 = resp.json()
+    owner = resp.json()
 
-    # Register user 2
+    # Register user
     resp = requests.post(url + 'auth/register', json={
-        'email': 'user2@gmail.com',
-        'password': 'password2',
+        'email': 'user@gmail.com',
+        'password': 'password',
         'name_first': 'Steve',
         'name_last': 'Jackson',
     })
     assert resp.status_code == 200
-    user2 = resp.json()
+    user = resp.json()
 
     # Set up channel
     resp = requests.post(url + 'channels/create', json={
-        'token': user1['token'],
-        'name': 'Test Channel 1',
+        'token': owner['token'],
+        'name': 'Test Channel',
         'is_public': True,
     })
     assert resp.status_code == 200
@@ -309,33 +309,33 @@ def test_http_channel_invite(url):
 
     # channel_id does not refer to a valid channel
     resp = requests.post(url + 'channel/invite', json ={
-        'token': user1['token'],
+        'token': owner['token'],
         'channel_id': channel_id + 100,
-        'u_id': user2['u_id'],
+        'u_id': user['u_id'],
     })
     assert resp.status_code == 400
 
     # u_id does not refer to a valid channel
     resp = requests.post(url + 'channel/invite', json ={
-        'token': user1['token'],
+        'token': owner['token'],
         'channel_id': channel_id,
-        'u_id': user2['u_id'] + 100,
+        'u_id': user['u_id'] + 100,
     })
     assert resp.status_code == 400
 
     # Authorised user not in channel
     resp = requests.post(url + 'channel/invite', json ={
-        'token': user2['token'],
+        'token': user['token'],
         'channel_id': channel_id,
-        'u_id': user2['u_id'],
+        'u_id': user['u_id'],
     })
     assert resp.status_code == 400
 
     # Invite the user successfully
     resp = requests.post(url + 'channel/invite', json ={
-        'token': user1['token'],
+        'token': owner['token'],
         'channel_id': channel_id,
-        'u_id': user2['u_id'],
+        'u_id': user['u_id'],
     })
     assert resp.status_code == 200
 
@@ -345,7 +345,88 @@ def test_http_channel_details(url):
     HTTP test for channel_details
     '''
     assert requests.delete(url + 'clear').status_code == 200
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'liambrown@gmail.com',
+        'password': 'password',
+        'name_first': 'Liam',
+        'name_last': 'Brown',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'victorzhang@gmail.com',
+        'password': 'password',
+        'name_first': 'Victor',
+        'name_last': 'Zhang',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Test Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # channel_id does not refer to a valid channel
+    resp = requests.post(url + 'channel/details', json ={
+        'token': owner['token'],
+        'channel_id': channel_id + 100,
+    })
+    assert resp.status_code == 400    
+
+    # Authorised user not in channel
+    resp = requests.post(url + 'channel/details', json ={
+        'token': user['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 400
     
+    # Invite the user successfully
+    resp = requests.post(url + 'channel/invite', json ={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # User can now view the channel details
+    resp = requests.post(url + 'channel/details', json ={
+        'token': user['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 200
+
+    payload = resp.json()
+    assert payload == {
+        'name': 'Test channel',
+        'owner_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Liam',
+                'name_last': 'Brown',
+            }
+        ],
+        'all_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Liam',
+                'name_last': 'Brown',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Victor',
+                'name_last': 'Zhang',
+            }
+        ],
+    }
 
 
 def test_http_channel_messages(url):
