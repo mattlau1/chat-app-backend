@@ -354,7 +354,7 @@ def test_http_channel_leave(url):
         'token': user['token'],
         'channel_id': channel_id,
     })
-    assert resp.status_code == 200
+    assert resp.status_code == 400
 
     # User joins channel
     resp = requests.post(url + 'channel/join', json={
@@ -451,7 +451,7 @@ def test_http_channel_join(url):
         'token': user['token'],
         'channel_id': private_channel_id,
     })
-    assert resp.status_code == 200
+    assert resp.status_code == 400
 
     # User joins channel
     resp = requests.post(url + 'channel/join', json={
