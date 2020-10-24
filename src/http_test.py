@@ -589,7 +589,110 @@ def test_http_channel_addowner(url):
     HTTP test for channel_addowner
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'jesschen@gmail.com',
+        'password': 'password',
+        'name_first': 'Jess',
+        'name_last': 'Chen',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Test Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Join channel
+    resp = requests.post(url + 'auth/register', json={
+        'token': user['token'],
+        'channel_id': channel_id
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # channel_id does not refer to a valid channel
+    resp = requests.post(url + 'channel/addowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id + 100,
+        'user_id': user['u_id'],
+    })
+    assert resp.status_code == 400   
+
+    # user is already an owner
+    resp = requests.post(url + 'channel/addowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'user_id': owner['u_id'],
+    })
+    assert resp.status_code == 400   
+
+    # Authorised user not in channel
+    resp = requests.post(url + 'channel/details', json ={
+        'token': user['token'],
+        'channel_id': channel_id,
+        'user_id': user['u_id'],
+    })
+    assert resp.status_code == 400
+    
+    # Add the user as an owner successfully
+    resp = requests.post(url + 'channel/addowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Check that the details are correct
+    resp = requests.post(url + 'channel/details', json ={
+        'token': user['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload == {
+        'name': 'Test Channel',
+        'owner_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Jess',
+                'name_last': 'Chen',
+            }
+        ],
+        'all_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Jess',
+                'name_last': 'Chen',
+            }
+        ],
+    }
 
 
 def test_http_channel_removeowner(url):
@@ -597,7 +700,113 @@ def test_http_channel_removeowner(url):
     HTTP test for channel_removeowner
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'jesschen@gmail.com',
+        'password': 'password',
+        'name_first': 'Jess',
+        'name_last': 'Chen',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Test Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Join channel
+    resp = requests.post(url + 'auth/register', json={
+        'token': user['token'],
+        'channel_id': channel_id
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # user is not an owner
+    resp = requests.post(url + 'channel/removeowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'user_id': user['u_id'],
+    })
+    assert resp.status_code == 400 
+
+    # Authorised user is not an owner
+    resp = requests.post(url + 'channel/removeowner', json ={
+        'token': user['token'],
+        'channel_id': channel_id,
+        'user_id': owner['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Add the user as an owner
+    resp = requests.post(url + 'channel/addowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # channel_id does not refer to a valid channel
+    resp = requests.post(url + 'channel/removeowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id + 100,
+        'user_id': user['u_id'],
+    })
+    assert resp.status_code == 400   
+
+    # Remove the user as an owner successfully
+    resp = requests.post(url + 'channel/removeowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Check that the details are correct
+    resp = requests.post(url + 'channel/details', json ={
+        'token': user['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload == {
+        'name': 'Test Channel',
+        'owner_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+        ],
+        'all_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Jess',
+                'name_last': 'Chen',
+            }
+        ],
+    }
 
 
 ###################
