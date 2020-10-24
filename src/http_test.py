@@ -634,7 +634,7 @@ def test_http_channel_addowner(url):
     })
     assert resp.status_code == 400
 
-    # user is already an owner
+    # User is already an owner
     resp = requests.post(url + 'channel/addowner', json={
         'token': owner['token'],
         'channel_id': channel_id,
@@ -736,7 +736,7 @@ def test_http_channel_removeowner(url):
     })
     assert resp.status_code == 200
 
-    # user is not an owner
+    # User is not an owner
     resp = requests.post(url + 'channel/removeowner', json={
         'token': owner['token'],
         'channel_id': channel_id,
@@ -1154,4 +1154,62 @@ def test_http_clear(url):
     HTTP test for clear
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Channel 1',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Clear
+    assert requests.delete(url + 'clear').status_code == 200
+    
+    # User now cannot view the channel details
+    resp = requests.get(url + 'channel/details', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 400
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+
+    # Cannot register same person twice
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 400
+
+    # Clear
+    assert requests.delete(url + 'clear').status_code == 200
+
+    # Register owner again successfully
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
