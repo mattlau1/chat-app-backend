@@ -869,7 +869,7 @@ def test_http_user_profile_setname(url):
         'name_last': 'B'
     })
     assert resp.status_code == 200
-    
+
     resp = requests.get(url+"user/profile", params={
         'token': user['token'],
         'u_id': user['u_id']
@@ -884,8 +884,8 @@ def test_http_user_profile_setname(url):
     assert profile['user']['u_id'] == user['u_id']
 
     # change name again with exactly 50 characters
-    long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-    long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    long_first = 'x' * 50
+    long_last = 'y' * 50
     
     resp = requests.put(url+'user/profile/setname', json={
         'token': user['token'],
@@ -915,8 +915,8 @@ def test_http_user_profile_setname(url):
     assert resp.status_code == 400
 
     # change into 51 characters
-    long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa'
-    long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyb'
+    long_first = 'x' * 51
+    long_last = 'y' * 51
     resp = requests.put(url+'user/profile/setname', json={
         'token': user['token'],
         'name_first': long_first,
