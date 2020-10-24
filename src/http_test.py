@@ -353,7 +353,138 @@ def test_http_channel_messages(url):
     HTTP test for channel_messages
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+
+    # Register users
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'admin@gmail.com',
+        'password': 'password',
+        'name_first': 'Admin',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    admin_user = resp.json()
+
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'random@gmail.com',
+        'password': 'password',
+        'name_first': 'Random',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    random_user = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': admin_user['token'],
+        'name': 'Admin Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    admin_channel_id = resp.json()['channel_id']
+
+    # Invalid token
+    resp = requests.get(url + 'channel/messages', params={
+        'token': '',
+        'channel_id': admin_channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 400
+
+    # User not in channel
+    resp = requests.get(url + 'channel/messages', params={
+        'token': random_user['token'],
+        'channel_id': admin_channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 400
+
+    # Invalid channel_id
+    resp = requests.get(url + 'channel/messages', params={
+        'token': admin_user['token'],
+        'channel_id': admin_channel_id + 1,
+        'start': 0,
+    })
+    assert resp.status_code == 400
+
+    # Test start index - testing 50 messages
+    for message_sent in range(1, 51):
+        # Send message
+        resp = requests.post(url + 'message/send', json={
+            'token': admin_user['token'],
+            'channel_id': admin_channel_id,
+            'message': f'Message {message_sent}',
+        })
+        assert resp.status_code == 200
+        # Invalid start index
+        resp = requests.get(url + 'channel/messages', params={
+            'token': admin_user['token'],
+            'channel_id': admin_channel_id,
+            'start': message_sent + 1,
+        })
+        assert resp.status_code == 400
+        # Valid request from start index 0
+        resp = requests.get(url + 'channel/messages', params={
+            'token': admin_user['token'],
+            'channel_id': admin_channel_id,
+            'start': 0,
+        })
+        assert resp.status_code == 200
+        payload = resp.json()
+        assert len(payload['messages']) == message_sent
+        assert payload['start'] == 0
+        assert payload['end'] == -1
+        # Valid request from previous message
+        resp = requests.get(url + 'channel/messages', params={
+            'token': admin_user['token'],
+            'channel_id': admin_channel_id,
+            'start': message_sent - 1,
+        })
+        assert resp.status_code == 200
+        payload = resp.json()
+        assert len(payload['messages']) == 1
+        assert payload['start'] == message_sent - 1
+        assert payload['end'] == -1
+        # Valid request from current message
+        resp = requests.get(url + 'channel/messages', params={
+            'token': admin_user['token'],
+            'channel_id': admin_channel_id,
+            'start': message_sent,
+        })
+        assert resp.status_code == 200
+        payload = resp.json()
+        assert len(payload['messages']) == 0
+        assert payload['start'] == message_sent
+        assert payload['end'] == -1
+
+    # Test message 51
+    resp = requests.post(url + 'message/send', json={
+        'token': admin_user['token'],
+        'channel_id': admin_channel_id,
+        'message': 'Message 51',
+    })
+    assert resp.status_code == 200
+
+    resp = requests.get(url + 'channel/messages', params={
+        'token': admin_user['token'],
+        'channel_id': admin_channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 50
+    assert payload['start'] == 0
+    assert payload['end'] == 50
+
+    resp = requests.get(url + 'channel/messages', params={
+        'token': admin_user['token'],
+        'channel_id': admin_channel_id,
+        'start': 1,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 50
+    assert payload['start'] == 1
+    assert payload['end'] == -1
 
 
 def test_http_channel_leave(url):
