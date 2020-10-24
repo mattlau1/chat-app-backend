@@ -69,6 +69,7 @@ def test_http_user_profile(url):
     })
     assert resp.status_code == 400
 
+
 def test_http_user_profile_setname(url):
     '''
     HTTP test for user_profile_setname
@@ -177,6 +178,7 @@ def test_http_user_profile_setname(url):
         'name_last': long_last
     })
     assert resp.status_code == 400
+
 
 def test_http_user_profile_setemail(url):
     '''
@@ -300,6 +302,7 @@ def test_http_user_profile_setemail(url):
 
     # Make sure user2's email is unchanged
     assert profile2['user']['email'] == 'zippy@hotmail.com'
+
 
 def test_http_user_profile_sethandle(url):
     '''
