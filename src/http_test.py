@@ -1208,6 +1208,13 @@ def test_http_message_remove(url):
     assert resp.status_code == 200
     m_id1 = resp.json()['message_id']
 
+    # Invalid message_id
+    resp = requests.delete(url + 'message/remove', json={
+        'token': owner['token'],
+        'message_id': m_id1 + 1,
+    })
+    assert resp.status_code == 400
+
     # User 1 sends message 2
     resp = requests.post(url + 'message/send', json={
         'token': user1['token'],
@@ -1230,13 +1237,6 @@ def test_http_message_remove(url):
     resp = requests.delete(url + 'message/remove', json={
         'token': '',
         'message_id': m_id1,
-    })
-    assert resp.status_code == 400
-
-    # Invalid message_id
-    resp = requests.delete(url + 'message/remove', json={
-        'token': owner['token'],
-        'message_id': '',
     })
     assert resp.status_code == 400
 
@@ -1385,6 +1385,14 @@ def test_http_message_edit(url):
     assert resp.status_code == 200
     m_id1 = resp.json()['message_id']
 
+    # Invalid message_id
+    resp = requests.put(url + 'message/edit', json={
+        'token': owner['token'],
+        'message_id': m_id1 + 1,
+        'message': 'Edited second message',
+    })
+    assert resp.status_code == 400
+
     # User 1 sends message 2
     resp = requests.post(url + 'message/send', json={
         'token': user1['token'],
@@ -1408,14 +1416,6 @@ def test_http_message_edit(url):
         'token': '',
         'message_id': m_id1,
         'message': 'Edited first message',
-    })
-    assert resp.status_code == 400
-
-    # Invalid message_id
-    resp = requests.put(url + 'message/edit', json={
-        'token': owner['token'],
-        'message_id': '',
-        'message': 'Edited second message',
     })
     assert resp.status_code == 400
 
