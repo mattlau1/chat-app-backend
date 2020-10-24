@@ -14,35 +14,35 @@ def test_channel_invite():
     Testing the channel_invite function
     '''
     clear()
-    user1 = auth_register('user1@gmail.com', 'password1', 'John', 'Smith')
-    user2 = auth_register('user2@gmail.com', 'password2', 'Steve', 'Jackson')
+    owner = auth_register('owner@gmail.com', 'password1', 'John', 'Smith')
+    user = auth_register('user@gmail.com', 'password2', 'Steve', 'Jackson')
     # User 1 creates a new channel, and invites User 2
-    channel1 = channels_create(user1['token'], 'Test Channel 1', True)
-    channel_invite(user1['token'], channel1['channel_id'], user2['u_id'])
+    channel1 = channels_create(owner['token'], 'Test Channel 1', True)
+    channel_invite(owner['token'], channel1['channel_id'], user['u_id'])
     # Already invited
-    channel_invite(user1['token'], channel1['channel_id'], user2['u_id'])
+    channel_invite(owner['token'], channel1['channel_id'], user['u_id'])
 
     # Checking if User 2 is a member of the channel (whether they can access channel details)
-    channel_details(user2['token'], channel1['channel_id'])
+    channel_details(user['token'], channel1['channel_id'])
 
-    channel2 = channels_create(user1['token'], 'Test Channel 2', True)
+    channel2 = channels_create(owner['token'], 'Test Channel 2', True)
 
     # Authorised user does not have a valid token
     with pytest.raises(AccessError):
-        channel_invite('', channel2['channel_id'], user2['u_id'])
+        channel_invite('', channel2['channel_id'], user['u_id'])
 
     # Channel ID does not refer to a valid channel
     with pytest.raises(InputError):
-        channel_invite(user1['token'], channel2['channel_id'] + 100, user2['u_id'])
+        channel_invite(owner['token'], channel2['channel_id'] + 100, user['u_id'])
 
     # User ID does not refer to a valid user
     with pytest.raises(InputError):
-        channel_invite(user1['token'], channel2['channel_id'], user2['u_id'] + 100)
+        channel_invite(owner['token'], channel2['channel_id'], user['u_id'] + 100)
 
     # Authorised user is not a member of the channel
     with pytest.raises(AccessError):
         user3 = auth_register('user3@gmail.com', 'password3', 'Jim', 'Johnson')
-        channel_invite(user3['token'], channel2['channel_id'], user2['u_id'])
+        channel_invite(user3['token'], channel2['channel_id'], user['u_id'])
 
 
 def test_channel_details():
