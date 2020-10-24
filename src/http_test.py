@@ -406,7 +406,7 @@ def test_http_channel_details(url):
 
     payload = resp.json()
     assert payload == {
-        'name': 'Test channel',
+        'name': 'Test Channel',
         'owner_members': [
             {
                 'u_id': owner['u_id'],
