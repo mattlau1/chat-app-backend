@@ -773,7 +773,7 @@ def test_http_user_profile(url):
     assert resp.status_code == 200
     user = resp.json()
 
-    resp = requests.put(url+"user/profile/sethandle", params={
+    resp = requests.put(url+"user/profile/sethandle", json={
         'token': user['token'],
         'handle_str': 'Stevenson'
     })
@@ -843,7 +843,7 @@ def test_http_user_profile_setname(url):
     assert profile['user']['u_id'] == user['u_id']
 
     # change setname
-    requests.put(url+'user/profile/setname', params={
+    requests.put(url+'user/profile/setname', json={
         'token': user['token'],
         'name_first': 'Monkey',
         'name_last': 'Monkeyson'
@@ -863,12 +863,13 @@ def test_http_user_profile_setname(url):
     assert profile['user']['u_id'] == user['u_id']
 
     # change name again with 1 character
-    requests.put(url+'user/profile/setname', params={
+    resp = requests.put(url+'user/profile/setname', json={
         'token': user['token'],
         'name_first': 'A',
         'name_last': 'B'
     })
-
+    assert resp.status_code == 200
+    
     resp = requests.get(url+"user/profile", params={
         'token': user['token'],
         'u_id': user['u_id']
@@ -885,6 +886,14 @@ def test_http_user_profile_setname(url):
     # change name again with exactly 50 characters
     long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    
+    resp = requests.put(url+'user/profile/setname', json={
+        'token': user['token'],
+        'name_first': long_first,
+        'name_last': long_last
+    })
+    assert resp.status_code == 200
+
     resp = requests.get(url+"user/profile", params={
         'token': user['token'],
         'u_id': user['u_id']
@@ -898,7 +907,7 @@ def test_http_user_profile_setname(url):
     assert profile['user']['u_id'] == user['u_id']
 
     # change into empty name
-    resp = requests.put(url+'user/profile/setname', params={
+    resp = requests.put(url+'user/profile/setname', json={
         'token': user['token'],
         'name_first': '',
         'name_last': ''
@@ -908,7 +917,7 @@ def test_http_user_profile_setname(url):
     # change into 51 characters
     long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa'
     long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyb'
-    resp = requests.put(url+'user/profile/setname', params={
+    resp = requests.put(url+'user/profile/setname', json={
         'token': user['token'],
         'name_first': long_first,
         'name_last': long_last
@@ -945,7 +954,7 @@ def test_http_user_profile_setemail(url):
     assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
 
     # set new email
-    requests.put(url+"user/profile/setemail", params={
+    requests.put(url+"user/profile/setemail", json={
         'token': user['token'],
         'email': 'stevennguyen22@gmail.com'
     })
@@ -974,7 +983,7 @@ def test_http_user_profile_setemail(url):
     user = resp.json()
 
     # set invalid email
-    resp = requests.put(url+"user/profile/setemail", params={
+    resp = requests.put(url+"user/profile/setemail", json={
         'token': user['token'],
         'email': 'steve.apple@'
     })
@@ -1003,14 +1012,14 @@ def test_http_user_profile_setemail(url):
     user2 = resp.json()
 
     # set valid email for user1
-    resp = requests.put(url+"user/profile/setemail", params={
+    resp = requests.put(url+"user/profile/setemail", json={
         'token': user1['token'],
         'email': 'monkey@gmail.com'
     })
     assert resp.status_code == 200
 
     # set user2's email to user1's email (should be taken)
-    resp = requests.put(url+"user/profile/setemail", params={
+    resp = requests.put(url+"user/profile/setemail", json={
         'token': user2['token'],
         'email': 'monkey@gmail.com'
     })
@@ -1057,7 +1066,7 @@ def test_http_user_profile_sethandle(url):
     user = resp.json()
 
     # set new handle
-    resp = requests.put(url+"user/profile/sethandle", params={
+    resp = requests.put(url+"user/profile/sethandle", json={
         'token': user['token'],
         'handle_str': 'Stevenson'
     })
@@ -1087,14 +1096,14 @@ def test_http_user_profile_sethandle(url):
     user = resp.json()
 
     # set invalid short handle
-    resp = requests.put(url+"user/profile/sethandle", params={
+    resp = requests.put(url+"user/profile/sethandle", json={
         'token': user['token'],
         'handle_str': 'AA'
     })
     assert resp.status_code == 400
 
     # set invalid long handle
-    resp = requests.put(url+"user/profile/sethandle", params={
+    resp = requests.put(url+"user/profile/sethandle", json={
         'token': user['token'],
         'handle_str': 'thisistwentyonechars!'
     })
@@ -1122,21 +1131,21 @@ def test_http_user_profile_sethandle(url):
     user2 = resp.json()
 
     # user1 changes handle
-    resp = requests.put(url+"user/profile/sethandle", params={
+    resp = requests.put(url+"user/profile/sethandle", json={
         'token': user1['token'],
         'handle_str': 'Banana'
     })
     assert resp.status_code == 200
 
     # user2 also changes handle
-    resp = requests.put(url+"user/profile/sethandle", params={
-        'token': user1['token'],
+    resp = requests.put(url+"user/profile/sethandle", json={
+        'token': user2['token'],
         'handle_str': 'Apple'
     })
     assert resp.status_code == 200
 
     # user2 tries to take user1's handle (should be taken)
-    resp = requests.put(url+"user/profile/sethandle", params={
+    resp = requests.put(url+"user/profile/sethandle", json={
         'token': user2['token'],
         'handle_str': 'Banana'
     })
