@@ -770,10 +770,14 @@ def test_http_user_profile(url):
         'name_first': 'Steven',
         'name_last': 'Nguyen',
     })
+    assert r.status_code == 200
     user = r.json()
+
     requests.put(url+"user/profile/sethandle", params = {'token': user['token'],'handle_str': 'Stevenson'})
     r = requests.get(url+"user/profile", params = {'token': user['token'],'u_id': user['u_id']})
+    assert r.status_code == 200
     profile = r.json()
+    
     assert profile['user']['name_first'] == "Steven"
     assert profile['user']['name_last'] == "Nguyen"
     assert profile['user']['u_id'] == user['u_id']
@@ -781,8 +785,8 @@ def test_http_user_profile(url):
     assert profile['user']['handle_str'] == 'Stevenson'
  
     # access user details without registering
-    with pytest.raises(AccessError):
-        requests.get(url+"user/profile", params = {'tokens': "&73hf(s!)@",'u_id': 42})
+    r = requests.get(url+"user/profile", params = {'tokens': "&73hf(s!)@",'u_id': 42})
+    assert r.status_code == 400
 
     # retrieving information with correct token but wrong id
     r = requests.post(url + 'auth/register', json={
@@ -792,8 +796,8 @@ def test_http_user_profile(url):
         'name_last': 'Andrewson',
     })
     user = r.json()
-    with pytest.raises(InputError):
-        requests.get(url+"user/profile", params = {'token': user['token'],'u_id': 34})
+    r = requests.get(url+"user/profile", params = {'token': user['token'],'u_id': 34})
+    assert r.status_code == 400
 
 
 def test_http_user_profile_setname(url):
@@ -811,6 +815,7 @@ def test_http_user_profile_setname(url):
     })
     user = r.json()
     r = requests.get(url+"profile", params = {'token': user['token'],'u_id': user['u_id']})
+    assert r.status_code == 200
     profile = r.json()
 
     # check original name
@@ -825,6 +830,7 @@ def test_http_user_profile_setname(url):
         'name_last': 'Monkeyson'
     })
     r = requests.get(url+"profile", params = {'token': user['token'],'u_id': user['u_id']})
+    assert r.status_code == 200
     profile = r.json()
     # check new set name
     assert profile['user']['name_first'] == "Monkey"
@@ -838,6 +844,7 @@ def test_http_user_profile_setname(url):
         'name_last': 'B'
     })
     r = requests.get(url+"user/profile", params = {'token': user['token'],'u_id': user['u_id']})
+    assert r.status_code == 200
     profile = r.json()
 
     # check new set name
@@ -849,28 +856,29 @@ def test_http_user_profile_setname(url):
     long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
     r = requests.get(url+"user/profile", params = {'token': user['token'],'u_id': user['u_id']})
+    assert r.status_code == 200
     profile = r.json()
     assert profile['user']['name_first'] == long_first
     assert profile['user']['name_last'] == long_last
     assert profile['user']['u_id'] == user['u_id']
 
     # change into empty name
-    with pytest.raises(InputError):
-        requests.put(url+'user/profile/setname', params = {
-            'token': user['token'], 
-            'name_first': '',
-            'name_last': ''
-        })
+    r = requests.put(url+'user/profile/setname', params = {
+        'token': user['token'], 
+        'name_first': '',
+        'name_last': ''
+    })
+    assert r.status_code == 400
 
     # change into 51 characters
     long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa'
     long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyb'
-    with pytest.raises(InputError):
-        requests.put(url+'user/profile/setname', params = {
-            'token': user['token'], 
-            'name_first': long_first,
-            'name_last': long_last
-        })
+    r = requests.put(url+'user/profile/setname', params = {
+        'token': user['token'], 
+        'name_first': long_first,
+        'name_last': long_last
+    })
+    assert r.status_code == 400
 
 def test_http_user_profile_setemail(url):
     '''
