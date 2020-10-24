@@ -107,6 +107,10 @@ def test_message_remove():
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     assert len(messages) == 0
 
+    # Message_id no longer exists
+    with pytest.raises(InputError):
+        message_remove(f_owner['token'], m_id1)
+
 
 def test_message_edit():
     '''
