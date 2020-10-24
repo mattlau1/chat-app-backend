@@ -363,7 +363,107 @@ def test_http_message_send(url):
     HTTP test for message_send
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'admin@gmail.com',
+        'password': 'password',
+        'name_first': 'Admin',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    admin_token = payload['token']
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': admin_token,
+        'name': 'Admin Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    admin_channel_id = resp.json()['channel_id']
+
+    # Invalid token
+    resp = requests.post(url + 'message/send', json={
+        'token': '',
+        'channel_id': admin_channel_id,
+        'message': 'test',
+    })
+    assert resp.status_code == 400
+
+    # User not in channel tries to send message
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'random@gmail.com',
+        'password': 'password',
+        'name_first': 'Random',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    random_token = payload['token']
+
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'test',
+    })
+    assert resp.status_code == 400
+
+    # Admin sends message
+    resp = requests.post(url + 'message/send', json={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'message': 'First message',
+    })
+    assert resp.status_code == 200
+
+    # Random user sends message after joining
+    resp = requests.post(url + 'channel/join', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'Second message',
+    })
+    assert resp.status_code == 200
+
+    # Empty messages
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': '',
+    })
+    assert resp.status_code == 400
+
+    # Long messages
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'A' * 1000,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'A' * 1001,
+    })
+    assert resp.status_code == 400
+
+    # Check messages have been sent
+    resp = requests.get(url + 'channel/messages', params={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 3
 
 
 def test_http_message_remove(url):
@@ -441,7 +541,133 @@ def test_http_search(url):
     HTTP test for search
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'admin@gmail.com',
+        'password': 'password',
+        'name_first': 'Admin',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    admin_token = payload['token']
+
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'random@gmail.com',
+        'password': 'password',
+        'name_first': 'Random',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    random_token = payload['token']
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': admin_token,
+        'name': 'Admin Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    admin_channel_id = resp.json()['channel_id']
+
+    resp = requests.post(url + 'channels/create', json={
+        'token': random_token,
+        'name': 'Secret Channel',
+        'is_public': False,
+    })
+    assert resp.status_code == 200
+    secret_channel_id = resp.json()['channel_id']
+
+    # Random user sends 'Hello world' to Admin Channel after joining
+    resp = requests.post(url + 'channel/join', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'Hello world',
+    })
+    assert resp.status_code == 200
+
+    # Admin sends 'Hello' and 'hello' to Admin Channel
+    resp = requests.post(url + 'message/send', json={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'message': 'Hello',
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/send', json={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'message': 'hello',
+    })
+    assert resp.status_code == 200
+
+    # Random User sends 'Helloooo' to Admin and Secret channel
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'Helloooo',
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/send', json={
+        'token': random_token,
+        'channel_id': secret_channel_id,
+        'message': 'Helloooo',
+    })
+    assert resp.status_code == 200
+
+    # Search for substring 'Hello'
+    # From Admin User's perspective
+    resp = requests.get(url + 'search', params={
+        'token': admin_token,
+        'query_str': 'Hello',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 3
+
+    # From Random User's perspective
+    resp = requests.get(url + 'search', params={
+        'token': random_token,
+        'query_str': 'Hello',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 4
+
+    # Invalid token
+    resp = requests.get(url + 'search', params={
+        'token': '',
+        'query_str': 'Hello',
+    })
+    assert resp.status_code == 400
+
+    # Search for substring 'asdf'
+    # From Admin User's perspective
+    resp = requests.get(url + 'search', params={
+        'token': admin_token,
+        'query_str': 'asdf',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 0
+
+    # From Random User's perspective
+    resp = requests.get(url + 'search', params={
+        'token': random_token,
+        'query_str': 'asdf',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 0
 
 
 def test_http_clear(url):

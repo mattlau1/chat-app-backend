@@ -197,8 +197,8 @@ def http_channels_create():
 ##################
 ## HTTP message ##
 ##################
-@APP.route('/messages/send', methods=['POST'])
-def http_messages_send():
+@APP.route('/message/send', methods=['POST'])
+def http_message_send():
     '''
     Wrapper function for messages_send (sends a message to channel)
     POST: JSON containing "token" (str), "channel_id" (int), "message" (str)
@@ -208,8 +208,8 @@ def http_messages_send():
     return dumps(message_send(payload['token'], payload['channel_id'], payload['message']))
 
 
-@APP.route('/messages/remove', methods=['DELETE'])
-def http_messages_remove():
+@APP.route('/message/remove', methods=['DELETE'])
+def http_message_remove():
     '''
     Wrapper function for messages_remove (removes a message)
     DELETE: JSON containing "token" (str), "message_id" (int)
@@ -219,8 +219,8 @@ def http_messages_remove():
     return dumps(message_remove(payload['token'], payload['message_id']))
 
 
-@APP.route('/messages/edit', methods=['PUT'])
-def http_messages_edit():
+@APP.route('/message/edit', methods=['PUT'])
+def http_message_edit():
     '''
     Wrapper function for messages_edit (edits a message)
     PUT: JSON containing "token" (str), "message_id" (int), "message" (str)
