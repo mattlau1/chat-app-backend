@@ -7,6 +7,7 @@ from auth import auth_register
 from message import message_send
 from error import InputError, AccessError
 from other import clear
+from user import user_profile_setname
 
 
 def test_channel_invite():
@@ -56,16 +57,65 @@ def test_channel_details():
 
     # Checking if owner of channel can check channel details, and if they are correct
     details = channel_details(owner['token'], channel['channel_id'])
-    assert len(details['all_members']) == 1
-    assert len(details['owner_members']) == 1
+    assert details == {
+        'name': 'Test Channel',
+        'owner_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Liam',
+                'name_last': 'Brown',
+            }
+        ],
+        'all_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Liam',
+                'name_last': 'Brown',
+            },
+        ],
+    }
 
     # Checking if member of channel can check channel details, and if they are correct
     channel_join(user['token'], channel['channel_id'])
     details = channel_details(user['token'], channel['channel_id'])
+    assert len(details['owner_members']) == 1
     assert len(details['all_members']) == 2
+    
     channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
     details = channel_details(user['token'], channel['channel_id'])
     assert len(details['owner_members']) == 2
+    assert len(details['all_members']) == 2
+
+    # Change the name of 'user' (2nd person) and check that all instances are updated
+    user_profile_setname(user['token'], 'Kevin', 'Zhu')     
+    details = channel_details(user['token'], channel['channel_id'])
+    assert details == {
+        'name': 'Test Channel',
+        'owner_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Liam',
+                'name_last': 'Brown',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Kevin',
+                'name_last': 'Zhu',
+            }
+        ],
+        'all_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Liam',
+                'name_last': 'Brown',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Kevin',
+                'name_last': 'Zhu',
+            }
+        ],
+    }   
 
     # Authorised user does not have a valid token
     with pytest.raises(AccessError):
