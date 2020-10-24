@@ -372,7 +372,7 @@ def test_http_channel_leave(url):
 
     # Check that the details are correct
     resp = requests.get(url + 'channel/details', params={
-        'token': user['token'],
+        'token': owner['token'],
         'channel_id': channel_id,
     })
     assert resp.status_code == 200
@@ -483,7 +483,7 @@ def test_http_channel_join(url):
                 'name_last': 'Michaels',
             },
             {
-                'u_id': owner['u_id'],
+                'u_id': user['u_id'],
                 'name_first': 'Kim',
                 'name_last': 'Williams',
             },
