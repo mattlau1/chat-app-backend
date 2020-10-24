@@ -277,7 +277,67 @@ def test_http_channel_invite(url):
     HTTP test for channel_invite
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
+    # Register user 1
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'user1@gmail.com',
+        'password': 'password1',
+        'name_first': 'John',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+    user1 = resp.json()
+
+    # Register user 2
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'user2@gmail.com',
+        'password': 'password2',
+        'name_first': 'Steve',
+        'name_last': 'Jackson',
+    })
+    assert resp.status_code == 200
+    user2 = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': user1['token'],
+        'name': 'Test Channel 1',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # channel_id does not refer to a valid channel
+    resp = requests.post(url + 'channel/invite', json ={
+        'token': user1['token'],
+        'channel_id': channel_id + 100,
+        'u_id': user2['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # u_id does not refer to a valid channel
+    resp = requests.post(url + 'channel/invite', json ={
+        'token': user1['token'],
+        'channel_id': channel_id,
+        'u_id': user2['u_id'] + 100,
+    })
+    assert resp.status_code == 400
+
+    # Authorised user not in channel
+    resp = requests.post(url + 'channel/invite', json ={
+        'token': user2['token'],
+        'channel_id': channel_id,
+        'u_id': user2['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Invite the user successfully
+    resp = requests.post(url + 'channel/invite', json ={
+        'token': user1['token'],
+        'channel_id': channel_id,
+        'u_id': user2['u_id'],
+    })
+    assert resp.status_code == 200
 
 
 def test_http_channel_details(url):
@@ -285,7 +345,7 @@ def test_http_channel_details(url):
     HTTP test for channel_details
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
 
 
 def test_http_channel_messages(url):
