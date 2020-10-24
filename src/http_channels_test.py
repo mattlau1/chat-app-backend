@@ -77,6 +77,7 @@ def test_http_channels_list(url):
     })
     assert resp.status_code == 400
 
+
 def test_http_channels_listall(url):
     '''
     HTTP test for channels_listall
@@ -170,6 +171,7 @@ def test_http_channels_listall(url):
         'token': 'thisisaninvalidtoken',
     })
     assert resp.status_code == 400
+
 
 def test_http_channels_create(url):
     '''
