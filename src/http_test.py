@@ -277,7 +277,7 @@ def test_http_channel_invite(url):
     HTTP test for channel_invite
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
+
     # Register owner
     resp = requests.post(url + 'auth/register', json={
         'email': 'owner@gmail.com',
@@ -376,21 +376,21 @@ def test_http_channel_details(url):
     channel_id = resp.json()['channel_id']
 
     # channel_id does not refer to a valid channel
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': owner['token'],
         'channel_id': channel_id + 100,
     })
-    assert resp.status_code == 400    
+    assert resp.status_code == 400
 
     # Authorised user not in channel
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': user['token'],
         'channel_id': channel_id,
     })
     assert resp.status_code == 400
-    
+
     # Invite the user successfully
-    resp = requests.post(url + 'channel/invite', json ={
+    resp = requests.post(url + 'channel/invite', json={
         'token': owner['token'],
         'channel_id': channel_id,
         'u_id': user['u_id'],
@@ -398,7 +398,7 @@ def test_http_channel_details(url):
     assert resp.status_code == 200
 
     # User can now view the channel details
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': user['token'],
         'channel_id': channel_id,
     })
@@ -589,7 +589,109 @@ def test_http_channel_addowner(url):
     HTTP test for channel_addowner
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'jesschen@gmail.com',
+        'password': 'password',
+        'name_first': 'Jess',
+        'name_last': 'Chen',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Test Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Join channel
+    resp = requests.post(url + 'channel/join', json={
+        'token': user['token'],
+        'channel_id': channel_id
+    })
+    assert resp.status_code == 200
+
+    # channel_id does not refer to a valid channel
+    resp = requests.post(url + 'channel/addowner', json ={
+        'token': owner['token'],
+        'channel_id': channel_id + 100,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # User is already an owner
+    resp = requests.post(url + 'channel/addowner', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': owner['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Authorised user not in channel
+    resp = requests.post(url + 'channel/addowner', json={
+        'token': user['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Add the user as an owner successfully
+    resp = requests.post(url + 'channel/addowner', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Check that the details are correct
+    resp = requests.get(url + 'channel/details', params={
+        'token': user['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload == {
+        'name': 'Test Channel',
+        'owner_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Jess',
+                'name_last': 'Chen',
+            }
+        ],
+        'all_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Jess',
+                'name_last': 'Chen',
+            }
+        ],
+    }
 
 
 def test_http_channel_removeowner(url):
@@ -597,7 +699,112 @@ def test_http_channel_removeowner(url):
     HTTP test for channel_removeowner
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'jesschen@gmail.com',
+        'password': 'password',
+        'name_first': 'Jess',
+        'name_last': 'Chen',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Test Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Join channel
+    resp = requests.post(url + 'channel/join', json={
+        'token': user['token'],
+        'channel_id': channel_id
+    })
+    assert resp.status_code == 200
+
+    # User is not an owner
+    resp = requests.post(url + 'channel/removeowner', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Authorised user is not an owner
+    resp = requests.post(url + 'channel/removeowner', json={
+        'token': user['token'],
+        'channel_id': channel_id,
+        'u_id': owner['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Add the user as an owner
+    resp = requests.post(url + 'channel/addowner', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # channel_id does not refer to a valid channel
+    resp = requests.post(url + 'channel/removeowner', json={
+        'token': owner['token'],
+        'channel_id': channel_id + 100,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Remove the user as an owner successfully
+    resp = requests.post(url + 'channel/removeowner', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Check that the details are correct
+    resp = requests.get(url + 'channel/details', params={
+        'token': user['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload == {
+        'name': 'Test Channel',
+        'owner_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+        ],
+        'all_members': [
+            {
+                'u_id': owner['u_id'],
+                'name_first': 'Bob',
+                'name_last': 'Smith',
+            },
+            {
+                'u_id': user['u_id'],
+                'name_first': 'Jess',
+                'name_last': 'Chen',
+            }
+        ],
+    }
 
 
 ###################
@@ -743,7 +950,176 @@ def test_http_message_remove(url):
     HTTP test for message_remove
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'liambrown@gmail.com',
+        'password': 'password',
+        'name_first': 'Liam',
+        'name_last': 'Brown',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Register user 1
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'victorzhang@gmail.com',
+        'password': 'password',
+        'name_first': 'Victor',
+        'name_last': 'Zhang',
+    })
+    assert resp.status_code == 200
+    user1 = resp.json()
+
+    # Register user 2
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'jesschen@gmail.com',
+        'password': 'password',
+        'name_first': 'Jess',
+        'name_last': 'Chen',
+    })
+    assert resp.status_code == 200
+    user2 = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Test Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Invite user 1
+    resp = requests.post(url + 'channel/invite', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user1['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Invite user 2
+    resp = requests.post(url + 'channel/invite', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user2['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Owner sends message 1
+    resp = requests.post(url + 'message/send', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'message': 'First message',
+    })
+    assert resp.status_code == 200
+    m_id1 = resp.json()['message_id']
+
+    # User 1 sends message 2
+    resp = requests.post(url + 'message/send', json={
+        'token': user1['token'],
+        'channel_id': channel_id,
+        'message': 'Second message',
+    })
+    assert resp.status_code == 200
+    m_id2 = resp.json()['message_id']
+
+    # User 2 sends message 3
+    resp = requests.post(url + 'message/send', json={
+        'token': user2['token'],
+        'channel_id': channel_id,
+        'message': 'Third message',
+    })
+    assert resp.status_code == 200
+    m_id3 = resp.json()['message_id']
+
+    # Invalid token
+    resp = requests.delete(url + 'message/remove', json={
+        'token': '',
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 400
+
+    # Invalid message_id
+    resp = requests.delete(url + 'message/remove', json={
+        'token': owner['token'],
+        'message_id': '',
+    })
+    assert resp.status_code == 400
+
+    # Authorised user did not send the message and is not channel or Flockr owner
+    resp = requests.delete(url + 'message/remove', json={
+        'token': user1['token'],
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 400
+
+    resp = requests.delete(url + 'message/remove', json={
+        'token': user2['token'],
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 400
+
+    # Check that there are 3 messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload) == 3
+
+    # Message sender can successfully remove their own message
+    resp = requests.delete(url + 'message/remove', json={
+        'token': user2['token'],
+        'message_id': m_id3,
+    })
+    assert resp.status_code == 200
+
+    # Check that there are 2 messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 2
+
+    # Owner can remove anyone's message
+    resp = requests.delete(url + 'message/remove', json={
+        'token': owner['token'],
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 200
+
+    # Check that there is 1 message
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 1
+
+    # Owner can remove their own message
+    resp = requests.delete(url + 'message/remove', json={
+        'token': owner['token'],
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 200
+
+    # Check that there are 0 messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 0
 
 
 def test_http_message_edit(url):
@@ -762,416 +1138,32 @@ def test_http_user_profile(url):
     HTTP test for user_profile
     '''
     assert requests.delete(url + 'clear').status_code == 200
+    pass
 
-    # registering valid user
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'stvnnguyen69@hotmail.com',
-        'password': 'password',
-        'name_first': 'Steven',
-        'name_last': 'Nguyen',
-    })
-    assert resp.status_code == 200
-    user = resp.json()
-
-    resp = requests.put(url+"user/profile/sethandle", json={
-        'token': user['token'],
-        'handle_str': 'Stevenson'
-    })
-    assert resp.status_code == 200
-
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    assert profile['user']['name_first'] == "Steven"
-    assert profile['user']['name_last'] == "Nguyen"
-    assert profile['user']['u_id'] == user['u_id']
-    assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
-    assert profile['user']['handle_str'] == 'Stevenson'
-
-    # access user details without registering
-    resp = requests.get(url+"user/profile", params={
-        'tokens': "&73hf(s!)@",
-        'u_id': 42
-    })
-
-    assert resp.status_code == 400
-
-    # retrieving information with correct token but wrong id
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'andrewwashere@outlook.com',
-        'password': '0987654321',
-        'name_first': 'Andrew',
-        'name_last': 'Andrewson',
-    })
-    user = resp.json()
-    resp = requests.get(url+"user/profile", params = {
-        'token': user['token'],
-        'u_id': 34
-    })
-    assert resp.status_code == 400
 
 def test_http_user_profile_setname(url):
     '''
     HTTP test for user_profile_setname
     '''
     assert requests.delete(url + 'clear').status_code == 200
+    pass
 
-    # create user
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'mmmonkey97@hotmail.com',
-        'password': 'banana',
-        'name_first': 'John',
-        'name_last': 'Johnson',
-    })
-    user = resp.json()
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    # check original name
-    assert profile['user']['name_first'] == "John"
-    assert profile['user']['name_last'] == "Johnson"
-    assert profile['user']['u_id'] == user['u_id']
-
-    # change setname
-    requests.put(url+'user/profile/setname', json={
-        'token': user['token'],
-        'name_first': 'Monkey',
-        'name_last': 'Monkeyson'
-    })
-
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    # check new set name
-    assert profile['user']['name_first'] == "Monkey"
-    assert profile['user']['name_last'] == "Monkeyson"
-    assert profile['user']['u_id'] == user['u_id']
-
-    # change name again with 1 character
-    resp = requests.put(url+'user/profile/setname', json={
-        'token': user['token'],
-        'name_first': 'A',
-        'name_last': 'B'
-    })
-    assert resp.status_code == 200
-    
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    # check new set name
-    assert profile['user']['name_first'] == "A"
-    assert profile['user']['name_last'] == "B"
-    assert profile['user']['u_id'] == user['u_id']
-
-    # change name again with exactly 50 characters
-    long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-    long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
-    
-    resp = requests.put(url+'user/profile/setname', json={
-        'token': user['token'],
-        'name_first': long_first,
-        'name_last': long_last
-    })
-    assert resp.status_code == 200
-
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    assert profile['user']['name_first'] == long_first
-    assert profile['user']['name_last'] == long_last
-    assert profile['user']['u_id'] == user['u_id']
-
-    # change into empty name
-    resp = requests.put(url+'user/profile/setname', json={
-        'token': user['token'],
-        'name_first': '',
-        'name_last': ''
-    })
-    assert resp.status_code == 400
-
-    # change into 51 characters
-    long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxa'
-    long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyb'
-    resp = requests.put(url+'user/profile/setname', json={
-        'token': user['token'],
-        'name_first': long_first,
-        'name_last': long_last
-    })
-    assert resp.status_code == 400
 
 def test_http_user_profile_setemail(url):
     '''
     HTTP test for user_profile_setemail
     '''
     assert requests.delete(url + 'clear').status_code == 200
+    pass
 
-    # SET VALID EMAIL
-
-    # registering valid user
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'stvnnguyen69@hotmail.com',
-        'password': 'password',
-        'name_first': 'Steven',
-        'name_last': 'Nguyen',
-    })
-    assert resp.status_code == 200
-    user = resp.json()
-
-    # get user profile
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    # check original email
-    assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
-
-    # set new email
-    requests.put(url+"user/profile/setemail", json={
-        'token': user['token'],
-        'email': 'stevennguyen22@gmail.com'
-    })
-
-    # get user profile
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    # check if email has changed
-    assert profile['user']['email'] == 'stevennguyen22@gmail.com'
-
-    # SETTING INVALID EMAIL
-
-    # register valid user
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'andrewwashere@outlook.com',
-        'password': '0987654321',
-        'name_first': 'Andrew',
-        'name_last': 'Andrewson',
-    })
-    assert resp.status_code == 200
-    user = resp.json()
-
-    # set invalid email
-    resp = requests.put(url+"user/profile/setemail", json={
-        'token': user['token'],
-        'email': 'steve.apple@'
-    })
-
-    assert resp.status_code == 400
-
-    # EMAIL ADDRESS TAKEN
-
-    # register two valid users
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'mmmonkey97@hotmail.com',
-        'password': 'banana',
-        'name_first': 'John',
-        'name_last': 'Johnson',
-    })
-    assert resp.status_code == 200
-    user1 = resp.json()
-
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'zippy@hotmail.com',
-        'password': 'carrot',
-        'name_first': 'Carrot',
-        'name_last': 'Carrotson',
-    })
-    assert resp.status_code == 200
-    user2 = resp.json()
-
-    # set valid email for user1
-    resp = requests.put(url+"user/profile/setemail", json={
-        'token': user1['token'],
-        'email': 'monkey@gmail.com'
-    })
-    assert resp.status_code == 200
-
-    # set user2's email to user1's email (should be taken)
-    resp = requests.put(url+"user/profile/setemail", json={
-        'token': user2['token'],
-        'email': 'monkey@gmail.com'
-    })
-    assert resp.status_code == 400
-
-    # get user1's profile
-    resp = requests.get(url+"user/profile", params={
-        'token': user1['token'],
-        'u_id': user1['u_id']
-    })
-    assert resp.status_code == 200
-    profile1 = resp.json()
-
-    # get user2's profile
-    resp = requests.get(url+"user/profile", params={
-        'token': user2['token'],
-        'u_id': user2['u_id']
-    })
-    assert resp.status_code == 200
-    profile2 = resp.json()
-
-    # make sure user1's email has changed
-    assert profile1['user']['email'] == 'monkey@gmail.com'
-
-    # make sure user2's email is unchanged
-    assert profile2['user']['email'] == 'zippy@hotmail.com'
 
 def test_http_user_profile_sethandle(url):
     '''
     HTTP test for user_profile_sethandle
     '''
     assert requests.delete(url + 'clear').status_code == 200
+    pass
 
-    # SET VALID HANDLE
-
-    # registering valid user
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'stvnnguyen69@hotmail.com',
-        'password': 'password',
-        'name_first': 'Steven',
-        'name_last': 'Nguyen',
-    })
-    assert resp.status_code == 200
-    user = resp.json()
-
-    # set new handle
-    resp = requests.put(url+"user/profile/sethandle", json={
-        'token': user['token'],
-        'handle_str': 'Stevenson'
-    })
-    assert resp.status_code == 200
-
-    # get user profile
-    resp = requests.get(url+"user/profile", params={
-        'token': user['token'],
-        'u_id': user['u_id']
-    })
-    assert resp.status_code == 200
-    profile = resp.json()
-
-    # check new handle
-    assert profile['user']['handle_str'] == 'Stevenson'
-
-    # SET INVALID HANDLE LENGTH
-
-    # register valid user
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'andrewwashere@outlook.com',
-        'password': '0987654321',
-        'name_first': 'Andrew',
-        'name_last': 'Andrewson',
-    })
-    assert resp.status_code == 200
-    user = resp.json()
-
-    # set invalid short handle
-    resp = requests.put(url+"user/profile/sethandle", json={
-        'token': user['token'],
-        'handle_str': 'AA'
-    })
-    assert resp.status_code == 400
-
-    # set invalid long handle
-    resp = requests.put(url+"user/profile/sethandle", json={
-        'token': user['token'],
-        'handle_str': 'thisistwentyonechars!'
-    })
-    assert resp.status_code == 400
-
-    # HANDLE TAKEN
-
-    # register two valid users
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'mmmonkey97@hotmail.com',
-        'password': 'banana',
-        'name_first': 'John',
-        'name_last': 'Johnson',
-    })
-    assert resp.status_code == 200
-    user1 = resp.json()
-
-    resp = requests.post(url + 'auth/register', json={
-        'email': 'zippy@hotmail.com',
-        'password': 'carrot',
-        'name_first': 'Carrot',
-        'name_last': 'Carrotson',
-    })
-    assert resp.status_code == 200
-    user2 = resp.json()
-
-    # user1 changes handle
-    resp = requests.put(url+"user/profile/sethandle", json={
-        'token': user1['token'],
-        'handle_str': 'Banana'
-    })
-    assert resp.status_code == 200
-
-    # user2 also changes handle
-    resp = requests.put(url+"user/profile/sethandle", json={
-        'token': user2['token'],
-        'handle_str': 'Apple'
-    })
-    assert resp.status_code == 200
-
-    # user2 tries to take user1's handle (should be taken)
-    resp = requests.put(url+"user/profile/sethandle", json={
-        'token': user2['token'],
-        'handle_str': 'Banana'
-    })
-    assert resp.status_code == 400
-
-    # get user1's profile
-    resp = requests.get(url+"user/profile", params={
-        'token': user1['token'],
-        'u_id': user1['u_id']
-    })
-    assert resp.status_code == 200
-    profile1 = resp.json()
-
-    # get user2's profile
-    resp = requests.get(url+"user/profile", params={
-        'token': user2['token'],
-        'u_id': user2['u_id']
-    })
-    assert resp.status_code == 200
-    profile2 = resp.json()
-
-    # make sure user1's handle has changed
-    assert profile1['user']['handle_str'] == 'Banana'
-
-    # make sure user2's handle isn't the same as user1's
-    assert profile2['user']['handle_str'] == 'Apple'
 
 ################
 ## HTTP other ##
@@ -1197,7 +1189,7 @@ def test_http_search(url):
     HTTP test for search
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
+
     # Register user
     resp = requests.post(url + 'auth/register', json={
         'email': 'admin@gmail.com',
@@ -1331,4 +1323,62 @@ def test_http_clear(url):
     HTTP test for clear
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Channel 1',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Clear
+    assert requests.delete(url + 'clear').status_code == 200
+    
+    # User now cannot view the channel details
+    resp = requests.get(url + 'channel/details', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+    })
+    assert resp.status_code == 400
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200
+
+    # Cannot register same person twice
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 400
+
+    # Clear
+    assert requests.delete(url + 'clear').status_code == 200
+
+    # Register owner again successfully
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'bobsmith@gmail.com',
+        'password': 'password',
+        'name_first': 'Bob',
+        'name_last': 'Smith',
+    })
+    assert resp.status_code == 200

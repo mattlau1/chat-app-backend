@@ -47,16 +47,12 @@ def test_invalid_user():
     Create valid users but call user detail with incorrrect u_id and token
     '''
     clear()
-    # retrieving information without registering
+    user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
+    # invalid token
     with pytest.raises(AccessError):
-        user_profile('@#*&$^', 11)
-    with pytest.raises(AccessError):
-        user_profile(')(!*#$', 12)
-    with pytest.raises(AccessError):
-        user_profile('*%&^', 13)
+        user_profile('', user['u_id'])
 
     # retrieving information with correct token but wrong id
-    user = auth_register('shortemail@gmail.com', '1234567', 'Michael', 'Jackson')
     user2 = auth_register('ilovescience10@hotmail.com', '7654321', 'Bill', 'Nye')
     user3 = auth_register('roariscool64@gmail.com', 'password123', 'Taylor', 'Series')
     with pytest.raises(InputError):
@@ -123,8 +119,8 @@ def test_valid_setnames():
     assert profile['user']['name_last'] == "B"
 
     # changing name with exactly 50 characters
-    long_first = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-    long_last = 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'
+    long_first = 'x' * 50
+    long_last = 'y' * 50
     user4 = auth_register('austinnistau@hotmai.com', 'password', 'Austin', 'Austinson')
     profile = user_profile(user4['token'], user4['u_id'])
     assert profile['user']['name_first'] == "Austin"
@@ -141,14 +137,18 @@ def test_invalid_setnames():
     '''
     clear()
     # changing name to more than 50 characters long
-    long_first = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-    long_last = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+    long_first = 'a' * 51
+    long_last = 'b' * 51
     user = auth_register('hardcoregamer02@hotmail.com', 'password', 'Raymond', 'Raymondson')
     profile = user_profile(user['token'], user['u_id'])
     assert profile['user']['name_first'] == "Raymond"
     assert profile['user']['name_last'] == "Raymondson"
     with pytest.raises(InputError):
         user_profile_setname(user['token'], long_first, long_last)
+
+    # invalid token
+    with pytest.raises(AccessError):
+        user_profile_setname(user['token'] + 'paddddding', 'A', 'B')
 
     # changing name with empty space
     user2 = auth_register('mmmonkey97@hotmail.com', 'password', 'John', 'Johnson')
@@ -157,6 +157,17 @@ def test_invalid_setnames():
         user_profile_setname(user2['token'], '', '')
     with pytest.raises(InputError):
         user_profile_setname(user2['token'], '  ', '  ')
+
+    # valid first, invalid last
+    with pytest.raises(InputError):
+        user_profile_setname(user2['token'], 'Valid', '')
+    with pytest.raises(InputError):
+        user_profile_setname(user2['token'], 'Valid', ' ')
+    # invalid first, valid last
+    with pytest.raises(InputError):
+        user_profile_setname(user2['token'], '', 'Valid')
+    with pytest.raises(InputError):
+        user_profile_setname(user2['token'], ' ', 'Valid')
 
 # user_profile_setemail tests
 def test_valid_email():
@@ -184,6 +195,9 @@ def test_invalid_email():
     '''
     clear()
     user = auth_register('ilovescience10@hotmail.com', '7654321', 'Bill', 'Nye')
+    # Invalid token
+    with pytest.raises(AccessError):
+        user_profile_setemail('', 'legit@gmail.com')
 
     # Alphanumeric string, no @ or domain
     with pytest.raises(InputError):
@@ -259,6 +273,9 @@ def test_valid_handle():
     clear()
     user = auth_register('therealbrucelee@gmail.com', 'gghgdshh', 'Bruce', 'Lee')
     profile = user_profile(user['token'], user['u_id'])
+    # Invalid token
+    with pytest.raises(AccessError):
+        user_profile_sethandle('hi', 'Real Bruce Lee')
 
     user_profile_sethandle(user['token'], 'Real Bruce Lee')
     profile = user_profile(user['token'], user['u_id'])
@@ -279,7 +296,13 @@ def test_handle_length():
 
     # User tries to change to short handle
     with pytest.raises(InputError):
+        user_profile_sethandle(user['token'], 'h')
+    with pytest.raises(InputError):
         user_profile_sethandle(user['token'], 'hi')
+
+    # Whitespace handle
+    with pytest.raises(InputError):
+        user_profile_sethandle(user['token'], '   ')
 
     # User tries to change to long handle
     with pytest.raises(InputError):
@@ -300,6 +323,7 @@ def test_taken_handle():
 
     # user1 changes handle to hello world
     user_profile_sethandle(user1['token'], 'hello world')
+    user_profile(user1['token'], user1['u_id'])
 
     # user2 tries to also change to hello world
     with pytest.raises(InputError):
@@ -307,6 +331,7 @@ def test_taken_handle():
 
     # user1 changes handle again
     user_profile_sethandle(user2['token'], 'goodbye world')
+    user_profile(user2['token'], user2['u_id'])
 
     with pytest.raises(InputError):
         user_profile_sethandle(user1['token'], 'goodbye world')
