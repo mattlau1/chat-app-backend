@@ -41,7 +41,7 @@ def test_channel_invite():
 
     # Authorised user is not a member of the channel
     with pytest.raises(AccessError):
-        user3 = auth_register('user3@gmail.com', 'password3', 'Jim', 'Johnson')
+        user3 = auth_register('user3@gmail.com', 'password', 'Jim', 'Johnson')
         channel_invite(user3['token'], channel2['channel_id'], user['u_id'])
 
 
