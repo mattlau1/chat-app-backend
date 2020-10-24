@@ -82,7 +82,91 @@ def test_http_users_all(url):
     HTTP test for users_all
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
+    # Register three users
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'markzuckerberg@gmail.com',
+        'password': 'password',
+        'name_first': 'Mark',
+        'name_last': 'Zuckerberg',
+    })
+    assert resp.status_code == 200
+    f_owner = resp.json()
+
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'brianpaul@gmail.com',
+        'password': 'password',
+        'name_first': 'Brian',
+        'name_last': 'Paul',
+    })
+    assert resp.status_code == 200
+    random_user1 = resp.json()
+
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'gregstevens@gmail.com',
+        'password': 'password',
+        'name_first': 'Greg',
+        'name_last': 'Stevens',
+    })
+    assert resp.status_code == 200
+    random_user2 = resp.json()
+
+    # Set handles of the users
+    resp = requests.put(url + 'user/profile/sethandle', json= {
+        'token': f_owner['token'],
+        'handle_str': 'MARKZUCKERBERG'
+    })
+    assert resp.status_code == 200
+
+    resp = requests.put(url + 'user/profile/sethandle', json= {
+        'token': random_user1['token'],
+        'handle_str': 'BRIANPAUL'
+    })
+    assert resp.status_code == 200
+
+    resp = requests.put(url + 'user/profile/sethandle', json= {
+        'token': random_user2['token'],
+        'handle_str': 'GREGSTEVENS'
+    })
+    assert resp.status_code == 200
+
+    # Check that the details returned from users_all are correct
+    resp = requests.get(url + 'users/all', params={
+        'token': f_owner['token'],
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert payload == {
+        'users': [
+            {
+                'u_id': f_owner['u_id'],
+                'email': 'markzuckerberg@gmail.com'
+                'name_first': 'Mark',
+                'name_last': 'Zuckerberg',
+                'handle_str': 'MARKZUCKERBERG',
+            },
+            {
+                'u_id': random_user1['u_id'],
+                'email': 'brianpaul@gmail.com'
+                'name_first': 'Brian',
+                'name_last': 'Paul',
+                'handle_str': 'BRIANPAUL',
+            },
+            {
+                'u_id': random_user2['u_id'],
+                'email': 'gregstevens@gmail.com'
+                'name_first': 'Greg',
+                'name_last': 'Stevens',
+                'handle_str': 'GREGSTEVENS',
+            },
+        ],
+    }
+
+    # Invalid token
+    resp = requests.get(url + 'users/all', params={
+        'token': '',
+    })
+    assert resp.status_code == 400
 
 
 def test_http_admin_userpermission_change(url):
