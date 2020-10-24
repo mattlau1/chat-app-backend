@@ -829,7 +829,7 @@ def test_http_user_profile_setname(url):
         'name_last': 'Johnson',
     })
     user = resp.json()
-    resp = requests.get(url+"profile", params={
+    resp = requests.get(url+"user/profile", params={
         'token': user['token'],
         'u_id': user['u_id']
     })
@@ -849,7 +849,7 @@ def test_http_user_profile_setname(url):
         'name_last': 'Monkeyson'
     })
 
-    resp = requests.get(url+"profile", params={
+    resp = requests.get(url+"user/profile", params={
         'token': user['token'],
         'u_id': user['u_id']
     })
