@@ -831,7 +831,56 @@ def test_http_channels_create(url):
     HTTP test for channels_create
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+    
+    # create user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'stvnnguyen69@hotmail.com',
+        'password': 'password',
+        'name_first': 'Steven',
+        'name_last': 'Nguyen',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+    # create normal channel 
+    resp = requests.post(url + 'channels/create', json={
+        'token': user['token'],
+        'name': 'Gaming Hub',
+        'is_public': True
+    })
+    assert resp.status_code == 200
+
+    # create a channel with name more than 20 characters
+    resp = requests.post(url + 'channels/create', json={
+        'token': user['token'],
+        'name': 'a' * 21,
+        'is_public': True
+    })
+    assert resp.status_code == 400
+
+    # create a channel with invalid token
+    resp = requests.post(url + 'channels/create', json={
+        'token': 'ASD@*(&!@*(s',
+        'name': 'UNSW club',
+        'is_public': True
+    })
+    assert resp.status_code == 400
+
+    # create a channel with empty name
+    resp = requests.post(url + 'channels/create', json={
+        'token': user['token'],
+        'name': '',
+        'is_public': False
+    })
+    assert resp.status_code == 400
+
+    # create a channel with spaces in name
+    resp = requests.post(url + 'channels/create', json={
+        'token': user['token'],
+        'name': '     ',
+        'is_public': False
+    })
+    assert resp.status_code == 400
 
 
 ##################
