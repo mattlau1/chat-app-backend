@@ -14,8 +14,8 @@ def test_channel_invite():
     Testing the channel_invite function
     '''
     clear()
-    owner = auth_register('owner@gmail.com', 'password1', 'John', 'Smith')
-    user = auth_register('user@gmail.com', 'password2', 'Steve', 'Jackson')
+    owner = auth_register('johnsmith@gmail.com', 'password', 'John', 'Smith')
+    user = auth_register('stevejackson@gmail.com', 'password', 'Steve', 'Jackson')
     # User 1 creates a new channel, and invites User 2
     channel1 = channels_create(owner['token'], 'Test Channel 1', True)
     channel_invite(owner['token'], channel1['channel_id'], user['u_id'])
