@@ -277,7 +277,7 @@ def test_http_channel_invite(url):
     HTTP test for channel_invite
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
+
     # Register owner
     resp = requests.post(url + 'auth/register', json={
         'email': 'owner@gmail.com',
@@ -376,21 +376,21 @@ def test_http_channel_details(url):
     channel_id = resp.json()['channel_id']
 
     # channel_id does not refer to a valid channel
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': owner['token'],
         'channel_id': channel_id + 100,
     })
-    assert resp.status_code == 400    
+    assert resp.status_code == 400
 
     # Authorised user not in channel
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': user['token'],
         'channel_id': channel_id,
     })
     assert resp.status_code == 400
-    
+
     # Invite the user successfully
-    resp = requests.post(url + 'channel/invite', json ={
+    resp = requests.post(url + 'channel/invite', json={
         'token': owner['token'],
         'channel_id': channel_id,
         'u_id': user['u_id'],
@@ -398,7 +398,7 @@ def test_http_channel_details(url):
     assert resp.status_code == 200
 
     # User can now view the channel details
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': user['token'],
         'channel_id': channel_id,
     })
@@ -620,39 +620,38 @@ def test_http_channel_addowner(url):
     channel_id = resp.json()['channel_id']
 
     # Join channel
-    resp = requests.post(url + 'auth/register', json={
+    resp = requests.post(url + 'channel/join', json={
         'token': user['token'],
         'channel_id': channel_id
     })
     assert resp.status_code == 200
-    user = resp.json()
 
     # channel_id does not refer to a valid channel
     resp = requests.post(url + 'channel/addowner', json ={
         'token': owner['token'],
         'channel_id': channel_id + 100,
-        'user_id': user['u_id'],
-    })
-    assert resp.status_code == 400   
-
-    # user is already an owner
-    resp = requests.post(url + 'channel/addowner', json ={
-        'token': owner['token'],
-        'channel_id': channel_id,
-        'user_id': owner['u_id'],
-    })
-    assert resp.status_code == 400   
-
-    # Authorised user not in channel
-    resp = requests.post(url + 'channel/details', json ={
-        'token': user['token'],
-        'channel_id': channel_id,
-        'user_id': user['u_id'],
+        'u_id': user['u_id'],
     })
     assert resp.status_code == 400
-    
+
+    # user is already an owner
+    resp = requests.post(url + 'channel/addowner', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': owner['u_id'],
+    })
+    assert resp.status_code == 400
+
+    # Authorised user not in channel
+    resp = requests.post(url + 'channel/addowner', json={
+        'token': user['token'],
+        'channel_id': channel_id,
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 400
+
     # Add the user as an owner successfully
-    resp = requests.post(url + 'channel/addowner', json ={
+    resp = requests.post(url + 'channel/addowner', json={
         'token': owner['token'],
         'channel_id': channel_id,
         'u_id': user['u_id'],
@@ -660,7 +659,7 @@ def test_http_channel_addowner(url):
     assert resp.status_code == 200
 
     # Check that the details are correct
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': user['token'],
         'channel_id': channel_id,
     })
@@ -700,7 +699,7 @@ def test_http_channel_removeowner(url):
     HTTP test for channel_removeowner
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
+
     # Register owner
     resp = requests.post(url + 'auth/register', json={
         'email': 'bobsmith@gmail.com',
@@ -731,31 +730,30 @@ def test_http_channel_removeowner(url):
     channel_id = resp.json()['channel_id']
 
     # Join channel
-    resp = requests.post(url + 'auth/register', json={
+    resp = requests.post(url + 'channel/join', json={
         'token': user['token'],
         'channel_id': channel_id
     })
     assert resp.status_code == 200
-    user = resp.json()
 
     # user is not an owner
-    resp = requests.post(url + 'channel/removeowner', json ={
+    resp = requests.post(url + 'channel/removeowner', json={
         'token': owner['token'],
         'channel_id': channel_id,
-        'user_id': user['u_id'],
+        'u_id': user['u_id'],
     })
-    assert resp.status_code == 400 
+    assert resp.status_code == 400
 
     # Authorised user is not an owner
-    resp = requests.post(url + 'channel/removeowner', json ={
+    resp = requests.post(url + 'channel/removeowner', json={
         'token': user['token'],
         'channel_id': channel_id,
-        'user_id': owner['u_id'],
+        'u_id': owner['u_id'],
     })
     assert resp.status_code == 400
 
     # Add the user as an owner
-    resp = requests.post(url + 'channel/addowner', json ={
+    resp = requests.post(url + 'channel/addowner', json={
         'token': owner['token'],
         'channel_id': channel_id,
         'u_id': user['u_id'],
@@ -763,15 +761,15 @@ def test_http_channel_removeowner(url):
     assert resp.status_code == 200
 
     # channel_id does not refer to a valid channel
-    resp = requests.post(url + 'channel/removeowner', json ={
+    resp = requests.post(url + 'channel/removeowner', json={
         'token': owner['token'],
         'channel_id': channel_id + 100,
-        'user_id': user['u_id'],
+        'u_id': user['u_id'],
     })
-    assert resp.status_code == 400   
+    assert resp.status_code == 400
 
     # Remove the user as an owner successfully
-    resp = requests.post(url + 'channel/removeowner', json ={
+    resp = requests.post(url + 'channel/removeowner', json={
         'token': owner['token'],
         'channel_id': channel_id,
         'u_id': user['u_id'],
@@ -779,7 +777,7 @@ def test_http_channel_removeowner(url):
     assert resp.status_code == 200
 
     # Check that the details are correct
-    resp = requests.post(url + 'channel/details', json ={
+    resp = requests.get(url + 'channel/details', params={
         'token': user['token'],
         'channel_id': channel_id,
     })
@@ -1022,7 +1020,7 @@ def test_http_search(url):
     HTTP test for search
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
+
     # Register user
     resp = requests.post(url + 'auth/register', json={
         'email': 'admin@gmail.com',
