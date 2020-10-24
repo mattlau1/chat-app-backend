@@ -140,21 +140,21 @@ def test_http_users_all(url):
         'users': [
             {
                 'u_id': f_owner['u_id'],
-                'email': 'markzuckerberg@gmail.com'
+                'email': 'markzuckerberg@gmail.com',
                 'name_first': 'Mark',
                 'name_last': 'Zuckerberg',
                 'handle_str': 'MARKZUCKERBERG',
             },
             {
                 'u_id': random_user1['u_id'],
-                'email': 'brianpaul@gmail.com'
+                'email': 'brianpaul@gmail.com',
                 'name_first': 'Brian',
                 'name_last': 'Paul',
                 'handle_str': 'BRIANPAUL',
             },
             {
                 'u_id': random_user2['u_id'],
-                'email': 'gregstevens@gmail.com'
+                'email': 'gregstevens@gmail.com',
                 'name_first': 'Greg',
                 'name_last': 'Stevens',
                 'handle_str': 'GREGSTEVENS',
