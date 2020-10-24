@@ -950,7 +950,176 @@ def test_http_message_remove(url):
     HTTP test for message_remove
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    pass
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'liambrown@gmail.com',
+        'password': 'password',
+        'name_first': 'Liam',
+        'name_last': 'Brown',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Register user 1
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'victorzhang@gmail.com',
+        'password': 'password',
+        'name_first': 'Victor',
+        'name_last': 'Zhang',
+    })
+    assert resp.status_code == 200
+    user1 = resp.json()
+
+    # Register user 2
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'jesschen@gmail.com',
+        'password': 'password',
+        'name_first': 'Jess',
+        'name_last': 'Chen',
+    })
+    assert resp.status_code == 200
+    user2 = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Test Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Invite user 1
+    resp = requests.post(url + 'channel/invite', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user1['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Invite user 2
+    resp = requests.post(url + 'channel/invite', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user2['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Owner sends message 1
+    resp = requests.post(url + 'message/send', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'message': 'First message',
+    })
+    assert resp.status_code == 200
+    m_id1 = resp.json()['message_id']
+
+    # User 1 sends message 2
+    resp = requests.post(url + 'message/send', json={
+        'token': user1['token'],
+        'channel_id': channel_id,
+        'message': 'Second message',
+    })
+    assert resp.status_code == 200
+    m_id2 = resp.json()['message_id']
+
+    # User 2 sends message 3
+    resp = requests.post(url + 'message/send', json={
+        'token': user2['token'],
+        'channel_id': channel_id,
+        'message': 'Third message',
+    })
+    assert resp.status_code == 200
+    m_id3 = resp.json()['message_id']
+
+    # Invalid token
+    resp = requests.delete(url + 'message/remove', json={
+        'token': '',
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 400
+
+    # Invalid message_id
+    resp = requests.delete(url + 'message/remove', json={
+        'token': owner['token'],
+        'message_id': '',
+    })
+    assert resp.status_code == 400
+
+    # Authorised user did not send the message and is not channel or Flockr owner
+    resp = requests.delete(url + 'message/remove', json={
+        'token': user1['token'],
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 400
+
+    resp = requests.delete(url + 'message/remove', json={
+        'token': user2['token'],
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 400
+
+    # Check that there are 3 messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload) == 3
+
+    # Message sender can successfully remove their own message
+    resp = requests.delete(url + 'message/remove', json={
+        'token': user2['token'],
+        'message_id': m_id3,
+    })
+    assert resp.status_code == 200
+
+    # Check that there are 2 messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 2
+
+    # Owner can remove anyone's message
+    resp = requests.delete(url + 'message/remove', json={
+        'token': owner['token'],
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 200
+
+    # Check that there is 1 message
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 1
+
+    # Owner can remove their own message
+    resp = requests.delete(url + 'message/remove', json={
+        'token': owner['token'],
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 200
+
+    # Check that there are 0 messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 0
 
 
 def test_http_message_edit(url):
