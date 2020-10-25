@@ -86,7 +86,6 @@ def message_edit(token, message_id, message):
 
     # Retrieve data
     auth_user = user_with_token(token)
-    message = message_with_id(message_id)
     channel_with_message, message_index = channel_with_message_id(message_id)
 
     # Error check
@@ -95,7 +94,7 @@ def message_edit(token, message_id, message):
     elif channel_with_message is None:
         raise InputError('Invalid Message ID')
 
-    sender = message['u_id']
+    sender = message_with_id(message_id)['u_id']
     user_is_channel_owner = (auth_user['u_id'] in channel_with_message['owner_members'])
     user_is_flockr_owner = (auth_user['permission_id'] == 1)
 

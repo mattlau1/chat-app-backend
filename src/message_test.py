@@ -76,15 +76,17 @@ def test_message_remove():
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
 
     m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First message')['message_id']
+
+    # Invalid message_id
+    with pytest.raises(InputError):
+        message_remove(f_owner['token'], m_id1 + 1)
+
     m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second message')['message_id']
     m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')['message_id']
 
     # Invalid token
     with pytest.raises(AccessError):
         message_remove('', m_id1)
-    # Invalid message_id
-    with pytest.raises(InputError):
-        message_remove(f_owner['token'], '')
 
     # Authorised user did not send the message and is not channel or Flockr owner
     with pytest.raises(AccessError):
@@ -107,6 +109,10 @@ def test_message_remove():
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     assert len(messages) == 0
 
+    # Message_id no longer exists
+    with pytest.raises(InputError):
+        message_remove(f_owner['token'], m_id1)
+
 
 def test_message_edit():
     '''
@@ -121,15 +127,22 @@ def test_message_edit():
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
 
     m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First message')['message_id']
+
+    # Invalid message_id
+    with pytest.raises(InputError):
+        message_edit(f_owner['token'], m_id1 + 1, 'Edited first message')
+
     m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second message')['message_id']
     m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')['message_id']
 
     # Invalid token
     with pytest.raises(AccessError):
         message_edit('', m_id1, 'Edited first message')
-    # Invalid message_id
-    with pytest.raises(InputError):
-        message_edit(f_owner['token'], '', 'Edited first message')
+
+    # Check messages content
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    messages = [message['message'] for message in messages]
+    assert messages == ['Third message', 'Second message', 'First message']
 
     # Authorised user did not send the message and is not channel or Flockr owner
     with pytest.raises(AccessError):
@@ -143,6 +156,11 @@ def test_message_edit():
     message_edit(f_owner['token'], m_id2, 'Edited second message')
     # Flockr owner can edit their own message
     message_edit(f_owner['token'], m_id1, 'Edited first message')
+
+    # Check messages content
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    messages = [message['message'] for message in messages]
+    assert messages == ['Edited third message', 'Edited second message', 'Edited first message']
 
     # If the edited message becomes an empty string, it should be deleted
     m_id4 = message_send(f_owner['token'], f_channel['channel_id'], 'Fourth message')['message_id']
