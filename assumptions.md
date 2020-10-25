@@ -12,6 +12,7 @@
 - An invalid or revoked token is indicated by an empty string ''
 - User accounts cannot be deleted (as in data entries deleted) in order to maintain sequential unique id ordering - could add a deactivation status in the future if necessary
 - Tokens are JWT encoded (special pytest to test for anti-tampering)
+- Tokens become invalidated once user logs out
 
 ## channel.py:
 - Flockr owner (person with permission_id == 1) has owner permissions for channel_join, channel_addowner, channel_removeowner (they can only add and remove owners while they are members of the channel)
