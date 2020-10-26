@@ -89,7 +89,8 @@ def http_channel_invite():
     Returns JSON containing empty dict
     '''
     payload = request.get_json()
-    return dumps(channel_invite(payload['token'], payload['channel_id'], payload['u_id']))
+    return dumps(channel_invite(payload['token'], int(payload['channel_id']),
+                 payload['u_id']))
 
 
 @APP.route('/channel/details', methods=['GET'])
@@ -124,7 +125,7 @@ def http_channel_leave():
     Returns JSON containing empty dict
     '''
     payload = request.get_json()
-    return dumps(channel_leave(payload['token'], payload['channel_id']))
+    return dumps(channel_leave(payload['token'], int(payload['channel_id'])))
 
 
 @APP.route('/channel/join', methods=['POST'])
@@ -135,7 +136,7 @@ def http_channel_join():
     Returns JSON containing empty dict
     '''
     payload = request.get_json()
-    return dumps(channel_join(payload['token'], payload['channel_id']))
+    return dumps(channel_join(payload['token'], int(payload['channel_id'])))
 
 
 @APP.route('/channel/addowner', methods=['POST'])
@@ -146,7 +147,8 @@ def http_channel_addowner():
     Returns JSON containing empty dict
     '''
     payload = request.get_json()
-    return dumps(channel_addowner(payload['token'], payload['channel_id'], payload['u_id']))
+    return dumps(channel_addowner(payload['token'], int(payload['channel_id']),
+                 payload['u_id']))
 
 
 @APP.route('/channel/removeowner', methods=['POST'])
@@ -157,7 +159,8 @@ def http_channel_removeowner():
     Returns JSON containing empty dict
     '''
     payload = request.get_json()
-    return dumps(channel_removeowner(payload['token'], payload['channel_id'], payload['u_id']))
+    return dumps(channel_removeowner(payload['token'], int(payload['channel_id']),
+                 payload['u_id']))
 
 
 ###################
@@ -205,7 +208,8 @@ def http_message_send():
     Returns JSON containing "message_id" (int)
     '''
     payload = request.get_json()
-    return dumps(message_send(payload['token'], payload['channel_id'], payload['message']))
+    return dumps(message_send(payload['token'], int(payload['channel_id']),
+                 payload['message']))
 
 
 @APP.route('/message/remove', methods=['DELETE'])
