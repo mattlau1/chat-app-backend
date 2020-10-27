@@ -1,5 +1,5 @@
 ''' Import required modules '''
-from data import data, valid_email, user_with_id, user_with_token, user_email_list, user_handle_list
+from data import valid_email, user_with_id, user_with_token, user_email_list, user_handle_list
 from error import InputError, AccessError
 
 def user_profile(token, u_id):
@@ -23,10 +23,10 @@ def user_profile(token, u_id):
     return {
         'user': {
             'u_id': target_user.u_id,
-        	'email': target_user.email,
-        	'name_first': target_user.name_first,
-        	'name_last': target_user.name_last,
-        	'handle_str': target_user.handle,
+            'email': target_user.email,
+            'name_first': target_user.name_first,
+            'name_last': target_user.name_last,
+            'handle_str': target_user.handle,
         }
     }
 

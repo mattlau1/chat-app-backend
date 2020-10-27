@@ -1,8 +1,8 @@
 ''' Import required modules '''
+from datetime import datetime
 import re
 import hashlib
 import jwt
-from datetime import datetime
 
 # Private key for jwt encoding and decoding
 PRIVATE_KEY = 'aHR0cHM6Ly95b3V0dS5iZS9kUXc0dzlXZ1hjUQ=='
@@ -57,7 +57,7 @@ class User:
         '''
         # Save passed parameters
         self.email = email
-        self.password = password
+        self.password = encrypt_password(password)
         self.name_first = name_first
         self.name_last = name_last
         # Generate extra parameters
@@ -65,14 +65,6 @@ class User:
         self.handle = self.generate_handle()
         self.token = self.generate_token()
         self.permission_id = 1 if len(data['users']) == 0 else 2
-
-    def encrypt_password(self, password):
-        '''
-        Encrypts a password for a given user
-        Input: User object, password (str)
-        Output: Encrypted password (str)
-        '''
-        return hashlib.sha256(password.encode()).hexdigest()
 
     def generate_handle(self):
         '''
@@ -101,8 +93,16 @@ class User:
         Input: User object, check_password (string)
         Output: True or False (bool)
         '''
-        return self.password == self.encrypt_password(check_password)
+        return self.password == encrypt_password(check_password)
 
+
+def encrypt_password(password):
+    '''
+    Encrypts a given password
+    Input: password (str)
+    Output: Encrypted password (str)
+    '''
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def user_email_list():
     '''
@@ -175,6 +175,7 @@ class Channel:
         self.all_members = [channel_creator,]
         self.messages = []
 
+
 class Message:
     '''
     Class for a message
@@ -194,6 +195,7 @@ class Message:
         self.message_id = data['latest_message_id']
         data['latest_message_id'] += 1
         self.time_created = datetime.timestamp(datetime.now())
+
 
 def channel_with_id(channel_id):
     '''

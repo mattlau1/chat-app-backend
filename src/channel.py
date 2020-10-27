@@ -1,5 +1,5 @@
 ''' Import required modules '''
-from data import data, Channel, user_with_token, user_with_id, channel_with_id
+from data import user_with_token, user_with_id, channel_with_id
 from error import InputError, AccessError
 
 def channel_invite(token, channel_id, u_id):

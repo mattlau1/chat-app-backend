@@ -1,6 +1,8 @@
 ''' Import required modules '''
-from datetime import datetime
-from data import data, Message, user_with_token, channel_with_id, channel_with_message_id, message_with_message_id
+from data import (
+    Message, user_with_token, channel_with_id,
+    channel_with_message_id, message_with_message_id
+)
 from error import InputError, AccessError
 
 

@@ -1,10 +1,5 @@
 ''' Import required modules '''
-import hashlib
-import jwt
-from data import (
-    data, User, valid_email, user_with_email, user_with_token,
-    user_email_list, user_handle_list,
-)
+from data import data, User, valid_email, user_with_email, user_with_token, user_email_list
 from error import InputError, AccessError
 
 def auth_login(email, password):
@@ -83,8 +78,7 @@ def auth_register(email, password, name_first, name_last):
         raise InputError('Last name cannot be empty')
 
     # Register new user
-    encrypted_password = hashlib.sha256(password.encode()).hexdigest()
-    new_user = User(email, encrypted_password, name_first, name_last)
+    new_user = User(email, password, name_first, name_last)
     data['users'].append(new_user)
 
     return {
