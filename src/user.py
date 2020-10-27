@@ -22,11 +22,11 @@ def user_profile(token, u_id):
 
     return {
         'user': {
-            'u_id': target_user['u_id'],
-        	'email': target_user['email'],
-        	'name_first': target_user['name_first'],
-        	'name_last': target_user['name_last'],
-        	'handle_str': target_user['handle'],
+            'u_id': target_user.u_id,
+        	'email': target_user.email,
+        	'name_first': target_user.name_first,
+        	'name_last': target_user.name_last,
+        	'handle_str': target_user.handle,
         }
     }
 
@@ -57,8 +57,8 @@ def user_profile_setname(token, name_first, name_last):
         raise InputError('Last name cannot be empty')
 
     # Update name
-    data['users'][auth_user['u_id']]['name_first'] = name_first
-    data['users'][auth_user['u_id']]['name_last'] = name_last
+    auth_user.name_first = name_first
+    auth_user.name_last = name_last
 
     return {
     }
@@ -85,7 +85,7 @@ def user_profile_setemail(token, email):
         raise InputError('Email already taken')
 
     # Update email
-    data['users'][auth_user['u_id']]['email'] = email
+    auth_user.email = email
 
     return {
     }
@@ -114,7 +114,7 @@ def user_profile_sethandle(token, handle_str):
         raise InputError('Handle already taken')
 
     # Update handle
-    data['users'][auth_user['u_id']]['handle'] = handle_str
+    auth_user.handle = handle_str
 
     return {
     }

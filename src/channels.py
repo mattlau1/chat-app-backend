@@ -1,5 +1,5 @@
 ''' Import required modules '''
-from data import data, user_with_token
+from data import data, Channel, user_with_token
 from error import InputError, AccessError
 
 def channels_list(token):
@@ -16,10 +16,10 @@ def channels_list(token):
     return {
         'channels': [
             {
-                'channel_id': channel['channel_id'],
-                'name': channel['name'],
+                'channel_id': channel.channel_id,
+                'name': channel.name,
             }
-            for channel in data['channels'] if auth_user['u_id'] in channel['all_members']
+            for channel in data['channels'] if auth_user in channel.all_members
         ],
     }
 
@@ -36,8 +36,8 @@ def channels_listall(token):
     return {
         'channels': [
             {
-                'channel_id': channel['channel_id'],
-                'name': channel['name'],
+                'channel_id': channel.channel_id,
+                'name': channel.name,
             }
             for channel in data['channels']
         ],
@@ -61,16 +61,9 @@ def channels_create(token, name, is_public):
         raise InputError('Whitespace name')
 
     # Register
-    channel_id = len(data['channels'])
-    data['channels'].append({
-        'channel_id': channel_id,
-        'name': name,
-        'is_public': is_public,
-        'owner_members': [auth_user['u_id'],],
-        'all_members': [auth_user['u_id'],],
-        'messages': [],
-    })
+    new_channel = Channel(auth_user, name, is_public)
+    data['channels'].append(new_channel)
 
     return {
-        'channel_id': channel_id,
+        'channel_id': new_channel.channel_id,
     }
