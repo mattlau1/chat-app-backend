@@ -56,7 +56,7 @@ def message_remove(token, message_id):
     user_is_channel_owner = (auth_user in channel_with_message.owner_members)
     user_is_flockr_owner = (auth_user.permission_id == 1)
 
-    if auth_user != message.sender and not user_is_channel_owner and not user_is_flockr_owner:
+    if auth_user is not message.sender and not user_is_channel_owner and not user_is_flockr_owner:
         raise AccessError('Invalid permissions')
 
     # Remove message
@@ -91,7 +91,7 @@ def message_edit(token, message_id, message):
     user_is_channel_owner = (auth_user in channel_with_message.owner_members)
     user_is_flockr_owner = (auth_user.permission_id == 1)
 
-    if auth_user != sender and not user_is_channel_owner and not user_is_flockr_owner:
+    if auth_user is not sender and not user_is_channel_owner and not user_is_flockr_owner:
         raise AccessError('Invalid permissions')
 
     # Update message
