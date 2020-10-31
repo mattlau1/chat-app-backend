@@ -118,3 +118,7 @@ def user_profile_sethandle(token, handle_str):
 
     return {
     }
+
+def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
+    # Might be better to move some of these functions into server.py
+    pass

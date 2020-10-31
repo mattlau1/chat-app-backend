@@ -85,3 +85,12 @@ def auth_register(email, password, name_first, name_last):
         'u_id': new_user.u_id,
         'token': new_user.token,
     }
+
+def auth_passwordreset_request(email):
+    # Check email valid and registered
+    # Generate and store reset code - know which user to point to
+    # Return random reset code generated
+    pass
+
+def auth_passwordreset_reset(reset_code, new_password):
+    pass

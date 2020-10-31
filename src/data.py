@@ -187,6 +187,8 @@ class Message:
             sender - User object
             time_created - UNIX timestamp (float)
             message - string
+            reacts - array of React objects
+            is_pinned - boolean
         '''
         # Save passed parameters
         self.sender = sender
@@ -195,6 +197,22 @@ class Message:
         self.message_id = data['latest_message_id']
         data['latest_message_id'] += 1
         self.time_created = datetime.timestamp(datetime.now())
+        self.reacts = []
+        self.is_pinned = False
+
+
+class React:
+    '''
+    Class for a message react
+    '''
+    def __init__(self, react_id, reactor):
+        '''
+        Constructor method for a React
+            react_id - unique integer
+            reactors - array of User objects
+        '''
+        self.react_id = react_id
+        self.reactors = [reactor,]
 
 
 def channel_with_id(channel_id):
@@ -208,22 +226,23 @@ def channel_with_id(channel_id):
 
 def channel_with_message_id(message_id):
     '''
-    Tries to return a tuple of the channel (channel info dict) containing the
-    message with specified message_id (int) and the index that the message is stored
-    under the channel, both returning None if not found
+    Tries to return the channel (Channel object) containing the
+    message with specified message_id (int), returning None if not found
     '''
     for channel in data['channels']:
-        for message_index, message in enumerate(channel.messages):
+        for message in channel.messages:
             if message.message_id == message_id:
-                return (channel, message_index)
-    return (None, None)
+                return channel
+    return None
 
-def message_with_message_id(channel, message_id):
+def message_with_message_id(message_id):
     '''
-    Tries to return the Message object corresponding to a given message_id (int)
-    in a given Channel (object), returning None if not found
+    Tries to return the Message object corresponding to a given message_id (int),
+    returning None if not found
     '''
-    for message in channel.messages:
-        if message.message_id == message_id:
-            return message
+    channel = channel_with_message_id(message_id)
+    if channel is not None:
+        for message in channel.messages:
+            if message.message_id == message_id:
+                return message
     return None

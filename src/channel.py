@@ -58,6 +58,7 @@ def channel_details(token, channel_id):
                 'u_id': owner.u_id,
                 'name_first': owner.name_first,
                 'name_last': owner.name_last,
+                # image url as well??
             }
             for owner in channel.owner_members
         ],
@@ -116,6 +117,15 @@ def channel_messages(token, channel_id, start):
                 'u_id': message.sender.u_id,
                 'time_created': message.time_created,
                 'message': message.message,
+                'reacts': [
+                    {
+                        'react_id': react.react_id,
+                        'u_ids': [reactor.u_id for reactor in react.reactors],
+                        'is_this_user_reacted': auth_user in react.reactors,
+                    }
+                    for react in message.reacts
+                ],
+                'is_pinned': message.is_pinned,
             }
             for message in messages
         ],
@@ -243,3 +253,7 @@ def channel_removeowner(token, channel_id, u_id):
 
     return {
     }
+
+def channel_kick(token, u_id):
+    # Will - bonus marks
+    pass

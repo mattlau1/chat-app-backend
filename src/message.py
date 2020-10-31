@@ -44,23 +44,23 @@ def message_remove(token, message_id):
     '''
     # Retrieve data
     auth_user = user_with_token(token)
-    channel_with_message, _ = channel_with_message_id(message_id)
+    channel = channel_with_message_id(message_id)
+    message = message_with_message_id(message_id)
 
     # Error check
     if auth_user is None:
         raise AccessError('Invalid token')
-    elif channel_with_message is None:
+    elif message is None:
         raise InputError('Invalid Message ID')
 
-    message = message_with_message_id(channel_with_message, message_id)
-    user_is_channel_owner = (auth_user in channel_with_message.owner_members)
+    user_is_channel_owner = (auth_user in channel.owner_members)
     user_is_flockr_owner = (auth_user.permission_id == 1)
 
     if auth_user is not message.sender and not user_is_channel_owner and not user_is_flockr_owner:
         raise AccessError('Invalid permissions')
 
     # Remove message
-    channel_with_message.messages.remove(message)
+    channel.messages.remove(message)
 
     return {
     }
@@ -79,23 +79,43 @@ def message_edit(token, message_id, message):
 
     # Retrieve data
     auth_user = user_with_token(token)
-    channel_with_message, message_index = channel_with_message_id(message_id)
+    channel = channel_with_message_id(message_id)
+    message_object = message_with_message_id(message_id)
 
     # Error check
     if auth_user is None:
         raise AccessError('Invalid token')
-    elif channel_with_message is None:
+    elif message_object is None:
         raise InputError('Invalid Message ID')
 
-    sender = message_with_message_id(channel_with_message, message_id).sender
-    user_is_channel_owner = (auth_user in channel_with_message.owner_members)
+    sender = message_object.sender
+    user_is_channel_owner = (auth_user in channel.owner_members)
     user_is_flockr_owner = (auth_user.permission_id == 1)
 
     if auth_user is not sender and not user_is_channel_owner and not user_is_flockr_owner:
         raise AccessError('Invalid permissions')
 
     # Update message
-    channel_with_message.messages[message_index].message = message
+    message_object.message = message
 
     return {
     }
+
+def message_sendlater(token, channel_id, message, time_sent):
+    pass
+
+def message_react(token, message_id, react_id):
+    pass
+
+def message_unreact(token, message_id, react_id):
+    pass
+
+def message_pin(token, message_id):
+    message = message_with_message_id(message_id)
+    message.is_pinned = True
+    pass
+
+def message_unpin(token, message_id):
+    message = message_with_message_id(message_id)
+    message.is_pinned = False
+    pass
