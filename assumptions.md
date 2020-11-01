@@ -13,7 +13,7 @@
 - User accounts cannot be deleted (as in data entries deleted) in order to maintain sequential unique id ordering - could add a deactivation status in the future if necessary
 - Tokens are JWT encoded (special pytest to test for anti-tampering)
 - Tokens become invalidated once user logs out
-- Reset codes are single-use only (invalidated once used)
+- Password reset codes are single-use only (invalidated once used)
 
 ## channel.py:
 - Flockr owner (person with permission_id == 1) has owner permissions for channel_join, channel_addowner, channel_removeowner (they can only add and remove owners while they are members of the channel)
