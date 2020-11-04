@@ -18,6 +18,8 @@ data = {
     'channels': [],
     # Stores the latest message_id used across all channels
     'latest_message_id': 0,
+    # Valid reset codes
+    'valid_reset_codes': [],
 }
 
 
@@ -31,6 +33,12 @@ def valid_email(email):
     '''
     regex = r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
     return re.search(regex, email)
+
+def current_time():
+    '''
+    Returns the current time as a UNIX timestamp (float)
+    '''
+    return datetime.timestamp(datetime.now())
 
 
 ##################################
@@ -57,10 +65,11 @@ class User:
         '''
         # Save passed parameters
         self.email = email
-        self.password = encrypt_password(password)
+        self.password = encrypt_string(password)
         self.name_first = name_first
         self.name_last = name_last
         # Generate extra parameters
+        self.profile_img_url = ''
         self.u_id = len(data['users'])
         self.handle = self.generate_handle()
         self.token = self.generate_token()
@@ -85,7 +94,15 @@ class User:
         Input: User object
         Output: JWT-encoded token (str)
         '''
-        return jwt.encode({'u_id': self.u_id}, PRIVATE_KEY, algorithm='HS256').decode('utf-8')
+        return jwt_encode_payload({'u_id': self.u_id})
+
+    def update_password(self, new_password):
+        '''
+        Updates the password for a User object
+        Input: User object, new_password (string)
+        No output
+        '''
+        self.password = encrypt_string(new_password)
 
     def verify_password(self, check_password):
         '''
@@ -93,16 +110,31 @@ class User:
         Input: User object, check_password (string)
         Output: True or False (bool)
         '''
-        return self.password == encrypt_password(check_password)
+        return self.password == encrypt_string(check_password)
 
+def jwt_encode_payload(payload):
+    '''
+    JWT encodes a given payload
+    Input: payload (dict)
+    Output: JWT-encoded string (str)
+    '''
+    return jwt.encode(payload, PRIVATE_KEY, algorithm='HS256').decode('utf-8')
 
-def encrypt_password(password):
+def jwt_decode_string(string):
     '''
-    Encrypts a given password
-    Input: password (str)
-    Output: Encrypted password (str)
+    Attempts to decode a given JWT-encoded string
+    Input: JWT-encoded string (str)
+    Output: payload (dict)
     '''
-    return hashlib.sha256(password.encode()).hexdigest()
+    return jwt.decode(string.encode('utf-8'), PRIVATE_KEY, algorithms=['HS256'])
+
+def encrypt_string(string):
+    '''
+    Encrypts a given string
+    Input: String (str)
+    Output: Encrypted string (str)
+    '''
+    return hashlib.sha256(string.encode()).hexdigest()
 
 def user_email_list():
     '''
@@ -139,9 +171,9 @@ def user_with_token(token):
     '''
     try:
         # Decode token and pass user id to user_with_id()
-        payload = jwt.decode(token.encode('utf-8'), PRIVATE_KEY, algorithms=['HS256'])
+        payload = jwt_decode_string(token)
         u_id = payload['u_id']
-        # Check for valid session (future iterations?)
+        # Check for valid session
         if data['users'][u_id].token != '':
             return user_with_id(payload['u_id'])
         return None
@@ -180,7 +212,7 @@ class Message:
     '''
     Class for a message
     '''
-    def __init__(self, sender, message):
+    def __init__(self, sender, message, time_created):
         '''
         Constructor method for a Message
             message_id - unique integer
@@ -196,10 +228,9 @@ class Message:
         # Generate extra parameters
         self.message_id = data['latest_message_id']
         data['latest_message_id'] += 1
-        self.time_created = datetime.timestamp(datetime.now())
+        self.time_created = time_created
         self.reacts = []
         self.is_pinned = False
-
 
 class React:
     '''
