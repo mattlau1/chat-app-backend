@@ -1,9 +1,11 @@
 ''' Test file for message.py '''
 import pytest
+import time
+from datetime import datetime, timedelta
 from auth import auth_register
 from channel import channel_messages, channel_invite
 from channels import channels_create
-from message import message_send, message_remove, message_edit
+from message import message_send, message_remove, message_edit, message_sendlater
 from error import InputError, AccessError
 from other import clear
 
@@ -185,3 +187,67 @@ def test_message_edit():
 
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     assert len(messages) == 3
+
+
+def test_message_sendlater_invalid():
+    '''
+    Test invalidly sending a message later
+    '''
+    clear()
+    f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
+    f_channel = channels_create(f_owner['token'], 'Main Channel', True)
+
+    time_sent = datetime.timestamp(datetime.now()) - 2
+
+    # Time is in the past
+    with pytest.raises(InputError):
+        message_sendlater(f_owner['token'], f_channel['channel_id'], 'Test message', time_sent)
+
+    time_sent = datetime.timestamp(datetime.now()) + 2
+
+    # Invalid token
+    with pytest.raises(AccessError):
+        message_sendlater('', f_channel['channel_id'], 'Test Message', time_sent)
+    # Invalid channel
+    with pytest.raises(InputError):
+        message_sendlater(f_owner['token'], f_channel['channel_id'] + 100, 'Test message', time_sent)
+
+    random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
+    r_channel = channels_create(random_user['token'], 'Random Channel', True)
+
+    # User not in channel as member
+    with pytest.raises(AccessError):
+        message_sendlater(f_owner['token'], r_channel['channel_id'], 'f_owner in r_channel', time_sent)
+    with pytest.raises(AccessError):
+        message_sendlater(random_user['token'], f_channel['channel_id'], 'random_user in f_channel', time_sent)
+
+    # Message lengths
+    with pytest.raises(InputError):
+        message_sendlater(f_owner['token'], f_channel['channel_id'], '', time_sent)
+    message = 'A' * 1001
+    with pytest.raises(InputError):
+        message_sendlater(f_owner['token'], f_channel['channel_id'], message, time_sent)
+    with pytest.raises(InputError):
+        message_sendlater(f_owner['token'], f_channel['channel_id'], message + 'x', time_sent)    
+
+
+def test_message_sendlater_valid():
+    '''
+    Test validly sending a message later
+    '''
+    clear()
+    f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
+    f_channel = channels_create(f_owner['token'], 'Main Channel', True)
+    random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
+    channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
+
+    time_sent = datetime.timestamp(datetime.now()) + 2
+
+    # Message lengths
+    message_sendlater(f_owner['token'], f_channel['channel_id'], 'First message', time_sent)
+    output = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
+    assert len(output['messages']) == 0
+
+    time.sleep(3)
+    output = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
+    assert len(output['messages']) == 1
