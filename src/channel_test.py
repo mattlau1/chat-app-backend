@@ -1,7 +1,7 @@
 ''' Test file for channel.py '''
 import pytest
 from channel import (channel_invite, channel_details, channel_messages, channel_leave,
-                     channel_join, channel_addowner, channel_removeowner)
+                     channel_join, channel_addowner, channel_removeowner, channel_kick)
 from channels import channels_create
 from auth import auth_register
 from message import message_send
@@ -363,6 +363,54 @@ def test_channel_removeowner():
     # Authorised user can remove owner (since they are now another owner)
     channel_removeowner(user['token'], channel['channel_id'], owner['u_id'])
 
+
+# Extra function
+def test_channel_kick():
+    '''
+    Testing the channel_kick function
+    '''
+    clear()
+    owner = auth_register('bobsmith@gmail.com', 'password', 'Bob', 'Smith')
+    channel = channels_create(owner['token'], 'Test channel', True)
+    user = auth_register('jesschen@gmail.com', 'password', 'Jess', 'Chen')
+    channel_join(user['token'], channel['channel_id'])
+
+    # Authorised user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_kick('', channel['channel_id'], user['u_id'])
+
+    # Old user does not have a valid token
+    with pytest.raises(AccessError):
+        channel_kick(owner['token'], channel['channel_id'], 100)
+
+    # Channel ID is not a valid channel
+    with pytest.raises(InputError):
+        channel_kick(owner['token'], channel['channel_id'] + 100, user['u_id'])
+
+    # Authorised user is not an owner
+    with pytest.raises(AccessError):
+        channel_kick(user['token'], channel['channel_id'], owner['u_id'])
+
+    # Old user is an owner
+    channel_addowner(owner['token'], channel['channel_id'], user['u_id'])
+    with pytest.raises(InputError):
+        channel_kick(owner['token'], channel['channel_id'], user['u_id'])
+
+    # Remove old user as an owner (so they are now just a member)
+    channel_removeowner(owner['token'], channel['channel_id'], user['u_id'])
+
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert len(details['all_members']) == 2
+
+    # Authorised user can now remove old user
+    channel_kick(owner['token'], channel['channel_id'], user['u_id'])
+    
+    details = channel_details(owner['token'], channel['channel_id'])
+    assert len(details['all_members']) == 1
+
+    # Removing someone who is already removed (no longer a member)
+    with pytest.raises(InputError):
+        channel_kick(owner['token'], channel['channel_id'], user['u_id'])
 
 def test_flockr_owner():
     '''
