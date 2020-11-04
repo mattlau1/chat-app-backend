@@ -254,6 +254,39 @@ def channel_removeowner(token, channel_id, u_id):
     return {
     }
 
-def channel_kick(token, u_id):
-    # Will - bonus marks
-    pass
+
+# Extra function
+def channel_kick(token, channel_id, u_id):
+    '''
+    Remove user with user id u_id as a member of the channel
+    Input: token (str), channel_id (int), u_id (int)
+    Output: empty dict
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
+    channel = channel_with_id(channel_id)
+    old_user = user_with_id(u_id)
+
+    # Error check
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel_id')
+    elif old_user is None:
+        raise AccessError('Invalid u_id')
+    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
+        raise AccessError('Authorised user is not an owner of channel and not Flockr owner')
+    elif auth_user not in channel.all_members:
+        # Flockr owner may not be a channel member
+        raise AccessError('Authorised user is not a member in the channel')
+    elif old_user in channel.owner_members:
+        # User cannot be an owner of the channel
+        raise InputError('User to be kicked cannot be an owner in the channel')
+    elif old_user not in channel.all_members:
+        raise InputError('User to be kicked is not a member in the channel')
+
+    # Remove owner
+    channel.all_members.remove(old_user)
+
+    return {
+    }
