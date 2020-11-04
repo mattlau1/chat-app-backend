@@ -1,10 +1,10 @@
 ''' Import required modules '''
+import threading
 from data import (
-    Message, user_with_token, channel_with_id,
-    channel_with_message_id, message_with_message_id
+    current_time, user_with_token, channel_with_id,
+    Message, channel_with_message_id, message_with_message_id
 )
 from error import InputError, AccessError
-
 
 def message_send(token, channel_id, message):
     '''
@@ -29,7 +29,7 @@ def message_send(token, channel_id, message):
         raise InputError('Message should be 1000 characters or less')
 
     # Store message
-    new_message = Message(auth_user, message)
+    new_message = Message(auth_user, message, current_time())
     channel.messages.append(new_message)
 
     return {
@@ -111,11 +111,7 @@ def message_unreact(token, message_id, react_id):
     pass
 
 def message_pin(token, message_id):
-    message = message_with_message_id(message_id)
-    message.is_pinned = True
     pass
 
 def message_unpin(token, message_id):
-    message = message_with_message_id(message_id)
-    message.is_pinned = False
     pass
