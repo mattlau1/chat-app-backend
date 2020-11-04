@@ -47,10 +47,9 @@ def test_clear_channels_messages():
     clear()
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     channel1 = channels_create(f_owner['token'], 'Channel 1', True)
-    m_id = message_send(f_owner['token'], channel1['channel_id'], 'First message')
+    message_send(f_owner['token'], channel1['channel_id'], 'First message')
     messages = channel_messages(f_owner['token'], channel1['channel_id'], 0)
     assert len(messages['messages']) == 1
-    assert m_id['message_id'] == 1
     channels_create(f_owner['token'], 'Channel 2', True)
     assert len(channels_list(f_owner['token'])['channels']) == 2
 
