@@ -86,11 +86,20 @@ def auth_register(email, password, name_first, name_last):
         'token': new_user.token,
     }
 
-def auth_passwordreset_request(email):
-    # Check email valid and registered
-    # Generate and store reset code - know which user to point to
-    # Return random reset code generated
+
+def generate_reset_code(email):
+    '''
+    Generates a reset code for a User given their email address
+    Input: email (string)
+    Output: reset_code (string)
+    '''
     pass
 
-def auth_passwordreset_reset(reset_code, new_password):
+
+def password_reset(reset_code, new_password):
+    '''
+    Updates the password of a User to new_password, given a reset_code
+    Input: reset_code (string), new_password (string)
+    Output: empty dict
+    '''
     pass

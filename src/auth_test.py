@@ -1,6 +1,6 @@
 ''' Test file for auth.py '''
 import pytest
-from auth import auth_login, auth_logout, auth_register
+from auth import auth_login, auth_logout, auth_register, generate_reset_code, password_reset
 from channels import channels_create
 from error import InputError, AccessError
 from other import clear
@@ -288,3 +288,48 @@ def test_token_tampering():
     fake_user1_token = '.'.join(fake_user1_token_components)
     with pytest.raises(AccessError):
         channels_create(fake_user1_token, 'Attempt', True)
+
+def test_password_reset_invalid():
+    '''
+    Test invalid password reset attempts
+    '''
+    clear()
+    # Invalid email
+    with pytest.raises(InputError):
+        generate_reset_code('1nv@lId@s"a!l.co')
+    # Unregistered email
+    with pytest.raises(InputError):
+        generate_reset_code('forgetful@gmail.com')
+    # Register User One
+    user = auth_register('forgetful@gmail.com', 'complicated', 'User', 'One')
+    reset_code = generate_reset_code('forgetful@gmail.com')
+    # Password reset to 'password'
+    with pytest.raises(InputError):
+        # Incorrect reset code
+        password_reset(reset_code + 'padding', 'password')
+    with pytest.raises(InputError):
+        # Password too short
+        password_reset(reset_code, 'short')
+
+def test_password_reset_valid():
+    '''
+    Test valid password reset attempts
+    '''
+    clear()
+    # Register User One
+    user = auth_register('forgetful@gmail.com', 'complicated', 'User', 'One')
+    reset_code = generate_reset_code('forgetful@gmail.com')
+    # Successful password reset
+    password_reset(reset_code, 'password')
+    # Cannot reuse code
+    with pytest.raises(InputError):
+        password_reset(reset_code, 'new_password')
+    # Check password has been changed
+    with pytest.raises(InputError):
+        # Old password does not work
+        auth_login('forgetful@gmail.com', 'complicated')
+    with pytest.raises(InputError):
+        # Other password change attempt doesn't work
+        auth_login('forgetful@gmail.com', 'new_password')
+    # Successful password change
+    auth_login('forgetful@gmail.com', 'password')
