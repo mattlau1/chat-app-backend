@@ -251,3 +251,31 @@ def test_message_sendlater_valid():
     time.sleep(3)
     output = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(output['messages']) == 1
+
+def test_message_valid_react():
+    '''
+    Test user valid react to the message
+    '''
+    clear()
+
+    # making a normal channel
+    f_owner = auth_register('fox@gmail.com', 'password', 'Fox', 'Foxson')
+    f_channel = channels_create(f_owner['token'], 'Main HUB', True)
+
+    # invite a random user to the channel
+    random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
+    channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
+
+    # owner sends message
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'I came first!')['message_id']
+
+    # random user reacts to the message
+    # the given react id from the spec is 1
+    message_react(random_user['token'], m_id1, 1)
+
+    # get status and check react
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
+    assert messages[]
+
+
+
