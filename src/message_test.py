@@ -417,9 +417,42 @@ def test_message_pin_permission():
 
 def test_message_pin_already_pinned():
     '''
+    Test:
+    - Pinning an already pinned message
 
+    Scenario:
+    - Owner registers
+    - Owner creates a channel
+    - Owner sends a message
+    - Owner pins the message
+    - Test checks that message is actually pinned
+    - Owner tries to pin the same message again
     ''' 
     clear()
+
+    # Owner registers
+    f_owner = auth_register('peterson@hotmail.com', 'djiffgjigi22', 'Peter', 'Peterson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Owner pins the message
+    message_pin(f_owner['token'], m_id1)
+
+    # Check that the message is pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] == True
+
+    # Try to pin already pinned message
+    with pytest.raises(InputError):
+        message_pin(f_owner['token'], m_id1)
 
 
 def test_message_unpin_invalid():
