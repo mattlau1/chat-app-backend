@@ -1,3 +1,5 @@
+''' Test file for standup.py '''
+import time
 import pytest
 from standup import standup_start, standup_active, standup_send
 from channels import channels_create
@@ -5,7 +7,6 @@ from channel import channel_join, channel_messages
 from auth import auth_register
 from error import InputError, AccessError
 from other import clear
-import time
 
 
 def test_standup_start_valid():
@@ -21,7 +22,7 @@ def test_standup_start_valid():
 
     # Check standup is active
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert standup_details['is_active'] == True
+    assert standup_details['is_active']
     # Check that time_finish of both standup_start and standup_active are the same
     t_finish2 = standup_details['time_finish']
     assert t_finish1 == t_finish2
@@ -29,7 +30,7 @@ def test_standup_start_valid():
     # Check standup is not active after standup ends
     time.sleep(7)
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert standup_details['is_active'] == False
+    assert not standup_details['is_active']
 
 
 def test_standup_start_invalid():
@@ -64,15 +65,15 @@ def test_standup_active_valid():
 
     # Check standup_active returns correct values with no active standup
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert standup_details['is_active'] == False
-    assert standup_details['time_finish'] == None
+    assert not standup_details['is_active']
+    assert standup_details['time_finish'] is None
 
     # Start standup for 10 seconds
     t_finish1 = standup_start(f_owner['token'], f_channel['channel_id'], 10)['time_finish']
 
     # Check standup_active returns correct values during a standup
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert standup_details['is_active'] == True
+    assert standup_details['is_active']
     # Check that time_finish of both standup_start and standup_active are the same
     t_finish2 = standup_details['time_finish']
     assert t_finish1 == t_finish2
@@ -80,8 +81,8 @@ def test_standup_active_valid():
     # Check standup_active returns correct values after standup ends
     time.sleep(12)
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert standup_details['is_active'] == False
-    assert standup_details['time_finish'] == None
+    assert not standup_details['is_active']
+    assert standup_details['time_finish'] is None
 
 
 def test_standup_active_invalid():
@@ -124,11 +125,11 @@ def test_standup_send_valid():
     # Users send messages during the standup
     message1 = 'F' * 1000
     message2 = 'X' * 1000
-    for i in range(0, 3):
+    for _ in range(0, 3):
         standup_send(f_owner['token'], f_channel['channel_id'], message1)
         standup_send(f_user['token'], f_channel['channel_id'], message2)
 
-    # Check only one single message (containing all the standup messages) is sent after the standup ends
+    # Check only one message (containing all the standup messages) is sent after the standup ends
     time.sleep(12)
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(messages['messages']) == 1
