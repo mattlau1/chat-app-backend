@@ -5,7 +5,10 @@ from datetime import datetime, timedelta
 from auth import auth_register
 from channel import channel_messages, channel_invite
 from channels import channels_create
-from message import message_send, message_remove, message_edit, message_sendlater
+from message import (
+    message_send, message_remove, message_edit, message_sendlater,
+    message_react, message_unreact, message_pin, message_unpin,
+)
 from error import InputError, AccessError
 from other import clear
 
@@ -278,4 +281,73 @@ def test_message_valid_react():
     assert messages[]
 
 
+def test_message_pin_invalid():
+    '''
+    Tests invalidly pinning a message.
+    - Pinning with invalid Token
+    - Pinning messages whilst not being in channel
+    - Pinning with invalid message id
+
+    Two users register (owner and user), owner creates a private channel and sends
+    a message. Test attempts to pin this message with invalid token and
+    message id. User tries to pin the message without being in the channel.
+    '''
+    clear()
+
+    # Owner and User register
+    f_owner = auth_register('johnmonkeyson@gmail.com', 'bananayummy', 'John', 'Monkeyson')
+    f_user = auth_register('stevenson@gmail.com', 'ihatebananas', 'Steven', 'Stevenson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # Invalid token
+    with pytest.raises(AccessError):
+        message_pin('thisisaninvalidtoken!', m_id1)
+
+    # Invalid message id
+    with pytest.raises(InputError):
+        message_pin(f_owner['token'], -29424)
+
+    # Pinning message without being in the channel
+    with pytest.raises(AccessError):
+        message_pin(f_user['token'], m_id1)
+
+
+def test_message_pin_permission():
+    '''
+    User not flockr owner
+    '''
+    clear()
+
+
+def test_message_pin_already_pinned():
+    '''
+
+    ''' 
+    clear()
+
+
+def test_message_unpin_invalid():
+    '''
+
+    '''
+    clear()
+
+
+def test_message_unpin_permission():
+    '''
+    User not flockr owner
+    '''
+    clear()
+
+
+def test_message_unpin_already_unpinned():
+    '''
+
+    '''
+    clear()
 
