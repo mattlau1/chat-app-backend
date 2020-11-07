@@ -26,8 +26,8 @@ def test_standup_start_valid():
     t_finish2 = standup_details['time_finish']
     assert t_finish1 == t_finish2
 
-    # Check standup is not active after standup ends (after 5 seconds)
-    time.sleep(5)
+    # Check standup is not active after standup ends
+    time.sleep(7)
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
     assert standup_details['is_active'] == False
 
@@ -77,8 +77,8 @@ def test_standup_active_valid():
     t_finish2 = standup_details['time_finish']
     assert t_finish1 == t_finish2
 
-    # Check standup_active returns correct values after standup ends (after 10 seconds)
-    time.sleep(10)
+    # Check standup_active returns correct values after standup ends
+    time.sleep(12)
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
     assert standup_details['is_active'] == False
     assert standup_details['time_finish'] == None
@@ -89,7 +89,9 @@ def test_standup_active_invalid():
     Test invalidly checking if a standup is active
     '''
     clear()
+    # Set up users and channel
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Owner')
+    f_user = auth_register('user@gmail.com', 'password', 'Random', 'User')
     f_channel = channels_create(f_owner['token'], 'Test Channel', True)
 
     # Invalid token
@@ -99,6 +101,10 @@ def test_standup_active_invalid():
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
         standup_active(f_owner['token'], f_channel['channel_id'] + 100)
+
+    # Authorised user is not a member of the channel
+    with pytest.raises(AccessError):
+        standup_active(f_user['token'], f_channel['channel_id'])
 
 
 def test_standup_send_valid():
@@ -123,7 +129,7 @@ def test_standup_send_valid():
         standup_send(f_user['token'], f_channel['channel_id'], message2)
 
     # Check only one single message (containing all the standup messages) is sent after the standup ends
-    time.sleep(10)
+    time.sleep(12)
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(messages['messages']) == 1
 
@@ -133,7 +139,9 @@ def test_standup_send_invalid():
     Test invalidly sending messages to get buffered in the standup queue
     '''
     clear()
+    # Set up users and channel
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Owner')
+    f_user = auth_register('user@gmail.com', 'password', 'Random', 'User')
     f_channel = channels_create(f_owner['token'], 'Test Channel', True)
 
     # Active standup is not currently running in the channel
@@ -141,7 +149,7 @@ def test_standup_send_invalid():
         standup_send(f_owner['token'], f_channel['channel_id'], 'Test message!')
 
     # Start a standup
-    standup_start(f_owner['token'], f_channel['channel_id'], 12)
+    standup_start(f_owner['token'], f_channel['channel_id'], 15)
 
     # Invalid token
     with pytest.raises(AccessError):
@@ -159,3 +167,7 @@ def test_standup_send_invalid():
         standup_send(f_owner['token'], f_channel['channel_id'], message)
     with pytest.raises(InputError):
         standup_send(f_owner['token'], f_channel['channel_id'], message + 'F')
+
+    # Authorised user is not a member of the channel
+    with pytest.raises(AccessError):
+        standup_send(f_user['token'], f_channel['channel_id'], 'Test message!')
