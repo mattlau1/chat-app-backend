@@ -289,11 +289,11 @@ def test_message_valid_react():
     for message in messages:
         if message['message_id'] == m_id1:
             assert message['reacts']['react_id'] == react_id
-            assert len(message['reacts']['u_ids']) == [random_user['u_id']]
+            assert message['reacts']['u_ids'] == [random_user['u_id']]
             assert message['reacts']['is_this_user_reacted'] == False 
 
     # the second user reacts to the same message 
-    message_react(random_user2['token'], m_id1, 1)
+    message_react(random_user2['token'], m_id1, react_id)
 
     # check if another user has reacted and check if a random user itself has reacted
     messages = channel_messages(random_user['token'], f_channel['channel_id'], 0)['messages']
@@ -305,7 +305,31 @@ def test_message_valid_react():
             assert message['reacts']['is_this_user_reacted'] == True 
 
 def test_message_invalid_react():
-    pass
+    '''
+    Test user reacting to message with invalid tokens and ids
+    '''
+    clear()
+    react_id = 1
+    # register an owner, create channel and invite user
+    # owner sends message
+    owner = auth_register('wolf@gmail.com', 'password', 'wolf', 'wolfson')
+    channel = channels_create(owner['token'], 'Main HUB', True)
+    user = auth_register('random@gmail.com', 'password', 'User', 'Userson')
+    channel_invite(owner['token'], channel['channel_id'], user['u_id'])
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'I was here!')['message_id']
+
+    # invalid user
+    with pytest.raises(AccessError):
+        message_react('@#($*&', m_id1, react_id)
+    
+    # invalid message id
+    with pytest.raises(AccessError):
+        message_react(user['token'], '#(@*$&', react_id)
+    
+    # invalid react id
+    with pytest.raises(InputError):
+        message_react(user['token'], m_id1, react_id)
+        
 
 def test_message_already_unreact():
     pass
@@ -314,7 +338,10 @@ def test_message_unreact_unreacted():
     pass
 
 def test_message_valid_unreact():
-    pass
+    '''
+    Test user unreacting the message after giving reaction
+    '''
+    react_id = 1
 
 def test_message_invalid_unreact():
     pass
