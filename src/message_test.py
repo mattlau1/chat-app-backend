@@ -290,7 +290,7 @@ def test_message_valid_react():
         if message['message_id'] == m_id1:
             assert message['reacts']['react_id'] == react_id
             assert message['reacts']['u_ids'] == [random_user['u_id']]
-            assert message['reacts']['is_this_user_reacted'] == False 
+            assert not message['reacts']['is_this_user_reacted']
 
     # the second user reacts to the same message 
     message_react(random_user2['token'], m_id1, react_id)
@@ -302,7 +302,7 @@ def test_message_valid_react():
         if message['message_id'] == m_id1:
             assert message['reacts']['react_id'] == react_id
             assert message['reacts']['u_ids'] == [random_user['u_id'], random_user2['u_id']]
-            assert message['reacts']['is_this_user_reacted'] == True 
+            assert message['reacts']['is_this_user_reacted']
 
 def test_message_invalid_react():
     '''
