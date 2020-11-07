@@ -346,19 +346,19 @@ def test_message_pin_valid():
     channel_invite(f_owner['token'], f_channel['channel_id'], f_user['u_id'])
 
     # Owner and user send messages in f_channel (Private Channel)
-    message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
-    message_send(f_owner['token'], f_channel['channel_id'], 'hello?')['message_id']
+    message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')
+    message_send(f_owner['token'], f_channel['channel_id'], 'hello?')
 
     m_id3 = message_send(f_user['token'], f_channel['channel_id'], 'pin this pls')['message_id']
 
-    message_send(f_owner['token'], f_channel['channel_id'], 'bye world')['message_id']
+    message_send(f_owner['token'], f_channel['channel_id'], 'bye world')
 
     # Get messages in channel
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
 
     # Check that all messages are not pinned
     for message in messages:
-        assert message['is_pinned'] == False
+        assert not message['is_pinned']
 
     # Owner pins a message
     message_pin(f_owner['token'], m_id3)
@@ -366,7 +366,7 @@ def test_message_pin_valid():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id3:
-            assert message['is_pinned'] == True
+            assert message['is_pinned']
 
 
 def test_message_pin_invalid():
@@ -413,7 +413,7 @@ def test_message_pin_invalid():
     # Check that the message is not pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == False
+            assert not message['is_pinned']
 
 
 def test_message_pin_permission():
@@ -422,12 +422,12 @@ def test_message_pin_permission():
     - Pinning a message without being the owner of the channel
 
     Scenario:
-    - Two users register (owner and user), owner creates a private channel and 
+    - Two users register (owner and user), owner creates a private channel and
     invites user to channel
     - Owner sends a message
     - User tries to pin message(should not work)
     - Test checks that the message is not pinned
-    - Owner pins the message (should work) 
+    - Owner pins the message (should work)
     - Test checks that the message is actually pinned
     '''
     clear()
@@ -455,7 +455,7 @@ def test_message_pin_permission():
     # Check that the message is not pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == False
+            assert not message['is_pinned']
 
     # Owner pins the message
     message_pin(f_owner['token'], m_id1)
@@ -463,7 +463,7 @@ def test_message_pin_permission():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == True
+            assert message['is_pinned']
 
 
 def test_message_pin_already_pinned():
@@ -478,7 +478,7 @@ def test_message_pin_already_pinned():
     - Owner pins the message
     - Test checks that message is actually pinned
     - Owner tries to pin the same message again
-    ''' 
+    '''
     clear()
 
     # Owner registers
@@ -499,7 +499,7 @@ def test_message_pin_already_pinned():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == True
+            assert message['is_pinned']
 
     # Try to pin already pinned message
     with pytest.raises(InputError):
@@ -534,19 +534,19 @@ def test_message_unpin_valid():
     channel_invite(f_owner['token'], f_channel['channel_id'], f_user['u_id'])
 
     # Owner and user send messages in f_channel (Private Channel)
-    message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
-    message_send(f_owner['token'], f_channel['channel_id'], 'hello?')['message_id']
+    message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')
+    message_send(f_owner['token'], f_channel['channel_id'], 'hello?')
 
     m_id3 = message_send(f_user['token'], f_channel['channel_id'], 'pin this pls')['message_id']
 
-    message_send(f_user['token'], f_channel['channel_id'], 'bye world')['message_id']
+    message_send(f_user['token'], f_channel['channel_id'], 'bye world')
 
     # Get messages in channel
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
 
     # Check that all messages are not pinned
     for message in messages:
-        assert message['is_pinned'] == False
+        assert not message['is_pinned']
 
     # Owner pins a message
     message_pin(f_owner['token'], m_id3)
@@ -554,14 +554,14 @@ def test_message_unpin_valid():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id3:
-            assert message['is_pinned'] == True
+            assert message['is_pinned']
 
     # Owner unpins the message
     message_unpin(f_owner['token'], m_id3)
 
     # Check that no messages are pinned
     for message in messages:
-        assert message['is_pinned'] == False
+        assert not message['is_pinned']
 
 
 def test_message_unpin_invalid():
@@ -613,7 +613,7 @@ def test_message_unpin_invalid():
     # Check that the message is still pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == True
+            assert message['is_pinned']
 
 
 def test_message_unpin_permission():
@@ -622,13 +622,13 @@ def test_message_unpin_permission():
     - Unpinning a message without being the owner of the channel
 
     Scenario:
-    - Two users register (owner and user), owner creates a private channel and 
+    - Two users register (owner and user), owner creates a private channel and
     invites user to channel
     - Owner sends a message
     - Owner pins the message
     - User tries to unpin message (should not work)
     - Test checks that the message is still pinned
-    - Owner unpins the message (should work) 
+    - Owner unpins the message (should work)
     - Test checks that the message is not pinned anymore
     '''
     clear()
@@ -659,7 +659,7 @@ def test_message_unpin_permission():
     # Check that the message is still pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == True
+            assert message['is_pinned']
 
     # Owner unpins the message
     message_unpin(f_owner['token'], m_id1)
@@ -667,7 +667,7 @@ def test_message_unpin_permission():
     # Check that the message is not pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == False
+            assert not message['is_pinned']
 
 
 def test_message_unpin_already_unpinned():
@@ -684,7 +684,7 @@ def test_message_unpin_already_unpinned():
     - Owner unpins message
     - Owner tries to unpin message again (should not work)
     - Test checks that the message is unpinned
-    ''' 
+    '''
     clear()
 
     # Owner registers
@@ -705,7 +705,7 @@ def test_message_unpin_already_unpinned():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == True
+            assert message['is_pinned']
 
     # Owner unpins message
     message_unpin(f_owner['token'], m_id1)
@@ -717,5 +717,5 @@ def test_message_unpin_already_unpinned():
     # Check that the message is unpinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned'] == False
+            assert not message['is_pinned']
             
