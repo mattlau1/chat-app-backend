@@ -252,11 +252,14 @@ def test_message_sendlater_valid():
     output = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(output['messages']) == 1
 
+
 def test_message_valid_react():
     '''
     Test user valid react to the message
     '''
     clear()
+    # the react_id is given in the spec
+    react_id = 1
 
     # making a normal channel
     f_owner = auth_register('fox@gmail.com', 'password', 'Fox', 'Foxson')
@@ -266,16 +269,36 @@ def test_message_valid_react():
     random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
 
+    # invite a second user
+    random_user2 = auth_register('randomguy@gmail.com', 'password', 'Random2', 'Guy2')
+    channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
+
     # owner sends message
     m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'I came first!')['message_id']
 
     # random user reacts to the message
     # the given react id from the spec is 1
-    message_react(random_user['token'], m_id1, 1)
+    message_react(random_user['token'], m_id1, react_id)
 
-    # get status and check react
-    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
-    assert messages[]
+    # get status and check react as 
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+    
+    # check if the user has reacted and check if the owner itself has reacted
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts']['react_id'] == react_id
+            assert len(message['reacts']['u_ids']) == [random_user['u_id']]
+            assert message['reacts']['is_this_user_reacted'] == False 
 
+    # the second user reacts to the same message 
+    message_react(random_user2['token'], m_id1, 1)
 
-
+    # check if another user has reacted and check if a random user itself has reacted
+    messages = channel_messages(random_user['token'], f_channel['channel_id'], 0)['messages']
+    
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts']['react_id'] == react_id
+            assert message['reacts']['u_ids'] == [random_user['u_id'], random_user2['u_id']]
+            assert message['reacts']['is_this_user_reacted'] == True 
+            
