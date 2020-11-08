@@ -1,4 +1,5 @@
 ''' Import required modules '''
+from threading import Timer
 from datetime import datetime
 import re
 import hashlib
@@ -197,6 +198,9 @@ class Channel:
             owner_members - array of User objects
             all_members - array of User objects
             messages - array of Message objects
+            standup_status - dictionary containing is_active (bool),
+                             time_finish (UNIX timestamp float), initiator (User object),
+                             queued_messages (list of Message objects)
         '''
         # Save passed parameters
         self.name = name
@@ -206,6 +210,40 @@ class Channel:
         self.owner_members = [channel_creator,]
         self.all_members = [channel_creator,]
         self.messages = []
+        self.standup_status = {
+            'is_active': False,
+            'time_finish': None,
+            'initiator': None,
+            'queued_messages': [],
+        }
+
+    def start_standup(self, initiator, length):
+        end_time = current_time() + length
+        self.standup_status = {
+            'is_active': True,
+            'time_finish': end_time,
+            'initiator': initiator,
+            'queued_messages': [],
+        }
+        # Threading to end standup after 'length' seconds has passed
+        t = Timer(length, self.end_standup)
+        t.start()
+        return end_time
+
+    def end_standup(self):
+        # Send packaged message
+        initiator = self.standup_status['initiator']
+        standup_messages = self.standup_status['queued_messages']
+        message = '\n'.join(f'{msg.sender.handle}: {msg.message}' for msg in standup_messages)
+        packaged_message = Message(sender=initiator, message=message, time_created=current_time())
+        self.messages.append(packaged_message)
+        # Reset standup_status
+        self.standup_status = {
+            'is_active': False,
+            'time_finish': None,
+            'initiator': None,
+            'queued_messages': [],
+        }
 
 
 class Message:
