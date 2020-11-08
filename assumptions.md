@@ -60,3 +60,5 @@
 ## standup.py:
 - Standup length must be greater than 0 seconds.
 - Even if user who started the standup has left the channel, the packaged message will still be sent.
+- User cannot call standup\_start nor standup\_active in channels they are not a member of.
+- If no messages are sent during a standup, the packaged message is not sent at the end of the standup.

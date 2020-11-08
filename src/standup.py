@@ -10,7 +10,7 @@ def standup_start(token, channel_id, length):
     then at the end of the standup period a message will be added to the message queue
     in the channel from the user who started the standup.
     Input: token (str), channel_id (int), length (int)
-    Output: time_finish (UNIX timestamp - float)
+    Output: time_finish (UNIX timestamp float)
     '''
     # Retrieve data
     auth_user = user_with_token(token)
@@ -25,6 +25,8 @@ def standup_start(token, channel_id, length):
         raise InputError('Invalid standup time')
     elif channel.standup_status['is_active']:
         raise InputError('An active standup is currently running')
+    elif auth_user not in channel.all_members:
+        raise AccessError('Authorised user not a member of channel')
 
     end_time = channel.start_standup(initiator=auth_user, length=length)
 
@@ -36,7 +38,32 @@ def standup_start(token, channel_id, length):
 
 
 def standup_active(token, channel_id):
-    pass
+    '''
+    For a given channel, return whether a standup is active in it, 
+    and what time the standup finishes. If no standup is active, 
+    then time_finish returns None.
+    Input: token (str), channel_id (int)
+    Output: is_active (bool), time_finish (UNIX timestamp float)
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
+    channel = channel_with_id(channel_id)
+
+    # Error check
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel')
+    elif auth_user not in channel.all_members:
+        raise AccessError('Authorised user not a member of channel')
+
+    standup_status = channel.standup_status
+
+    return {
+        'is_active': standup_status['is_active'],
+        'time_finish': standup_status['time_finish'],
+    }
+
 
 def standup_send(token, channel_id, message):
     pass
