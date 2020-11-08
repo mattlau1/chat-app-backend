@@ -56,3 +56,7 @@
 
 ## other.py:
 - Search searches for substring, but the query string is case sensitive
+
+## standup.py:
+- Standup length must be greater than 0 seconds.
+- Even if user who started the standup has left the channel, the packaged message will still be sent.

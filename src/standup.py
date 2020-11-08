@@ -21,6 +21,8 @@ def standup_start(token, channel_id, length):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
+    elif length <= 0:
+        raise InputError('Invalid standup time')
     elif channel.standup_status['is_active']:
         raise InputError('An active standup is currently running')
 

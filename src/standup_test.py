@@ -28,7 +28,7 @@ def test_standup_start_valid():
     assert t_finish1 == t_finish2
 
     # Check standup is not active after standup ends
-    time.sleep(7)
+    time.sleep(6)
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
     assert standup_details['is_active'] is False
 
@@ -48,6 +48,12 @@ def test_standup_start_invalid():
     # Channel ID is not a valid channel
     with pytest.raises(InputError):
         standup_start(f_owner['token'], f_channel['channel_id'] + 100, 5)
+
+    # Invalid standup length
+    with pytest.raises(InputError):
+        standup_start(f_owner['token'], f_channel['channel_id'], 0)
+    with pytest.raises(InputError):
+        standup_start(f_owner['token'], f_channel['channel_id'], -5)
 
     # Active standup is currently running
     standup_start(f_owner['token'], f_channel['channel_id'], 5)
@@ -119,8 +125,8 @@ def test_standup_send_valid():
     f_channel = channels_create(f_owner['token'], 'Test Channel', True)
     channel_join(f_user['token'], f_channel['channel_id'])
 
-    # Start standup for 10 seconds
-    standup_start(f_owner['token'], f_channel['channel_id'], 10)
+    # Start standup for 5 seconds
+    standup_start(f_owner['token'], f_channel['channel_id'], 5)
 
     # Users send messages during the standup
     message1 = 'F' * 1000
@@ -130,7 +136,7 @@ def test_standup_send_valid():
         standup_send(f_user['token'], f_channel['channel_id'], message2)
 
     # Check only one message (containing all the standup messages) is sent after the standup ends
-    time.sleep(12)
+    time.sleep(6)
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(messages['messages']) == 1
 
