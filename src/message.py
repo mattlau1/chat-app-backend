@@ -107,8 +107,9 @@ def message_sendlater(token, channel_id, message, time_sent):
 def message_react(token, message_id, react_id):
     '''
     Given a message within a channel, add react to the message using the
-    provided id. 
+    provided id.
     Input: token (str), message_id (int), react_id (int)
+    Output: empty dict
     '''
     auth_user = user_with_token(token)
     message = message_with_message_id(message_id)
@@ -124,7 +125,32 @@ def message_react(token, message_id, react_id):
     }
 
 def message_unreact(token, message_id, react_id):
-    pass
+    '''
+    Given a message that has a react on it, a matching user can unreact the 
+    message based on user's token.
+    Input: token (str), message_id (int), react_id (int)
+    Output: empty dict
+    '''
+    auth_user = user_with_token(token)
+    message = message_with_message_id(message_id)
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    elif message is None:
+        raise AccessError('Invalid message_id')
+    elif react_id != 1:
+        raise InputError('Invalid react_id')
+    # add to assumptions: active react means there are reactors for the react
+    react = react_with_id_for_message(message, react_id)
+    if react is None or not react.reactors:
+        raise InputError('Message does not contain an active React with react_id')
+    # add to assumptions: auth_user does has to be a reactor in order to be removed
+    elif auth_user not in react.reactors:
+        raise AccessError(f'You have not reacted to this message with react_id {react_id}')
+
+    message.remove_react(auth_user, react_id)
+
+    return {
+    }
 
 def message_pin(token, message_id):
     '''
