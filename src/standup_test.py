@@ -156,7 +156,7 @@ def test_standup_send_invalid():
         standup_send(f_owner['token'], f_channel['channel_id'], 'Test message!')
 
     # Start a standup
-    standup_start(f_owner['token'], f_channel['channel_id'], 15)
+    standup_start(f_owner['token'], f_channel['channel_id'], 7)
 
     # Invalid token
     with pytest.raises(AccessError):

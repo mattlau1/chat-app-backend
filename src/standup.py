@@ -15,7 +15,7 @@ def standup_start(token, channel_id, length):
     # Retrieve data
     auth_user = user_with_token(token)
     channel = channel_with_id(channel_id)
-    
+
     # Error check
     if auth_user is None:
         raise AccessError('Invalid token')
@@ -26,7 +26,7 @@ def standup_start(token, channel_id, length):
     elif channel.standup_status['is_active']:
         raise InputError('An active standup is currently running')
     elif auth_user not in channel.all_members:
-        raise AccessError('Authorised user not a member of channel')
+        raise AccessError('User not member of channel')
 
     end_time = channel.start_standup(initiator=auth_user, length=length)
 
@@ -39,8 +39,8 @@ def standup_start(token, channel_id, length):
 
 def standup_active(token, channel_id):
     '''
-    For a given channel, return whether a standup is active in it, 
-    and what time the standup finishes. If no standup is active, 
+    For a given channel, return whether a standup is active in it,
+    and what time the standup finishes. If no standup is active,
     then time_finish returns None.
     Input: token (str), channel_id (int)
     Output: is_active (bool), time_finish (UNIX timestamp float)
@@ -55,7 +55,7 @@ def standup_active(token, channel_id):
     elif channel is None:
         raise InputError('Invalid channel')
     elif auth_user not in channel.all_members:
-        raise AccessError('Authorised user not a member of channel')
+        raise AccessError('User not member of channel')
 
     standup_status = channel.standup_status
 
@@ -66,4 +66,33 @@ def standup_active(token, channel_id):
 
 
 def standup_send(token, channel_id, message):
-    pass
+    '''
+    Send a message to get buffered in the standup queue,
+    assuming a standup is currently active
+    Input: token (str), channel_id (int), message (str)
+    Output: empty dict
+    '''
+    # Retrieve data
+    auth_user = user_with_token(token)
+    channel = channel_with_id(channel_id)
+
+    # Error check
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    elif channel is None:
+        raise InputError('Invalid channel')
+    elif auth_user not in channel.all_members:
+        raise AccessError('User not member of channel')
+    elif not channel.standup_status['is_active']:
+        raise InputError('An active standup is not currently running')
+    elif not message:
+        raise InputError('Empty message not allowed')
+    elif len(message) > 1000:
+        raise InputError('Message should be 1000 characters or less')
+
+    # Add message to queue
+    msg = Message(auth_user, message, time_created=current_time())
+    channel.standup_status['queued_messages'].append(msg)
+
+    return {
+    }
