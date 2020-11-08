@@ -288,7 +288,7 @@ def test_message_react_valid():
         if message['message_id'] == m_id1:
             assert message['reacts']['react_id'] == 1
             assert message['reacts']['u_ids'] == [random_user['u_id']]
-            assert not message['reacts']['is_this_user_reacted']
+            assert message['reacts']['is_this_user_reacted'] is False
 
     # the second user reacts to the same message
     message_react(random_user2['token'], m_id1, 1)
@@ -488,7 +488,7 @@ def test_message_pin_valid():
 
     # Check that all messages are not pinned
     for message in messages:
-        assert not message['is_pinned']
+        assert message['is_pinned'] is False
 
     # Owner pins a message
     message_pin(f_owner['token'], m_id3)
@@ -496,7 +496,7 @@ def test_message_pin_valid():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id3:
-            assert message['is_pinned']
+            assert message['is_pinned'] is True
 
 
 def test_message_pin_invalid():
@@ -543,7 +543,7 @@ def test_message_pin_invalid():
     # Check that the message is not pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert not message['is_pinned']
+            assert message['is_pinned'] is False
 
 
 def test_message_pin_permission():
@@ -585,7 +585,7 @@ def test_message_pin_permission():
     # Check that the message is not pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert not message['is_pinned']
+            assert message['is_pinned'] is False
 
     # Owner pins the message
     message_pin(f_owner['token'], m_id1)
@@ -593,7 +593,7 @@ def test_message_pin_permission():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned']
+            assert message['is_pinned'] is True
 
 
 def test_message_pin_already_pinned():
@@ -629,7 +629,7 @@ def test_message_pin_already_pinned():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned']
+            assert message['is_pinned'] is True
 
     # Try to pin already pinned message
     with pytest.raises(InputError):
@@ -676,7 +676,7 @@ def test_message_unpin_valid():
 
     # Check that all messages are not pinned
     for message in messages:
-        assert not message['is_pinned']
+        assert message['is_pinned'] is False
 
     # Owner pins a message
     message_pin(f_owner['token'], m_id3)
@@ -684,14 +684,14 @@ def test_message_unpin_valid():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id3:
-            assert message['is_pinned']
+            assert message['is_pinned'] is True
 
     # Owner unpins the message
     message_unpin(f_owner['token'], m_id3)
 
     # Check that no messages are pinned
     for message in messages:
-        assert not message['is_pinned']
+        assert message['is_pinned'] is False
 
 
 def test_message_unpin_invalid():
@@ -743,7 +743,7 @@ def test_message_unpin_invalid():
     # Check that the message is still pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned']
+            assert message['is_pinned'] is True
 
 
 def test_message_unpin_permission():
@@ -789,7 +789,7 @@ def test_message_unpin_permission():
     # Check that the message is still pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned']
+            assert message['is_pinned'] is True
 
     # Owner unpins the message
     message_unpin(f_owner['token'], m_id1)
@@ -797,7 +797,7 @@ def test_message_unpin_permission():
     # Check that the message is not pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert not message['is_pinned']
+            assert message['is_pinned'] is False
 
 
 def test_message_unpin_already_unpinned():
@@ -835,7 +835,7 @@ def test_message_unpin_already_unpinned():
     # Check that the message is pinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert message['is_pinned']
+            assert message['is_pinned'] is True
 
     # Owner unpins message
     message_unpin(f_owner['token'], m_id1)
@@ -847,5 +847,5 @@ def test_message_unpin_already_unpinned():
     # Check that the message is unpinned
     for message in messages:
         if message['message_id'] == m_id1:
-            assert not message['is_pinned']
+            assert message['is_pinned'] is False
             
