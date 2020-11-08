@@ -1,4 +1,5 @@
 ''' Import required modules '''
+from threading import Timer
 from datetime import datetime
 import re
 import hashlib
@@ -197,6 +198,9 @@ class Channel:
             owner_members - array of User objects
             all_members - array of User objects
             messages - array of Message objects
+            standup_status - dictionary containing is_active (bool),
+                             time_finish (UNIX timestamp float), initiator (User object),
+                             queued_messages (list of Message objects)
         '''
         # Save passed parameters
         self.name = name
@@ -206,6 +210,60 @@ class Channel:
         self.owner_members = [channel_creator,]
         self.all_members = [channel_creator,]
         self.messages = []
+        self.standup_status = {
+            'is_active': False,
+            'time_finish': None,
+            'initiator': None,
+            'queued_messages': [],
+        }
+
+    def start_standup(self, initiator, length):
+        end_time = current_time() + length
+        self.standup_status = {
+            'is_active': True,
+            'time_finish': end_time,
+            'initiator': initiator,
+            'queued_messages': [],
+        }
+        # Threading to end standup after 'length' seconds has passed
+        t = Timer(length, self.end_standup)
+        t.start()
+        return end_time
+
+    def end_standup(self):
+        # Send packaged message
+        initiator = self.standup_status['initiator']
+        standup_messages = self.standup_status['queued_messages']
+        message = '\n'.join(f'{msg.sender.handle}: {msg.message}' for msg in standup_messages)
+        packaged_message = Message(sender=initiator, message=message, time_created=current_time())
+        self.messages.append(packaged_message)
+        # Reset standup_status
+        self.standup_status = {
+            'is_active': False,
+            'time_finish': None,
+            'initiator': None,
+            'queued_messages': [],
+        }
+
+def channel_with_id(channel_id):
+    '''
+    Extracts information about a specified channel (by id)
+    Tries to return channel (dict) with specified channel id (int), returning None if not found
+    '''
+    if 0 <= channel_id < len(data['channels']):
+        return data['channels'][channel_id]
+    return None
+
+def channel_with_message_id(message_id):
+    '''
+    Tries to return the channel (Channel object) containing the
+    message with specified message_id (int), returning None if not found
+    '''
+    for channel in data['channels']:
+        for message in channel.messages:
+            if message.message_id == message_id:
+                return channel
+    return None
 
 
 class Message:
@@ -231,6 +289,41 @@ class Message:
         self.time_created = time_created
         self.reacts = []
         self.is_pinned = False
+    
+    def add_react(self, reactor, react_id):
+        '''
+        Adds the reactor's react to a Message object
+        '''
+        # Check if React object with react_id already exists
+        react = react_with_id_for_message(self, react_id)
+        if react is None:
+            # Create new react
+            new_react = React(react_id, reactor)
+            self.reacts.append(new_react)
+        else:
+            # Append new reactor to existing of reactors
+            react.reactors.append(reactor)
+
+    def remove_react(self, reactor, react_id):
+        '''
+        Removes the reactor's react from a Message object
+        '''
+        react = react_with_id_for_message(self, react_id)
+        react.reactors.remove(reactor)
+
+
+def message_with_message_id(message_id):
+    '''
+    Tries to return the Message object corresponding to a given message_id (int),
+    returning None if not found
+    '''
+    channel = channel_with_message_id(message_id)
+    if channel is not None:
+        for message in channel.messages:
+            if message.message_id == message_id:
+                return message
+    return None
+
 
 class React:
     '''
@@ -246,34 +339,12 @@ class React:
         self.reactors = [reactor,]
 
 
-def channel_with_id(channel_id):
+def react_with_id_for_message(message, react_id):
     '''
-    Extracts information about a specified channel (by id)
-    Tries to return channel (dict) with specified channel id (int), returning None if not found
+    Tries to return the React object with a given
+    react_id (int) in a message (Message object)
     '''
-    if 0 <= channel_id < len(data['channels']):
-        return data['channels'][channel_id]
-    return None
-
-def channel_with_message_id(message_id):
-    '''
-    Tries to return the channel (Channel object) containing the
-    message with specified message_id (int), returning None if not found
-    '''
-    for channel in data['channels']:
-        for message in channel.messages:
-            if message.message_id == message_id:
-                return channel
-    return None
-
-def message_with_message_id(message_id):
-    '''
-    Tries to return the Message object corresponding to a given message_id (int),
-    returning None if not found
-    '''
-    channel = channel_with_message_id(message_id)
-    if channel is not None:
-        for message in channel.messages:
-            if message.message_id == message_id:
-                return message
+    for react in message.reacts:
+        if react.react_id == react_id:
+            return react
     return None
