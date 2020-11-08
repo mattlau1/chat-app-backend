@@ -425,6 +425,8 @@ def test_message_unreact_others_react():
     '''
     Test user trying to unreact other user's reaction
     '''
+    clear()
+    
     owner = auth_register('music@gmail.com', 'password', 'ipod', 'ipodson')
     channel = channels_create(owner['token'], 'UNSW HUB', True)
     # create 2 users that will join the same channel
