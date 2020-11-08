@@ -258,7 +258,18 @@ def test_message_sendlater_valid():
 
 def test_message_react_valid():
     '''
-    Test user valid react to the message
+    Test:
+    - Multiple users reacting to the same message
+
+    Scenario:
+    - The owner and 2 random user creates an account
+    - The owner creates a public channel and sends a message
+    - 1st random user has reacted to the message
+    - Test that only 1 random user has reacted by checking the id
+    - from the owner's point of view, it shows that the owner has not reacted
+    - 2nd random user has reacted to the same message
+    - Test that the message has been reacted by those two random users
+    - from the first user's point of view, it shows that it has reacted to the msg
     '''
     clear()
 
@@ -305,7 +316,18 @@ def test_message_react_valid():
 
 def test_message_react_invalid():
     '''
-    Test user reacting to message with invalid tokens and ids
+    Test:
+    - User react with invalid tokens
+    - User react with invalid message id
+    - User react with invalid react id
+
+    Scenario:
+    - The owner registers an account and creates a channel
+    - The user creates an account and gets invited to the channel
+    - The owner sends a message
+    - Invalid user tries to react to the message
+    - Valid user tries to react to non existent message
+    - Valid user tries to react with invalid react id
     '''
     clear()
 
@@ -332,7 +354,18 @@ def test_message_react_invalid():
 
 def test_message_unreact_valid():
     '''
-    Test user unreacting the message after giving reaction
+    Test:
+    - Unreact the message after giving reaction
+
+    Scenario:
+    - Owner, user1 and user2 all create an account
+    - The owner creates a channel and invites user1 and user2
+    - The owner sends a message and all 3 users react to the message
+    - Test that the message has got reacts from those 3 users
+    - user1 and user2 unreacts the message
+    - Test that the message has got reacts only from the owner
+    - Owner unreacst the message
+    - Test that the message has no reacts
     '''
     clear()
 
@@ -374,7 +407,18 @@ def test_message_unreact_valid():
 
 def test_message_unreact_invalid():
     '''
-    Test user unreacting the message with invalid tokens and id
+    Test:
+    - Invalid user tries to unreact the message
+    - Valid user tries to unreact with invalid message id
+    - Valid user tries to unreact with invalid react id
+
+    Scenario:
+    - The owner creates an account and a channel
+    - The user creats an account and gets invited to the channel
+    - The owner sends a message and the user reacts to it
+    - Test that the invalid user tries to unreact to the message
+    - Test that the valid user tries to unreact with invalid message id
+    - Test that the valid user tries to unreact with invalid id
     '''
     clear()
 
@@ -403,7 +447,15 @@ def test_message_unreact_invalid():
 
 def test_message_unreact_already_unreacted():
     '''
-    Test user trying to unreact on a message that contains no reacts
+    Test:
+    - Unreact on a message that contains no reacts at all
+
+    Scenario:
+    - The owner creates an account and channel
+    - The user creats an account and gets invited to the channel
+    - The owner sends a message
+    - No one has reacted to the message at all
+    - Test that the user tries to unreact with valid tokens, message id and react id
     '''
     clear()
 
@@ -423,10 +475,19 @@ def test_message_unreact_already_unreacted():
 
 def test_message_unreact_others_react():
     '''
-    Test user trying to unreact other user's reaction
+    Test:
+    - Unreact other user's reaction
+
+    Scenario:
+    - The owner, user1 and user2 creates an account
+    - The owner creates a channel and invites user1 and user2
+    - The owner sends the message
+    - User1 reacts to the message while user2 does nothing at all
+    - Check that the message has react only from user1
+    - Test that the user2 unreact to the message that has react from user1
     '''
     clear()
-    
+
     owner = auth_register('music@gmail.com', 'password', 'ipod', 'ipodson')
     channel = channels_create(owner['token'], 'UNSW HUB', True)
     # create 2 users that will join the same channel
