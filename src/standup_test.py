@@ -22,7 +22,7 @@ def test_standup_start_valid():
 
     # Check standup is active
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert standup_details['is_active']
+    assert standup_details['is_active'] is True
     # Check that time_finish of both standup_start and standup_active are the same
     t_finish2 = standup_details['time_finish']
     assert t_finish1 == t_finish2
@@ -30,7 +30,7 @@ def test_standup_start_valid():
     # Check standup is not active after standup ends
     time.sleep(7)
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert not standup_details['is_active']
+    assert standup_details['is_active'] is False
 
 
 def test_standup_start_invalid():
@@ -65,7 +65,7 @@ def test_standup_active_valid():
 
     # Check standup_active returns correct values with no active standup
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert not standup_details['is_active']
+    assert standup_details['is_active'] is False
     assert standup_details['time_finish'] is None
 
     # Start standup for 10 seconds
@@ -73,7 +73,7 @@ def test_standup_active_valid():
 
     # Check standup_active returns correct values during a standup
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert standup_details['is_active']
+    assert standup_details['is_active'] is True
     # Check that time_finish of both standup_start and standup_active are the same
     t_finish2 = standup_details['time_finish']
     assert t_finish1 == t_finish2
@@ -81,7 +81,7 @@ def test_standup_active_valid():
     # Check standup_active returns correct values after standup ends
     time.sleep(12)
     standup_details = standup_active(f_owner['token'], f_channel['channel_id'])
-    assert not standup_details['is_active']
+    assert standup_details['is_active'] is False
     assert standup_details['time_finish'] is None
 
 
