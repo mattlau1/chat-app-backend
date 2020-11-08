@@ -111,7 +111,56 @@ def message_unreact(token, message_id, react_id):
     pass
 
 def message_pin(token, message_id):
-    pass
+    '''
+    Given a message within a channel, mark it as "pinned" to be given special
+    display treatment by the frontend.
+    Input: token (str), message_id (int)
+    Output: empty dict
+    '''
+    auth_user = user_with_token(token)
+    channel = channel_with_message_id(message_id)
+    message = message_with_message_id(message_id)
+
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    elif auth_user not in channel.all_members:
+        raise AccessError('Invalid permission')
+    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
+        # Only owners can pin messages
+        raise AccessError('Invalid permission for pinning messages')
+    elif message is None:
+        raise InputError('Invalid message_id')
+    elif message.is_pinned:
+        raise InputError('Message already pinned')
+
+    message.is_pinned = True
+
+    return {
+    }
 
 def message_unpin(token, message_id):
-    pass
+    '''
+    Given a message within a channel, remove it's mark as unpinned.
+    Input: token (str), message_id (int)
+    Output: empty dict
+    '''
+    auth_user = user_with_token(token)
+    channel = channel_with_message_id(message_id)
+    message = message_with_message_id(message_id)
+
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    elif auth_user not in channel.all_members:
+        raise AccessError('Invalid permission')
+    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
+        # Only owners can pin messages
+        raise AccessError('Invalid permission for unpinning messages')
+    elif message is None:
+        raise InputError('Invalid message_id')
+    elif not message.is_pinned:
+        raise InputError('Message already unpinned')
+
+    message.is_pinned = False
+
+    return {
+    }
