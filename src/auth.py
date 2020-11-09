@@ -1,5 +1,6 @@
 ''' Import required modules '''
-from data import data, User, valid_email, user_with_email, user_with_token, user_email_list
+from data import (data, User, valid_email, jwt_encode_payload, jwt_decode_string,
+                  user_with_email, user_with_token, user_email_list)
 from error import InputError, AccessError
 
 def auth_login(email, password):
@@ -93,7 +94,20 @@ def generate_reset_code(email):
     Input: email (string)
     Output: reset_code (string)
     '''
-    pass
+    user = user_with_email(email)
+
+    # Error checks - add to assumptions
+    if not valid_email(email):
+        raise InputError('Invalid email')
+    if user is None:
+        raise InputError('Unregistered email')
+
+    # Generate, store and return random reset code
+    reset_code = jwt_encode_payload({'email': email})
+    if reset_code not in data['valid_reset_codes']:
+        data['valid_reset_codes'].append(reset_code)
+
+    return reset_code
 
 
 def password_reset(reset_code, new_password):
@@ -102,4 +116,23 @@ def password_reset(reset_code, new_password):
     Input: reset_code (string), new_password (string)
     Output: empty dict
     '''
-    pass
+    # Error check
+    if len(new_password) < 6:
+        # Password length
+        raise InputError('Password too short')
+
+    # Decode reset_code
+    try:
+        payload = jwt_decode_string(reset_code)
+        user = user_with_email(payload['email'])
+        # Check reset_code is still valid
+        if reset_code not in data['valid_reset_codes']:
+            raise InputError('Invalid reset code')
+        user.update_password(new_password)
+        # Invalidate current reset_code
+        data['valid_reset_codes'].remove(reset_code)
+    except:
+        raise InputError('Invalid reset code')
+    
+    return {
+    }
