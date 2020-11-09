@@ -231,7 +231,7 @@ class Channel:
         return end_time
 
     def end_standup(self):
-        # Send packaged message
+        # Send packaged message if there are any messages
         initiator = self.standup_status['initiator']
         standup_messages = self.standup_status['queued_messages']
         if standup_messages:
