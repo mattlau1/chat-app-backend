@@ -230,6 +230,63 @@ def http_message_edit():
     return dumps(message_edit(payload['token'], payload['message_id'], payload['message']))
 
 
+@APP.route('/message/sendlater', methods=['POST'])
+def http_message_sendlater():
+    '''
+    Wrapper function for message_sendlater (sends a message at a later date)
+    POST: JSON containing "token" (str), "channel_id" (int),
+          "message" (str), "time_sent" (UNIX timestamp - float)
+    Returns JSON containing "message_id" (int)
+    '''
+    payload = request.get_json()
+    return dumps(message_sendlater(payload['token'], payload['channel_id'],
+                                   payload['message'], payload['time_sent']))
+
+
+@APP.route('/message/react', methods=['POST'])
+def http_message_react():
+    '''
+    Wrapper function for message_react (reacts to a given message)
+    POST: JSON containing "token" (str), "message_id" (int), "react_id" (int)
+    Returns JSON containing empty dict
+    '''
+    payload = request.get_json()
+    return dumps(message_react(payload['token'], payload['message_id'], payload['react_id']))
+
+
+@APP.route('/message/unreact', methods=['POST'])
+def http_message_unreact():
+    '''
+    Wrapper function for message_unreact (unreacts to a given message)
+    POST: JSON containing "token" (str), "message_id" (int), "react_id" (int)
+    Returns JSON containing empty dict
+    '''
+    payload = request.get_json()
+    return dumps(message_unreact(payload['token'], payload['message_id'], payload['react_id']))
+
+
+@APP.route('/message/pin', methods=['POST'])
+def http_message_pin():
+    '''
+    Wrapper function for message_pin (pins given message)
+    POST: JSON containing "token" (str), "message_id" (int)
+    Returns JSON containing empty dict
+    '''
+    payload = request.get_json()
+    return dumps(message_pin(payload['token'], payload['message_id']))
+
+
+@APP.route('/message/unpin', methods=['POST'])
+def http_message_unpin():
+    '''
+    Wrapper function for message_unpin (unpins given message)
+    POST: JSON containing "token" (str), "message_id" (int)
+    Returns JSON containing empty dict
+    '''
+    payload = request.get_json()
+    return dumps(message_unpin(payload['token'], payload['message_id']))
+
+
 ###############
 ## HTTP user ##
 ###############
