@@ -181,6 +181,15 @@ def user_with_token(token):
     except:
         return None
 
+def user_with_handle(handle):
+    '''
+    Tries to return User object with specified handle (str), returning None if not found
+    '''
+    for user in data['users']:
+        if user.handle == handle:
+            return user
+    return None
+
 
 ##################################################
 ### Helper functions for channels and messages ###
