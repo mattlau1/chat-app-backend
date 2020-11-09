@@ -273,38 +273,37 @@ def test_message_react_valid():
     '''
     clear()
 
-    # making a normal channel
+    # Making a normal channel
     f_owner = auth_register('fox@gmail.com', 'password', 'Fox', 'Foxson')
     f_channel = channels_create(f_owner['token'], 'Main HUB', True)
 
-    # invite a random user to the channel
+    # Invite a random user to the channel
     random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
 
-    # invite a second user
+    # Invite a second user
     random_user2 = auth_register('randomguy@gmail.com', 'password', 'Random2', 'Guy2')
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
 
-    # owner sends message
+    # Owner sends message
     m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'I came first!')['message_id']
 
-    # random user reacts to the message
-    # the given react id from the spec is 1
+    # Random user reacts to the message (the given react_id is 1)
     message_react(random_user['token'], m_id1, 1)
 
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
 
-    # check if the user has reacted and check if the owner itself has reacted
+    # Check if the user has reacted and check if the owner itself has reacted
     for message in messages:
         if message['message_id'] == m_id1:
             assert message['reacts'][0]['react_id'] == 1
             assert message['reacts'][0]['u_ids'] == [random_user['u_id']]
             assert message['reacts'][0]['is_this_user_reacted'] is False
 
-    # the second user reacts to the same message
+    # Second user reacts to the same message
     message_react(random_user2['token'], m_id1, 1)
 
-    # check if another user has reacted and check if a random user itself has reacted
+    # Check if another user has reacted and check if a random user itself has reacted
     messages = channel_messages(random_user['token'], f_channel['channel_id'], 0)['messages']
 
     for message in messages:
@@ -331,23 +330,23 @@ def test_message_react_invalid():
     '''
     clear()
 
-    # register an owner, create channel and invite user
-    # owner sends message
+    # Register an owner, create channel and invite user
+    # Owner sends message
     owner = auth_register('wolf@gmail.com', 'password', 'wolf', 'wolfson')
     channel = channels_create(owner['token'], 'Main HUB', True)
     user = auth_register('random@gmail.com', 'password', 'User', 'Userson')
     channel_invite(owner['token'], channel['channel_id'], user['u_id'])
     m_id1 = message_send(owner['token'], channel['channel_id'], 'I was here!')['message_id']
 
-    # invalid user
+    # Invalid user
     with pytest.raises(AccessError):
         message_react('@#($*&', m_id1, 1)
 
-    # invalid message id
+    # Invalid message id
     with pytest.raises(AccessError):
         message_react(user['token'], '#(@*$&', 1)
 
-    # invalid react id
+    # Invalid react id
     with pytest.raises(InputError):
         message_react(user['token'], m_id1, 'zap')
 
@@ -396,7 +395,7 @@ def test_message_unreact_valid():
         if message['message_id'] == m_id1:
             assert message['reacts'][0]['u_ids'] == [owner['u_id']]
 
-    # another user unreacts
+    # Another user unreacts
     message_unreact(owner['token'], m_id1, 1)
     messages = channel_messages(owner['token'], channel['channel_id'], 0)['messages']
 
@@ -429,18 +428,18 @@ def test_message_unreact_invalid():
     msg = 'please unreact this!'
     m_id1 = message_send(owner['token'], channel['channel_id'], msg)['message_id']
 
-    # react
+    # React
     message_react(user['token'], m_id1, 1)
 
-    # invalid user
+    # Invalid user
     with pytest.raises(AccessError):
         message_unreact('@#($*&', m_id1, 1)
 
-    # invalid message id
+    # Invalid message id
     with pytest.raises(AccessError):
         message_unreact(user['token'], '#(@*$&', 1)
 
-    # invalid react id
+    # Invalid react id
     with pytest.raises(InputError):
         message_unreact(user['token'], m_id1, 'paz')
 
@@ -465,10 +464,10 @@ def test_message_unreact_already_unreacted():
     channel_invite(owner['token'], channel['channel_id'], user['u_id'])
     msg = 'this message has no reaction'
 
-    # there is an existing message
+    # There is an existing message
     m_id1 = message_send(owner['token'], channel['channel_id'], msg)['message_id']
 
-    # unreact to message that has no reacts
+    # Unreact to message that has no reacts
     with pytest.raises(InputError):
         message_unreact(user['token'], m_id1, 1)
 
@@ -490,14 +489,14 @@ def test_message_unreact_others_react():
 
     owner = auth_register('music@gmail.com', 'password', 'ipod', 'ipodson')
     channel = channels_create(owner['token'], 'UNSW HUB', True)
-    # create 2 users that will join the same channel
+    # Create 2 users that will join the same channel
     user1 = auth_register('scary@gmail.com', 'password', 'Stranger', 'Danger')
     user2 = auth_register('creepy@gmail.com', 'password', 'Danger', 'Dangerson')
     channel_invite(owner['token'], channel['channel_id'], user1['u_id'])
     channel_invite(owner['token'], channel['channel_id'], user2['u_id'])
     msg = 'The quick brown fox jumps over the lazy dog'
 
-    # owner sends the message
+    # Owner sends the message
     m_id1 = message_send(owner['token'], channel['channel_id'], msg)['message_id']
 
     # user1 reacts while user2 does nothing

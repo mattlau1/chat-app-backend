@@ -47,6 +47,8 @@
 - Message remove/edit must be called by original message sender, channel owner or Flockr owner
 - Flockr owners not in a channel cannot search messages from that channel (matches reference implementation)
 - Substring for search is caps-sensitive
+- auth_user has to be a reactor in order to be removed
+- Only owners can pin and unpin messages
 
 ## user.py:
 - User's email length can be 3-20 **inclusive** (i.e 1234567890@123456.com [20 characters])
@@ -56,3 +58,11 @@
 
 ## other.py:
 - Search searches for substring, but the query string is case sensitive
+
+## standup.py:
+- Standup length must be greater than 0 seconds.
+- Even if user who started the standup has left the channel, the packaged message will still be sent.
+- User cannot call standup\_start nor standup\_active in channels they are not a member of.
+- If no messages are sent during a standup, the packaged message is not sent at the end of the standup.
+- Not allowed to send empty messages during standup.
+- The packaged message includes the handles of users.
