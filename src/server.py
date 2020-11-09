@@ -8,7 +8,8 @@ from auth import auth_login, auth_logout, auth_register
 from channel import (channel_invite, channel_details, channel_messages, channel_leave,
                      channel_join, channel_addowner, channel_removeowner)
 from channels import channels_list, channels_listall, channels_create
-from message import message_send, message_remove, message_edit
+from message import (message_send, message_remove, message_edit, message_sendlater,
+                     message_react, message_unreact, message_pin, message_unpin)
 from user import user_profile, user_profile_setname, user_profile_setemail, user_profile_sethandle
 from other import users_all, admin_userpermission_change, search, clear
 
