@@ -522,3 +522,34 @@ def test_http_message_edit(url):
     assert resp.status_code == 200
     payload = resp.json()
     assert len(payload['messages']) == 3
+
+def test_http_message_sendlater(url):
+    '''
+    HTTP test for message_sendlater
+    '''
+    assert requests.delete(url + 'clear').status_code == 200
+
+def test_http_message_react(url):
+    '''
+    HTTP test for message_react
+    '''
+    assert requests.delete(url + 'clear').status_code == 200
+
+def test_http_message_unreact(url):
+    '''
+    HTTP test for message_unreact
+    '''
+    assert requests.delete(url + 'clear').status_code == 200
+
+def test_http_message_pin(url):
+    '''
+    HTTP test for message_pin
+    '''
+    assert requests.delete(url + 'clear').status_code == 200
+
+def test_http_message_unpin(url):
+    '''
+    HTTP test for message_unpin
+    '''
+    assert requests.delete(url + 'clear').status_code == 200
+
