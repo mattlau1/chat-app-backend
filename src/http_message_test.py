@@ -536,7 +536,7 @@ def test_http_message_react(url):
     assert requests.delete(url + 'clear').status_code == 200
 
     # SCENARIO:
-    # The owner, user1 and user2 creats an account
+    # The owner, user1 and user2 creates an account
     # The owner creats a channel, invites user2 and user2 and sends a message
     # user1 and user2 reacts to the message
     # test that the user1 and user2 has both reacted to the message from owner's
@@ -671,6 +671,236 @@ def test_http_message_unreact(url):
     HTTP test for message_unreact
     '''
     assert requests.delete(url + 'clear').status_code == 200
+
+    # SCENARIO
+    # Owner, user1 and user2 create account
+    # owner invites user1 and user2 and sends a message
+    # Owner, user1 and user2 reacts to the message
+    # Test that all 3 users reacted to the message
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'ilovebanana69@gmail.com',
+        'password': 'password',
+        'name_first': 'Johnny',
+        'name_last': 'Monkeyson',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Main HUB',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Register user 1
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'hellokitty01@gmail.com',
+        'password': 'password',
+        'name_first': 'Hello',
+        'name_last': 'Helloson',
+    })
+    assert resp.status_code == 200
+    user1 = resp.json()
+
+    # Register user 2
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'snowsmasher666@gmail.com',
+        'password': 'password',
+        'name_first': 'Snow',
+        'name_last': 'Snowson',
+    })
+    user2 = resp.json()
+
+    # Invite user 1
+    resp = requests.post(url + 'channel/invite', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user1['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # Invite user 2
+    resp = requests.post(url + 'channel/invite', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user2['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # owner sends a message
+    resp = requests.post(url + 'message/send', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'message': 'I am good with alphebet',
+    })
+    assert resp.status_code == 200
+    m_id1 = resp.json()['message_id']
+
+    # owner, user1 and user2 reacts to the message
+    resp = requests.post(url + 'message/react', json={
+        'token': owner['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/react', json={
+        'token': user1['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/react', json={
+        'token': user2['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 200
+
+    # check that all 3 users has reacted to the message
+    # Get any information in regards to the message
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # check that user1 and user2 reacted and owner sees that
+    id_list = [owner['u_id'],user1['u_id'],user2['u_id']]
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == id_list
+
+    # user1 and user2 unreacts
+    resp = requests.post(url + 'message/unreact', json={
+        'token': user1['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/unreact', json={
+        'token': user2['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 200
+
+    # upddate information about message
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # check that user1 and user2 has unreacted to the message
+    # and it should be owner that has react
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == [owner['u_id']]
+
+    # SCENARIO
+    # invalid user unreact to the message
+    # valid user unreact to invalid message
+    # valid user unreact to the message with invalid react id
+
+    # invalid user unreact
+    resp = requests.post(url + 'message/unreact', json={
+        'token': 'sdf)8sd',
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 400
+
+    # owner unreact to invalid message id
+    resp = requests.post(url + 'message/unreact', json={
+        'token': owner['token'],
+        'message_id': 666,
+        'react_id': 1,
+    })
+    assert resp.status_code == 400
+
+    # owner unreact with invalid react id
+    resp = requests.post(url + 'message/unreact', json={
+        'token': owner['token'],
+        'message_id': m_id1,
+        'react_id': 666,
+    })
+
+    # SCENARIO
+    # owner unreacts to the message
+    # user1 attempts to unreact the message that has no react at all
+    # user1 reacts to the message
+    # user2 attempts to unreact the message that user1 reacted to
+
+    # owner unreacts
+    resp = requests.post(url + 'message/unreact', json={
+        'token': owner['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 200
+
+    # check that the message has no reacts
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == []
+
+    # user 1 unreacts to the message with no reacts
+    resp = requests.post(url + 'message/unreact', json={
+        'token': user1['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 400
+
+    # user1 reacts to the message
+    resp = requests.post(url + 'message/react', json={
+        'token': user1['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 200
+
+    # check that only user1 react to the message
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == [user1['u_id']]
+
+    # user2 unreact user1's react
+    resp = requests.post(url + 'message/unreact', json={
+        'token': user2['token'],
+        'message_id': m_id1,
+        'react_id': 1,
+    })
+    assert resp.status_code == 400
+
 
 def test_http_message_pin(url):
     '''
