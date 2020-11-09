@@ -236,8 +236,8 @@ class Channel:
         standup_messages = self.standup_status['queued_messages']
         if standup_messages:
             message = '\n'.join(f'{msg.sender.handle}: {msg.message}' for msg in standup_messages)
-            packaged_message = Message(sender=initiator, message=message, time_created=current_time())
-            self.messages.append(packaged_message)
+            packaged_msg = Message(sender=initiator, message=message, time_created=current_time())
+            self.messages.append(packaged_msg)
         # Reset standup_status
         self.standup_status = {
             'is_active': False,
