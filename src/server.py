@@ -1,17 +1,20 @@
 ''' Import required modules '''
 import sys
 from json import dumps
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_cors import CORS
+from flask_mail import Mail, Message
 from error import InputError
-from auth import auth_login, auth_logout, auth_register
+from auth import auth_login, auth_logout, auth_register, generate_reset_code, password_reset
 from channel import (channel_invite, channel_details, channel_messages, channel_leave,
                      channel_join, channel_addowner, channel_removeowner)
 from channels import channels_list, channels_listall, channels_create
 from message import (message_send, message_remove, message_edit, message_sendlater,
                      message_react, message_unreact, message_pin, message_unpin)
-from user import user_profile, user_profile_setname, user_profile_setemail, user_profile_sethandle
+from user import (user_profile, user_profile_setname, user_profile_setemail,
+                  user_profile_sethandle, user_profile_uploadphoto)
 from other import users_all, admin_userpermission_change, search, clear
+from standup import standup_start, standup_active, standup_send
 
 def defaultHandler(err):
     response = err.get_response()
@@ -24,11 +27,20 @@ def defaultHandler(err):
     response.content_type = 'application/json'
     return response
 
-APP = Flask(__name__)
+APP = Flask(__name__, static_folder='../static/')
 CORS(APP)
 
 APP.config['TRAP_HTTP_EXCEPTIONS'] = True
 APP.register_error_handler(Exception, defaultHandler)
+
+# Configure email server
+APP.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=465,
+    MAIL_USE_SSL=True,
+    MAIL_USERNAME='comp1531flockr@gmail.com',
+    MAIL_PASSWORD='HelloWorld'
+)
 
 # Example
 @APP.route("/echo", methods=['GET'])
@@ -39,6 +51,14 @@ def echo():
     return dumps({
         'data': data
     })
+
+@APP.route('/static/<path:path>')
+def serve(path):
+    '''
+    Serves a given static file
+    '''
+    return send_from_directory('', path)
+
 
 ###############
 ## HTTP auth ##
@@ -77,6 +97,35 @@ def http_auth_register():
                                payload['password'],
                                payload['name_first'],
                                payload['name_last']))
+
+
+@APP.route('/auth/passwordreset/request', methods=['POST'])
+def http_auth_passwordreset_request():
+    # Retrieve data
+    payload = request.get_json()
+    email = payload['email']
+    # Generate reset code
+    reset_code = generate_reset_code(email)
+    # Create email message
+    message = Message("Flockr Password Reset Request",
+                      sender='comp1531flockr@gmail.com',
+                      recipients=[email])
+    message.html = f'''
+    <p>Your reset code is: <b>{reset_code}</b></p>
+    <p>Please enter this code when prompted.</p>
+    <p>If you were not expecting this email, please ignore it.</p>
+    '''
+    # Send email
+    mail = Mail(app=APP)
+    mail.send(message)
+    return dumps({})
+
+
+@APP.route('/auth/passwordreset/reset', methods=['POST'])
+def http_auth_passwordreset_reset():
+    # Retrieve data
+    payload = request.get_json()
+    return dumps(password_reset(payload['reset_code'], payload['new_password']))
 
 
 ##################
@@ -201,7 +250,7 @@ def http_channels_create():
 @APP.route('/message/send', methods=['POST'])
 def http_message_send():
     '''
-    Wrapper function for messages_send (sends a message to channel)
+    Wrapper function for message_send (sends a message to channel)
     POST: JSON containing "token" (str), "channel_id" (int), "message" (str)
     Returns JSON containing "message_id" (int)
     '''
@@ -212,7 +261,7 @@ def http_message_send():
 @APP.route('/message/remove', methods=['DELETE'])
 def http_message_remove():
     '''
-    Wrapper function for messages_remove (removes a message)
+    Wrapper function for message_remove (removes a message)
     DELETE: JSON containing "token" (str), "message_id" (int)
     Returns JSON containing empty dict
     '''
@@ -223,7 +272,7 @@ def http_message_remove():
 @APP.route('/message/edit', methods=['PUT'])
 def http_message_edit():
     '''
-    Wrapper function for messages_edit (edits a message)
+    Wrapper function for message_edit (edits a message)
     PUT: JSON containing "token" (str), "message_id" (int), "message" (str)
     Returns JSON containing empty dict
     '''
@@ -337,6 +386,21 @@ def http_user_profile_sethandle():
     return dumps(user_profile_sethandle(payload['token'], payload['handle_str']))
 
 
+@APP.route('/user/profile/uploadphoto', methods=['POST'])
+def http_user_profile_uploadphoto():
+    '''
+    Wrapper function for user_profile_uploadphoto (uploads a profile pic for a user)
+    POST: JSON containing "token" (str), "img_url" (str), "x_start" (int),
+          "y_start" (int), "x_end" (int), "y_end" (int)
+    Returns JSON containing empty dict
+    '''
+    url_root = request.url_root
+    payload = request.get_json()
+    return dumps(user_profile_uploadphoto(payload['token'], url_root, payload['img_url'],
+                                          payload['x_start'], payload['y_start'],
+                                          payload['x_end'], payload['y_end']))
+
+
 ################
 ## HTTP other ##
 ################
@@ -381,6 +445,42 @@ def http_clear():
     Returns JSON containing empty dict
     '''
     return dumps(clear())
+
+
+##################
+## HTTP standup ##
+##################
+@APP.route('/standup/start', methods=['POST'])
+def http_standup_start():
+    '''
+    Wrapper for standup_start (starts a standup)
+    POST: JSON containing "token" (str), "channel_id" (int), "length" (int)
+    Returns JSON containing "time_finish" (UNIX timestamp float)
+    '''
+    payload = request.get_json()
+    return dumps(standup_start(payload['token'], payload['channel_id'], payload['length']))
+
+
+@APP.route('/standup/active', methods=['GET'])
+def http_standup_active():
+    '''
+    Wrapper for standup_active (returns information about standup status)
+    POST: JSON containing "token" (str), "channel_id" (int)
+    Returns JSON containing "is_active" (bool), "time_finish" (UNIX timestamp float)
+    '''
+    return dumps(standup_active(request.args.get('token', type=str),
+                                request.args.get('channel_id', type=int)))
+
+
+@APP.route('/standup/send', methods=['POST'])
+def http_standup_send():
+    '''
+    Wrapper for standup_send (adds a message to the standup message queue)
+    POST: JSON containing "token" (str), "channel_id" (int), "message" (str)
+    Returns JSON containing empty dict
+    '''
+    payload = request.get_json()
+    return dumps(standup_send(payload['token'], payload['channel_id'], payload['message']))
 
 
 if __name__ == "__main__":
