@@ -95,9 +95,6 @@ def bot_help(channel_id):
       flips a coin - heads or tails?
     - /dice (X)
       rolls a X-sided dice, or a six-sided dice by default
-    - /poll and vote
-    - something that reads reacts on its own message
-    - bot or channel status (number of members etc)
     '''
     bot_send_message(channel_with_id(channel_id), bot_msg, temporary=False)
 
