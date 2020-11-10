@@ -37,9 +37,9 @@ def valid_email(email):
 
 def current_time():
     '''
-    Returns the current time as a UNIX timestamp (float)
+    Returns the current time as a UNIX timestamp (int)
     '''
-    return datetime.timestamp(datetime.now())
+    return int(datetime.timestamp(datetime.now()))
 
 
 ##################################
@@ -208,7 +208,7 @@ class Channel:
             all_members - array of User objects
             messages - array of Message objects
             standup_status - dictionary containing is_active (bool),
-                             time_finish (UNIX timestamp float), initiator (User object),
+                             time_finish (UNIX timestamp int), initiator (User object),
                              queued_messages (list of Message objects)
         '''
         # Save passed parameters
@@ -265,7 +265,7 @@ class Message:
         Constructor method for a Message
             message_id - unique integer
             sender - User object
-            time_created - UNIX timestamp (float)
+            time_created - UNIX timestamp (int)
             message - string
             reacts - array of React objects
             is_pinned - boolean
