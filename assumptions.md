@@ -47,6 +47,8 @@
 - Message remove/edit must be called by original message sender, channel owner or Flockr owner
 - Flockr owners not in a channel cannot search messages from that channel (matches reference implementation)
 - Substring for search is caps-sensitive
+- auth_user has to be a reactor in order to be removed
+- Only owners can pin and unpin messages
 
 ## user.py:
 - User's email length can be 3-20 **inclusive** (i.e 1234567890@123456.com [20 characters])
