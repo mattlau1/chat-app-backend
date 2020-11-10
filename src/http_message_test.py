@@ -536,6 +536,10 @@ def test_http_message_react(url):
     assert requests.delete(url + 'clear').status_code == 200
 
 
+    # Test:
+    # - React to the message normally
+    # - User can see themselves if they have reacted or not
+    #
     # Scenario:
     # - The owner, user1 and user2 creates an account
     # - The owner creates a channel, invites user1 and user2 and sends a message
@@ -640,6 +644,11 @@ def test_http_message_react(url):
             assert message['reacts'][0]['is_this_user_reacted'] is False
 
 
+    # Test:
+    # - React with invalid token
+    # - React with invalid message id
+    # - React with invalid react id
+    #
     # Scenario:
     # - Test invalid user reacts to the message
     # - Test valid user reacts to invalid message
@@ -677,6 +686,10 @@ def test_http_message_unreact(url):
     assert requests.delete(url + 'clear').status_code == 200
 
 
+    # Test:
+    # - React to the message
+    # - Unreact to the message normally
+    #
     # Scenario:
     # - Owner, user1 and user2 create account
     # - owner invites user1 and user2 and sends a message
@@ -816,6 +829,11 @@ def test_http_message_unreact(url):
             assert message['reacts'][0]['u_ids'] == [owner['u_id']]
 
 
+    # Test:
+    # - Unreact to the message with invalid token
+    # - Unreact to the message with invalid message id
+    # - Unreact to the message with invalid react id
+    #
     # Scenario:
     # - invalid user unreact to the message
     # - valid user unreact to invalid message
@@ -846,6 +864,10 @@ def test_http_message_unreact(url):
     })
 
 
+    # Test:
+    # - Unreact to the message that has no reacts
+    # - Unreact to the message without using react beforehand
+    #
     # Scenario:
     # - owner unreacts to the message
     # - user1 attempts to unreact the message that has no react at all
