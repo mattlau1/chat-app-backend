@@ -7,6 +7,8 @@ from data import data, User, Message, current_time, user_with_token, user_with_i
 from channel import channel_kick
 from error import InputError, AccessError
 
+# Currently only for message_send, will need to add to message_sendlater
+
 bot_status = {
     'active': False,
     'u_id': -1,
