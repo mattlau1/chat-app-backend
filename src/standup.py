@@ -30,8 +30,6 @@ def standup_start(token, channel_id, length):
 
     end_time = channel.start_standup(initiator=auth_user, length=length)
 
-    # Threading for end_standup
-
     return {
         'time_finish': end_time,
     }
