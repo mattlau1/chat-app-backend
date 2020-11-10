@@ -21,12 +21,12 @@ def standup_start(token, channel_id, length):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
+    elif auth_user not in channel.all_members:
+        raise AccessError('User not member of channel')
     elif length <= 0:
         raise InputError('Invalid standup time')
     elif channel.standup_status['is_active']:
         raise InputError('An active standup is currently running')
-    elif auth_user not in channel.all_members:
-        raise AccessError('User not member of channel')
 
     end_time = channel.start_standup(initiator=auth_user, length=length)
 
