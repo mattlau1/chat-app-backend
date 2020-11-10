@@ -119,6 +119,40 @@ def user_profile_sethandle(token, handle_str):
     return {
     }
 
-def user_profile_uploadphoto(token, img_url, x_start, y_start, x_end, y_end):
-    # Might be better to move some of these functions into server.py
-    pass
+def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, y_end):
+    x_start, y_start, x_end, y_end = int(x_start), int(y_start), int(x_end), int(y_end)
+    auth_user = user_with_token(token)
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    
+    # Retrieve image
+    image_name = f'static/{auth_user.handle}.jpg'
+    try:
+        urllib.request.urlretrieve(img_url, image_name)
+    except urllib.request.URLError:
+        raise InputError('Invalid image url')
+    
+    # Crop and save image
+    img = Image.open(image_name)
+    width, height = img.size
+    if not valid_crop_dimensions(width, height, x_start, y_start, x_end, y_end):
+        raise InputError(f'Invalid image dimensions provided. \
+            Original image has width {width} and height {height}.')
+    img = img.crop((x_start, y_start, x_end, y_end))
+    img.save(image_name)
+    
+    # Update profile pic
+    auth_user.profile_img_url = url_root + image_name
+    
+    return {
+    }
+
+def valid_crop_dimensions(width, height, x_start, y_start, x_end, y_end):
+    '''
+    Helper function for user_profile_uploadphoto to check for valid crop dimensions
+    '''
+    if x_start not in range(width) or x_end not in range(width):
+        return False
+    if y_start not in range(height) or y_end not in range(height):
+        return False
+    return True
