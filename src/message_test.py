@@ -568,9 +568,9 @@ def test_message_pin_valid():
 def test_message_pin_invalid():
     '''
     Test:
-    - Pinning with invalid Token
-    - Pinning messages whilst not being in channel
+    - Pinning with invalid token
     - Pinning with invalid message id
+    - Pinning messages whilst not being in channel
 
     Scenario:
     - Two users register (owner and user)
