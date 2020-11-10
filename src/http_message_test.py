@@ -1,11 +1,11 @@
 ''' Import required modules '''
-import pytest
 import re
 from subprocess import Popen, PIPE
 import signal
 from time import sleep
-import requests
 import json
+import requests
+import pytest
 from echo_http_test import url
 
 ##################
@@ -535,12 +535,14 @@ def test_http_message_react(url):
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
-    # SCENARIO:
-    # The owner, user1 and user2 creates an account
-    # The owner creates a channel, invites user1 and user2 and sends a message
-    # user1 and user2 react to the message
-    # test that the user1 and user2 has both reacted to the message from owner's
+
+    # Scenario:
+    # - The owner, user1 and user2 creates an account
+    # - The owner creates a channel, invites user1 and user2 and sends a message
+    # - user1 and user2 react to the message
+    # - test that the user1 and user2 has both reacted to the message from owner's
     # point of view
+
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={
@@ -634,13 +636,15 @@ def test_http_message_react(url):
     for message in messages:
         if message['message_id'] == m_id1:
             assert message['reacts'][0]['react_id'] == 1
-            assert message['reacts'][0]['u_ids'] == [user1['u_id'],user2['u_id']]
+            assert message['reacts'][0]['u_ids'] == [user1['u_id'], user2['u_id']]
             assert message['reacts'][0]['is_this_user_reacted'] is False
 
-    # SCENARIO
-    # Test invalid user reacts to the message
-    # Test valid user reacts to invalid message
-    # Test valid user reacts to the message with invalid react id
+
+    # Scenario:
+    # - Test invalid user reacts to the message
+    # - Test valid user reacts to invalid message
+    # - Test valid user reacts to the message with invalid react id
+
 
     # invalid user react
     resp = requests.post(url + 'message/react', json={
@@ -672,11 +676,13 @@ def test_http_message_unreact(url):
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
-    # SCENARIO
-    # Owner, user1 and user2 create account
-    # owner invites user1 and user2 and sends a message
-    # Owner, user1 and user2 reacts to the message
-    # Test that all 3 users reacted to the message
+
+    # Scenario:
+    # - Owner, user1 and user2 create account
+    # - owner invites user1 and user2 and sends a message
+    # - Owner, user1 and user2 reacts to the message
+    # - Test that all 3 users reacted to the message
+
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={
@@ -809,10 +815,12 @@ def test_http_message_unreact(url):
         if message['message_id'] == m_id1:
             assert message['reacts'][0]['u_ids'] == [owner['u_id']]
 
-    # SCENARIO
-    # invalid user unreact to the message
-    # valid user unreact to invalid message
-    # valid user unreact to the message with invalid react id
+
+    # Scenario:
+    # - invalid user unreact to the message
+    # - valid user unreact to invalid message
+    # - valid user unreact to the message with invalid react id
+
 
     # invalid user unreact
     resp = requests.post(url + 'message/unreact', json={
@@ -837,11 +845,13 @@ def test_http_message_unreact(url):
         'react_id': 666,
     })
 
-    # SCENARIO
-    # owner unreacts to the message
-    # user1 attempts to unreact the message that has no react at all
-    # user1 reacts to the message
-    # user2 attempts to unreact the message that user1 reacted to
+
+    # Scenario:
+    # - owner unreacts to the message
+    # - user1 attempts to unreact the message that has no react at all
+    # - user1 reacts to the message
+    # - user2 attempts to unreact the message that user1 reacted to
+
 
     # owner unreacts
     resp = requests.post(url + 'message/unreact', json={
@@ -907,6 +917,7 @@ def test_http_message_pin(url):
     HTTP test for message_pin
     '''
     assert requests.delete(url + 'clear').status_code == 200
+
 
     # Test:
     # - Pinning a message normally
@@ -987,6 +998,7 @@ def test_http_message_pin(url):
         if message['message_id'] == m_id1:
             assert message['is_pinned'] is True
 
+
     # Test:
     # - Pinning with invalid token
     # - Pinning messages whilst not being in channel
@@ -996,9 +1008,10 @@ def test_http_message_pin(url):
     # Scenario:
     # - user2 registers (not in channel)
     # - user1 sends another message
-    # - Test tries pinning with invalid token, message id
+    # - Test tries pinning with invalid token and message id
     # - user2 tries pinning without being in channel
     # - user1 tries pinning whilst being in channel (not owner)
+    # - Test checks that message is still not pinned
 
 
     # Register user 2
@@ -1071,6 +1084,7 @@ def test_http_message_pin(url):
         if message['message_id'] == m_id2:
             assert message['is_pinned'] is False
 
+
     # Test:
     # - Pinning an already pinned message
     #
@@ -1123,4 +1137,281 @@ def test_http_message_unpin(url):
     HTTP test for message_unpin
     '''
     assert requests.delete(url + 'clear').status_code == 200
+
+
+    # Test:
+    # - Unpinning a message normally
+    #
+    # Scenario:
+    # - The owner and user1 register
+    # - The owner creates a channel, invites user1
+    # - user1 sends a message
+    # - The owner pins the message
+    # - Test checks that the message is pinned
+    # - owner unpins the message
+    # - Test checks that the message is not pinned
+
+
+    # Register owner
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'thisismymail69@gmail.com',
+        'password': 'password',
+        'name_first': 'Owner',
+        'name_last': 'Ownerson',
+    })
+    assert resp.status_code == 200
+    owner = resp.json()
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': owner['token'],
+        'name': 'Main HUB',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    channel_id = resp.json()['channel_id']
+
+    # Register user 1
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'useremail01@gmail.com',
+        'password': 'password',
+        'name_first': 'User',
+        'name_last': 'Userson',
+    })
+    assert resp.status_code == 200
+    user1 = resp.json()
+
+    # Invite user 1
+    resp = requests.post(url + 'channel/invite', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'u_id': user1['u_id'],
+    })
+    assert resp.status_code == 200
+
+    # user1 sends a message
+    resp = requests.post(url + 'message/send', json={
+        'token': user1['token'],
+        'channel_id': channel_id,
+        'message': 'I am good with alphebet',
+    })
+    assert resp.status_code == 200
+    m_id1 = resp.json()['message_id']
+
+    # Owner pins message
+    resp = requests.post(url + 'message/pin', json={
+        'token': owner['token'],
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 200
+
+    # Update messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # Check that message is pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is True
+
+    # Owner unpins message
+    resp = requests.post(url + 'message/unpin', json={
+        'token': owner['token'],
+        'message_id': m_id1,
+    })
+    assert resp.status_code == 200
+
+    # Update messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # Check that message is not pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is False
+
+
+    # Test:
+    # - Unpinning with invalid token
+    # - Unpinning messages whilst not being in channel
+    # - Unpinning with invalid message id
+    # - Unpinning without being owner of channel
+    #
+    # Scenario:
+    # - user2 registers (not in channel)
+    # - user1 sends another message
+    # - owner pins the message
+    # - Test tries unpinning with invalid token and message id
+    # - user2 tries unpinning without being in channel
+    # - user1 tries unpinning whilst being in channel (not owner)
+    # - Test checks that message is still pinned
+
+
+    # Register user 2
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'snowsmasher666@gmail.com',
+        'password': 'password',
+        'name_first': 'Snow',
+        'name_last': 'Snowson',
+    })
+    user2 = resp.json()
+
+    # user1 sends a message
+    resp = requests.post(url + 'message/send', json={
+        'token': user1['token'],
+        'channel_id': channel_id,
+        'message': 'hello everyone',
+    })
+    assert resp.status_code == 200
+    m_id2 = resp.json()['message_id']
+
+    # Update messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # Owner pins message
+    resp = requests.post(url + 'message/pin', json={
+        'token': owner['token'],
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 200
+
+    # Update messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # Unpinning with invalid token
+    resp = requests.post(url + 'message/unpin', json={
+        'token': 'notavalidtoken',
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 400
+
+    # Unpinning with invalid message id
+    resp = requests.post(url + 'message/unpin', json={
+        'token': owner['token'],
+        'message_id': -400,
+    })
+    assert resp.status_code == 400
+
+    # Unpinning without being in the channel
+    resp = requests.post(url + 'message/unpin', json={
+        'token': user2['token'],
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 400
+
+    # Unpinning without being owner of channel
+    resp = requests.post(url + 'message/unpin', json={
+        'token': user1['token'],
+        'message_id': m_id2,
+    })
+    assert resp.status_code == 400
+
+    # Update messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # Check that message is still pinned
+    for message in messages:
+        if message['message_id'] == m_id2:
+            assert message['is_pinned'] is True
+
+
+    # Test:
+    # - Unpinning an already unpinned message
+    #
+    # Scenario:
+    # - owner sends a message
+    # - owner pins the message
+    # - Test checks that message is pinned
+    # - owner unpins the message
+    # - owner tries to unpin the message again
+    # - Test checks that the message is unpinned
+
+
+    # owner sends a message
+    resp = requests.post(url + 'message/send', json={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'message': 'hello user1',
+    })
+    assert resp.status_code == 200
+    m_id3 = resp.json()['message_id']
+
+    # Owner pins message (m_id3)
+    resp = requests.post(url + 'message/pin', json={
+        'token': owner['token'],
+        'message_id': m_id3,
+    })
+
+    # Update messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # Check that message is pinned
+    for message in messages:
+        if message['message_id'] == m_id3:
+            assert message['is_pinned'] is True
+
+    # Owner unpins message
+    resp = requests.post(url + 'message/unpin', json={
+        'token': owner['token'],
+        'message_id': m_id3,
+    })
+    assert resp.status_code == 200
+
+    # Owner tries to unpins message again
+    resp = requests.post(url + 'message/unpin', json={
+        'token': owner['token'],
+        'message_id': m_id3,
+    })
+    assert resp.status_code == 400
+
+    # Update messages
+    resp = requests.get(url + 'channel/messages', params={
+        'token': owner['token'],
+        'channel_id': channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    messages = resp.json()['messages']
+
+    # Check that message is not pinned
+    for message in messages:
+        if message['message_id'] == m_id3:
+            assert message['is_pinned'] is False
 
