@@ -301,7 +301,7 @@ def test_password_reset_invalid():
     with pytest.raises(InputError):
         generate_reset_code('forgetful@gmail.com')
     # Register User One
-    user = auth_register('forgetful@gmail.com', 'complicated', 'User', 'One')
+    auth_register('forgetful@gmail.com', 'complicated', 'User', 'One')
     reset_code = generate_reset_code('forgetful@gmail.com')
     # Password reset to 'password'
     with pytest.raises(InputError):
@@ -317,7 +317,7 @@ def test_password_reset_valid():
     '''
     clear()
     # Register User One
-    user = auth_register('forgetful@gmail.com', 'complicated', 'User', 'One')
+    auth_register('forgetful@gmail.com', 'complicated', 'User', 'One')
     reset_code = generate_reset_code('forgetful@gmail.com')
     # Successful password reset
     password_reset(reset_code, 'password')
