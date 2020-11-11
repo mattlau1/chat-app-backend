@@ -412,6 +412,11 @@ def test_channel_kick():
     with pytest.raises(InputError):
         channel_kick(owner['token'], channel['channel_id'], user['u_id'])
 
+    # Removed user cannot kick
+    with pytest.raises(AccessError):
+        channel_kick(user['token'], channel['channel_id'], owner['u_id'])
+
+
 def test_flockr_owner():
     '''
     Testing functionality for Flockr owner

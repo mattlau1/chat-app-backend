@@ -49,9 +49,6 @@ class User:
     '''
     Class for a User
     '''
-    # pylint: disable=too-many-instance-attributes
-    # 8 attributes reasonable
-
     def __init__(self, email, password, name_first, name_last):
         '''
         Constructor method for a User
@@ -346,6 +343,7 @@ def react_with_id_for_message(message, react_id):
     react_id (int) in a message (Message object)
     '''
     for react in message.reacts:
+        # Note: if there is only one valid react_id, this will always be true
         if react.react_id == react_id:
             return react
     return None

@@ -274,11 +274,11 @@ def channel_kick(token, channel_id, u_id):
         raise InputError('Invalid channel_id')
     elif old_user is None:
         raise AccessError('Invalid u_id')
-    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
-        raise AccessError('Authorised user is not an owner of channel and not Flockr owner')
     elif auth_user not in channel.all_members:
         # Flockr owner may not be a channel member
         raise AccessError('Authorised user is not a member in the channel')
+    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
+        raise AccessError('Authorised user is not an owner of channel and not Flockr owner')
     elif old_user in channel.owner_members:
         # User cannot be an owner of the channel
         raise InputError('User to be kicked cannot be an owner in the channel')

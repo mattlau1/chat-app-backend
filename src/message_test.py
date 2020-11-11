@@ -344,7 +344,7 @@ def test_message_react_invalid():
 
     # Invalid message id
     with pytest.raises(AccessError):
-        message_react(user['token'], '#(@*$&', 1)
+        message_react(user['token'], m_id1 + 1000, 1)
 
     # Invalid react id
     with pytest.raises(InputError):
