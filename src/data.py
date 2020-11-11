@@ -316,11 +316,13 @@ def message_with_message_id(message_id):
     returning None if not found
     '''
     channel = channel_with_message_id(message_id)
-    if channel is not None:
-        for message in channel.messages:
-            if message.message_id == message_id:
-                return message
-    return None
+    if channel is None:
+        return None
+    # If message_id has been found in channel_with_message_id, then
+    # message_id is in channel.messages from this point forth
+    for message in channel.messages:
+        if message.message_id == message_id:
+            return message
 
 
 class React:
