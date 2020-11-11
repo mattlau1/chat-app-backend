@@ -1,4 +1,6 @@
 ''' Import required modules '''
+import urllib.request
+from PIL import Image
 from data import valid_email, user_with_id, user_with_token, user_email_list, user_handle_list
 from error import InputError, AccessError
 
