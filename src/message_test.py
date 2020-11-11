@@ -241,8 +241,6 @@ def test_message_sendlater_valid():
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
     f_channel = channels_create(f_owner['token'], 'Main Channel', True)
-    random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
-    channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
 
     time_sent = datetime.timestamp(datetime.now()) + 2
 
