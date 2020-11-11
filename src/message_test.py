@@ -348,7 +348,7 @@ def test_message_react_invalid():
 
     # Invalid react id
     with pytest.raises(InputError):
-        message_react(user['token'], m_id1, 'zap')
+        message_react(user['token'], m_id1, 999)
 
 
 def test_message_unreact_valid():
@@ -437,11 +437,11 @@ def test_message_unreact_invalid():
 
     # Invalid message id
     with pytest.raises(AccessError):
-        message_unreact(user['token'], '#(@*$&', 1)
+        message_unreact(user['token'], m_id1 + 666, 1)
 
     # Invalid react id
     with pytest.raises(InputError):
-        message_unreact(user['token'], m_id1, 'paz')
+        message_unreact(user['token'], m_id1, 999)
 
 
 def test_message_unreact_already_unreacted():
