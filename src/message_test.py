@@ -1,7 +1,7 @@
 ''' Test file for message.py '''
 import pytest
-import time
-from datetime import datetime, timedelta
+from time import sleep
+from datetime import datetime
 from auth import auth_register
 from channel import channel_messages, channel_invite
 from channels import channels_create
@@ -251,7 +251,7 @@ def test_message_sendlater_valid():
     output = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(output['messages']) == 0
 
-    time.sleep(3)
+    sleep(3)
     output = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(output['messages']) == 1
 
