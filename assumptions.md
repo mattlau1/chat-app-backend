@@ -47,12 +47,15 @@
 - Message remove/edit must be called by original message sender, channel owner or Flockr owner
 - Flockr owners not in a channel cannot search messages from that channel (matches reference implementation)
 - Substring for search is caps-sensitive
+- auth_user has to be a reactor in order to be removed
+- Only owners can pin and unpin messages
 
 ## user.py:
 - User's email length can be 3-20 **inclusive** (i.e 1234567890@123456.com [20 characters])
 - User cannot use set\_profile\_name to change the name to itself (i.e changing Rebecca to Rebecca)
 - User cannot use set\_email\_name to change the email to itself (i.e changing Andrew@google.com to Andrew@google.com)
 - Emails and names with only whitespace count as 'empty' emails/names (i.e '    ' is empty)
+- Valid crop dimensions for uploading photo: x coordinates need to be from 0 to width - 1; y coordinates need to be from 0 to height - 1
 
 ## other.py:
 - Search searches for substring, but the query string is case sensitive

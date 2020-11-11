@@ -5,7 +5,10 @@ from datetime import datetime, timedelta
 from auth import auth_register
 from channel import channel_messages, channel_invite
 from channels import channels_create
-from message import message_send, message_remove, message_edit, message_sendlater
+from message import (
+    message_send, message_remove, message_edit, message_sendlater,
+    message_react, message_unreact, message_pin, message_unpin,
+)
 from error import InputError, AccessError
 from other import clear
 
@@ -228,7 +231,7 @@ def test_message_sendlater_invalid():
     with pytest.raises(InputError):
         message_sendlater(f_owner['token'], f_channel['channel_id'], message, time_sent)
     with pytest.raises(InputError):
-        message_sendlater(f_owner['token'], f_channel['channel_id'], message + 'x', time_sent)    
+        message_sendlater(f_owner['token'], f_channel['channel_id'], message + 'x', time_sent)
 
 
 def test_message_sendlater_valid():
@@ -251,3 +254,679 @@ def test_message_sendlater_valid():
     time.sleep(3)
     output = channel_messages(f_owner['token'], f_channel['channel_id'], 0)
     assert len(output['messages']) == 1
+
+
+def test_message_react_valid():
+    '''
+    Test:
+    - Multiple users reacting to the same message
+
+    Scenario:
+    - The owner and 2 random user creates an account
+    - The owner creates a public channel and sends a message
+    - 1st random user has reacted to the message
+    - Test that only 1 random user has reacted by checking the id
+    - from the owner's point of view, it shows that the owner has not reacted
+    - 2nd random user has reacted to the same message
+    - Test that the message has been reacted by those two random users
+    - from the first user's point of view, it shows that it has reacted to the msg
+    '''
+    clear()
+
+    # Making a normal channel
+    f_owner = auth_register('fox@gmail.com', 'password', 'Fox', 'Foxson')
+    f_channel = channels_create(f_owner['token'], 'Main HUB', True)
+
+    # Invite a random user to the channel
+    random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
+    channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
+
+    # Invite a second user
+    random_user2 = auth_register('randomguy@gmail.com', 'password', 'Random2', 'Guy2')
+    channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
+
+    # Owner sends message
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'I came first!')['message_id']
+
+    # Random user reacts to the message (the given react_id is 1)
+    message_react(random_user['token'], m_id1, 1)
+
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check if the user has reacted and check if the owner itself has reacted
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['react_id'] == 1
+            assert message['reacts'][0]['u_ids'] == [random_user['u_id']]
+            assert message['reacts'][0]['is_this_user_reacted'] is False
+
+    # Second user reacts to the same message
+    message_react(random_user2['token'], m_id1, 1)
+
+    # Check if another user has reacted and check if a random user itself has reacted
+    messages = channel_messages(random_user['token'], f_channel['channel_id'], 0)['messages']
+
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['react_id'] == 1
+            assert message['reacts'][0]['u_ids'] == [random_user['u_id'], random_user2['u_id']]
+            assert message['reacts'][0]['is_this_user_reacted']
+
+
+def test_message_react_invalid():
+    '''
+    Test:
+    - User react with invalid tokens
+    - User react with invalid message id
+    - User react with invalid react id
+
+    Scenario:
+    - The owner registers an account and creates a channel
+    - The user creates an account and gets invited to the channel
+    - The owner sends a message
+    - Invalid user tries to react to the message
+    - Valid user tries to react to non existent message
+    - Valid user tries to react with invalid react id
+    '''
+    clear()
+
+    # Register an owner, create channel and invite user
+    # Owner sends message
+    owner = auth_register('wolf@gmail.com', 'password', 'wolf', 'wolfson')
+    channel = channels_create(owner['token'], 'Main HUB', True)
+    user = auth_register('random@gmail.com', 'password', 'User', 'Userson')
+    channel_invite(owner['token'], channel['channel_id'], user['u_id'])
+    m_id1 = message_send(owner['token'], channel['channel_id'], 'I was here!')['message_id']
+
+    # Invalid user
+    with pytest.raises(AccessError):
+        message_react('@#($*&', m_id1, 1)
+
+    # Invalid message id
+    with pytest.raises(AccessError):
+        message_react(user['token'], '#(@*$&', 1)
+
+    # Invalid react id
+    with pytest.raises(InputError):
+        message_react(user['token'], m_id1, 'zap')
+
+
+def test_message_unreact_valid():
+    '''
+    Test:
+    - Unreact the message after giving reaction
+
+    Scenario:
+    - Owner, user1 and user2 all create an account
+    - The owner creates a channel and invites user1 and user2
+    - The owner sends a message and all 3 users react to the message
+    - Test that the message has got reacts from those 3 users
+    - user1 and user2 unreacts the message
+    - Test that the message has got reacts only from the owner
+    - Owner unreacst the message
+    - Test that the message has no reacts
+    '''
+    clear()
+
+    owner = auth_register('wolf@gmail.com', 'password', 'wolf', 'wolfson')
+    channel = channels_create(owner['token'], 'UNSW HUB', True)
+    user = auth_register('random@gmail.com', 'password', 'User', 'Userson')
+    user2 = auth_register('random2@gmail.com', 'password', 'User2', 'Userson2')
+    channel_invite(owner['token'], channel['channel_id'], user['u_id'])
+    m_id1 = message_send(owner['token'], channel['channel_id'], 'made you look!')['message_id']
+
+    # 3 users reacted
+    message_react(user['token'], m_id1, 1)
+    message_react(user2['token'], m_id1, 1)
+    message_react(owner['token'], m_id1, 1)
+
+    messages = channel_messages(owner['token'], channel['channel_id'], 0)['messages']
+
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == [user['u_id'], user2['u_id'], owner['u_id']]
+
+    # 2 users unreact
+    message_unreact(user['token'], m_id1, 1)
+    message_unreact(user2['token'], m_id1, 1)
+    messages = channel_messages(owner['token'], channel['channel_id'], 0)['messages']
+
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == [owner['u_id']]
+
+    # Another user unreacts
+    message_unreact(owner['token'], m_id1, 1)
+    messages = channel_messages(owner['token'], channel['channel_id'], 0)['messages']
+
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == []
+
+
+def test_message_unreact_invalid():
+    '''
+    Test:
+    - Invalid user tries to unreact the message
+    - Valid user tries to unreact with invalid message id
+    - Valid user tries to unreact with invalid react id
+
+    Scenario:
+    - The owner creates an account and a channel
+    - The user creats an account and gets invited to the channel
+    - The owner sends a message and the user reacts to it
+    - Test that the invalid user tries to unreact to the message
+    - Test that the valid user tries to unreact with invalid message id
+    - Test that the valid user tries to unreact with invalid id
+    '''
+    clear()
+
+    owner = auth_register('wolf@gmail.com', 'password', 'wolf', 'wolfson')
+    channel = channels_create(owner['token'], 'UNSW HUB', True)
+    user = auth_register('random@gmail.com', 'password', 'User', 'Userson')
+    channel_invite(owner['token'], channel['channel_id'], user['u_id'])
+    msg = 'please unreact this!'
+    m_id1 = message_send(owner['token'], channel['channel_id'], msg)['message_id']
+
+    # React
+    message_react(user['token'], m_id1, 1)
+
+    # Invalid user
+    with pytest.raises(AccessError):
+        message_unreact('@#($*&', m_id1, 1)
+
+    # Invalid message id
+    with pytest.raises(AccessError):
+        message_unreact(user['token'], '#(@*$&', 1)
+
+    # Invalid react id
+    with pytest.raises(InputError):
+        message_unreact(user['token'], m_id1, 'paz')
+
+
+def test_message_unreact_already_unreacted():
+    '''
+    Test:
+    - Unreact on a message that contains no reacts at all
+
+    Scenario:
+    - The owner creates an account and channel
+    - The user creats an account and gets invited to the channel
+    - The owner sends a message
+    - No one has reacted to the message at all
+    - Test that the user tries to unreact with valid tokens, message id and react id
+    '''
+    clear()
+
+    owner = auth_register('space@gmail.com', 'password', 'Einstein', 'Einsteinson')
+    channel = channels_create(owner['token'], 'UNSW HUB', True)
+    user = auth_register('zeke999@gmail.com', 'password', 'Zeke', 'Zekeson')
+    channel_invite(owner['token'], channel['channel_id'], user['u_id'])
+    msg = 'this message has no reaction'
+
+    # There is an existing message
+    m_id1 = message_send(owner['token'], channel['channel_id'], msg)['message_id']
+
+    # Unreact to message that has no reacts
+    with pytest.raises(InputError):
+        message_unreact(user['token'], m_id1, 1)
+
+
+def test_message_unreact_others_react():
+    '''
+    Test:
+    - Unreact other user's reaction
+
+    Scenario:
+    - The owner, user1 and user2 creates an account
+    - The owner creates a channel and invites user1 and user2
+    - The owner sends the message
+    - User1 reacts to the message while user2 does nothing at all
+    - Check that the message has react only from user1
+    - Test that the user2 unreact to the message that has react from user1
+    '''
+    clear()
+
+    owner = auth_register('music@gmail.com', 'password', 'ipod', 'ipodson')
+    channel = channels_create(owner['token'], 'UNSW HUB', True)
+    # Create 2 users that will join the same channel
+    user1 = auth_register('scary@gmail.com', 'password', 'Stranger', 'Danger')
+    user2 = auth_register('creepy@gmail.com', 'password', 'Danger', 'Dangerson')
+    channel_invite(owner['token'], channel['channel_id'], user1['u_id'])
+    channel_invite(owner['token'], channel['channel_id'], user2['u_id'])
+    msg = 'The quick brown fox jumps over the lazy dog'
+
+    # Owner sends the message
+    m_id1 = message_send(owner['token'], channel['channel_id'], msg)['message_id']
+
+    # user1 reacts while user2 does nothing
+    message_react(user1['token'], m_id1, 1)
+    messages = channel_messages(owner['token'], channel['channel_id'], 0)['messages']
+
+    # confirm user reacts
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['reacts'][0]['u_ids'] == [user1['u_id']]
+
+    # user2 tries to unreact the message that user1 has reacted to
+    with pytest.raises(AccessError):
+        message_unreact(user2['token'], m_id1, 1)
+
+
+def test_message_pin_valid():
+    '''
+    Test:
+    - Pinning a message normally
+
+    Scenario:
+    - Two users register (owner and user)
+    - Owner creates a private channel and invites user
+    - Owner and user send messages
+    - Test checks that all messages are not pinned
+    - Owner pins 1 message
+    - Test checks that the message is pinned
+    '''
+    clear()
+
+    # Owner and User register
+    f_owner = auth_register('johnmonkeyson@gmail.com', 'bananayummy', 'John', 'Monkeyson')
+    f_user = auth_register('stevenson@gmail.com', 'ihatebananas', 'Steven', 'Stevenson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner invites f_user to channel
+    channel_invite(f_owner['token'], f_channel['channel_id'], f_user['u_id'])
+
+    # Owner and user send messages in f_channel (Private Channel)
+    message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')
+    message_send(f_owner['token'], f_channel['channel_id'], 'hello?')
+
+    m_id3 = message_send(f_user['token'], f_channel['channel_id'], 'pin this pls')['message_id']
+
+    message_send(f_owner['token'], f_channel['channel_id'], 'bye world')
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that all messages are not pinned
+    for message in messages:
+        assert message['is_pinned'] is False
+
+    # Owner pins a message
+    message_pin(f_owner['token'], m_id3)
+
+    # Update messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is pinned
+    for message in messages:
+        if message['message_id'] == m_id3:
+            assert message['is_pinned'] is True
+
+
+def test_message_pin_invalid():
+    '''
+    Test:
+    - Pinning with invalid token
+    - Pinning with invalid message id
+    - Pinning messages whilst not being in channel
+
+    Scenario:
+    - Two users register (owner and user)
+    - Owner creates a private channel and sends a message
+    - Test attempts to pin this message with invalid token and message id
+    - User tries to pin the message without being in the channel
+    - Test checks that the message is not pinned
+    '''
+    clear()
+
+    # Owner and User register
+    f_owner = auth_register('johnmonkeyson@gmail.com', 'bananayummy', 'John', 'Monkeyson')
+    f_user = auth_register('stevenson@gmail.com', 'ihatebananas', 'Steven', 'Stevenson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # Invalid token
+    with pytest.raises(AccessError):
+        message_pin('thisisaninvalidtoken!', m_id1)
+
+    # Invalid message id
+    with pytest.raises(InputError):
+        message_pin(f_owner['token'], -29424)
+
+    # Pinning message without being in the channel
+    with pytest.raises(AccessError):
+        message_pin(f_user['token'], m_id1)
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is not pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is False
+
+
+def test_message_pin_permission():
+    '''
+    Test:
+    - Pinning a message without being the owner of the channel
+
+    Scenario:
+    - Two users register (owner and user), owner creates a private channel and
+    invites user to channel
+    - Owner sends a message
+    - User tries to pin message(should not work)
+    - Test checks that the message is not pinned
+    - Owner pins the message (should work)
+    - Test checks that the message is actually pinned
+    '''
+    clear()
+
+    # Owner and User register
+    f_owner = auth_register('peter@com.com', 'djiffgjigi22', 'Peter', 'Peterson')
+    f_user = auth_register('useruserson@gmail.com', 'helloworld', 'User', 'Userson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner invites f_user to channel
+    channel_invite(f_owner['token'], f_channel['channel_id'], f_user['u_id'])
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # User tries to pin the message but is not an owner (no permission)
+    with pytest.raises(AccessError):
+        message_pin(f_user['token'], m_id1)
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is not pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is False
+
+    # Owner pins the message
+    message_pin(f_owner['token'], m_id1)
+
+    # Update messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is True
+
+
+def test_message_pin_already_pinned():
+    '''
+    Test:
+    - Pinning an already pinned message
+
+    Scenario:
+    - Owner registers
+    - Owner creates a channel
+    - Owner sends a message
+    - Owner pins the message
+    - Test checks that message is actually pinned
+    - Owner tries to pin the same message again
+    '''
+    clear()
+
+    # Owner registers
+    f_owner = auth_register('peterson@hotmail.com', 'djiffgjigi22', 'Peter', 'Peterson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # Owner pins the message
+    message_pin(f_owner['token'], m_id1)
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is True
+
+    # Try to pin already pinned message
+    with pytest.raises(InputError):
+        message_pin(f_owner['token'], m_id1)
+
+
+def test_message_unpin_valid():
+    '''
+    Test:
+    - Unpinning a message normally
+
+    Scenario:
+    - Two users register (owner and user)
+    - Owner creates a private channel and invites user
+    - Owner and user send messages
+    - Test checks that all messages are not pinned
+    - Owner pins 1 message
+    - Test checks that the message is pinned
+    - Owner unpins message
+    - Test checks that all messages are unpinned
+    '''
+    clear()
+
+    # Owner and User register
+    f_owner = auth_register('johnmonkeyson@gmail.com', 'bananayummy', 'John', 'Monkeyson')
+    f_user = auth_register('stevenson@gmail.com', 'ihatebananas', 'Steven', 'Stevenson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner invites f_user to channel
+    channel_invite(f_owner['token'], f_channel['channel_id'], f_user['u_id'])
+
+    # Owner and user send messages in f_channel (Private Channel)
+    message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')
+    message_send(f_owner['token'], f_channel['channel_id'], 'hello?')
+
+    m_id3 = message_send(f_user['token'], f_channel['channel_id'], 'pin this pls')['message_id']
+
+    message_send(f_user['token'], f_channel['channel_id'], 'bye world')
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that all messages are not pinned
+    for message in messages:
+        assert message['is_pinned'] is False
+
+    # Owner pins a message
+    message_pin(f_owner['token'], m_id3)
+
+    # Update messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is pinned
+    for message in messages:
+        if message['message_id'] == m_id3:
+            assert message['is_pinned'] is True
+
+    # Owner unpins the message
+    message_unpin(f_owner['token'], m_id3)
+
+    # Update messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that no messages are pinned
+    for message in messages:
+        assert message['is_pinned'] is False
+
+
+def test_message_unpin_invalid():
+    '''
+    Test:
+    - Unpinning with invalid Token
+    - Unpinning messages whilst not being in channel
+    - Unpinning with invalid message id
+
+    Scenario:
+    - Two users register (owner and user)
+    - Owner creates a private channel and sends a message
+    - Owner pins message
+    - Test tries to unpin message with invalid token
+    - Test tries to unpin message with an invalid message id
+    - User1 tries to unpin message without being in the channel
+    - Test checks that the message is still pinned
+    '''
+    clear()
+
+    # Owner and User register
+    f_owner = auth_register('johnmonkeyson@gmail.com', 'bananayummy', 'John', 'Monkeyson')
+    f_user = auth_register('stevenson@gmail.com', 'ihatebananas', 'Steven', 'Stevenson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # Owner pins message
+    message_pin(f_owner['token'], m_id1)
+
+    # Invalid token
+    with pytest.raises(AccessError):
+        message_unpin('thisisaninvalidtoken!', m_id1)
+
+    # Invalid message id
+    with pytest.raises(InputError):
+        message_unpin(f_owner['token'], -4224)
+
+    # Unpinning message without being in the channel
+    with pytest.raises(AccessError):
+        message_unpin(f_user['token'], m_id1)
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is still pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is True
+
+
+def test_message_unpin_permission():
+    '''
+    Test:
+    - Unpinning a message without being the owner of the channel
+
+    Scenario:
+    - Two users register (owner and user), owner creates a private channel and
+    invites user to channel
+    - Owner sends a message
+    - Owner pins the message
+    - User tries to unpin message (should not work)
+    - Test checks that the message is still pinned
+    - Owner unpins the message (should work)
+    - Test checks that the message is not pinned anymore
+    '''
+    clear()
+
+    # Owner and User register
+    f_owner = auth_register('peter@com.com', 'djiffgjigi22', 'Peter', 'Peterson')
+    f_user = auth_register('useruserson@gmail.com', 'helloworld', 'User', 'Userson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner invites f_user to channel
+    channel_invite(f_owner['token'], f_channel['channel_id'], f_user['u_id'])
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # Owner pins message
+    message_pin(f_owner['token'], m_id1)
+
+    # User tries to unpin message (should not work)
+    with pytest.raises(AccessError):
+        message_unpin(f_user['token'], m_id1)
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is still pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is True
+
+    # Owner unpins the message
+    message_unpin(f_owner['token'], m_id1)
+
+    # Update messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is not pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is False
+
+
+def test_message_unpin_already_unpinned():
+    '''
+    Test:
+    - Unpinning an already unpinned message
+
+    Scenario:
+    - Owner registers
+    - Owner creates a channel
+    - Owner sends a message
+    - Owner pins the message
+    - Test checks that the message is pinned
+    - Owner unpins message
+    - Owner tries to unpin message again (should not work)
+    - Test checks that the message is unpinned
+    '''
+    clear()
+
+    # Owner registers
+    f_owner = auth_register('peterson@hotmail.com', 'djiffgjigi22', 'Peter', 'Peterson')
+
+    # Owner creates private channel
+    f_channel = channels_create(f_owner['token'], 'Private Channel', False)
+
+    # Owner sends message in f_channel (Private Channel)
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'hELLO wOORLD!')['message_id']
+
+    # Owner pins the message
+    message_pin(f_owner['token'], m_id1)
+
+    # Get messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Check that the message is pinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is True
+
+    # Owner unpins message
+    message_unpin(f_owner['token'], m_id1)
+
+    # Update messages in channel
+    messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
+
+    # Owner tries to unpin unpinned message
+    with pytest.raises(InputError):
+        message_unpin(f_owner['token'], m_id1)
+
+    # Check that the message is unpinned
+    for message in messages:
+        if message['message_id'] == m_id1:
+            assert message['is_pinned'] is False
+            

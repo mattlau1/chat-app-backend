@@ -49,6 +49,11 @@ def test_standup_start_invalid():
     with pytest.raises(InputError):
         standup_start(f_owner['token'], f_channel['channel_id'] + 100, 5)
 
+    # User not member of channel
+    f_user = auth_register('user@gmail.com', 'password', 'Random', 'User')
+    with pytest.raises(AccessError):
+        standup_start(f_user['token'], f_channel['channel_id'], 5)
+
     # Invalid standup length
     with pytest.raises(InputError):
         standup_start(f_owner['token'], f_channel['channel_id'], 0)
