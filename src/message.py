@@ -5,6 +5,7 @@ from data import (
     Message, channel_with_message_id, message_with_message_id,
     react_with_id_for_message
 )
+from bot import bot_message_parser
 from error import InputError, AccessError
 
 def message_send(token, channel_id, message):
@@ -32,6 +33,7 @@ def message_send(token, channel_id, message):
     # Store message
     new_message = Message(auth_user, message, current_time())
     channel.messages.append(new_message)
+    bot_message_parser(token, channel_id, message)
 
     return {
         'message_id': new_message.message_id,

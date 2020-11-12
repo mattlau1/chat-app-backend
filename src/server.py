@@ -285,7 +285,7 @@ def http_message_sendlater():
     '''
     Wrapper function for message_sendlater (sends a message at a later date)
     POST: JSON containing "token" (str), "channel_id" (int),
-          "message" (str), "time_sent" (UNIX timestamp - float)
+          "message" (str), "time_sent" (UNIX timestamp - int)
     Returns JSON containing "message_id" (int)
     '''
     payload = request.get_json()
@@ -455,7 +455,7 @@ def http_standup_start():
     '''
     Wrapper for standup_start (starts a standup)
     POST: JSON containing "token" (str), "channel_id" (int), "length" (int)
-    Returns JSON containing "time_finish" (UNIX timestamp float)
+    Returns JSON containing "time_finish" (UNIX timestamp int)
     '''
     payload = request.get_json()
     return dumps(standup_start(payload['token'], payload['channel_id'], payload['length']))
@@ -466,7 +466,7 @@ def http_standup_active():
     '''
     Wrapper for standup_active (returns information about standup status)
     POST: JSON containing "token" (str), "channel_id" (int)
-    Returns JSON containing "is_active" (bool), "time_finish" (UNIX timestamp float)
+    Returns JSON containing "is_active" (bool), "time_finish" (UNIX timestamp int)
     '''
     return dumps(standup_active(request.args.get('token', type=str),
                                 request.args.get('channel_id', type=int)))
