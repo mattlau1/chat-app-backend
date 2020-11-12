@@ -210,7 +210,7 @@ def test_message_edit():
     # Check messages content
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     messages = [message['message'] for message in messages]
-    assert messages == ['Third message', 'Second message', 'First message']
+    assert messages == ['Third msg', 'Second msg', 'First msg']
 
     # Authorised user did not send the message and is not channel or Flockr owner
     with pytest.raises(AccessError):
