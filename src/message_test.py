@@ -1,7 +1,7 @@
 ''' Test file for message.py '''
-import pytest
 from time import sleep
 from datetime import datetime
+import pytest
 from auth import auth_register
 from channel import channel_messages, channel_invite
 from channels import channels_create
@@ -12,11 +12,25 @@ from message import (
 from error import InputError, AccessError
 from other import clear
 
-
 def test_message_send_invalid():
     '''
-    Test invalid message sending
+    Test:
+        - Sending message with invalid token
+        - Sending message with invalid channel id
+        - Sending message without being a member of channel
+        - Sending empty messages
+        - Sending messages that are too long (1000+ characters)
+
+    Scenario:
+        - Owner registers and creates channel
+        - Test tries to send message with invalid token
+        - Owner tries to send message in an invalid channel
+        - random_user registers and creates channel
+        - Owner tries to send message in random_user's channel without being a member
+        - random_user tries to send message in owner's channel without being a member
+        - Owner tries to send an empty string and a 1001 character string
     '''
+
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
     f_channel = channels_create(f_owner['token'], 'Main Channel', True)
@@ -49,7 +63,16 @@ def test_message_send_invalid():
 
 def test_message_send_valid():
     '''
-    Valid message sending
+    Test:
+        - Sending messages normally
+
+    Scenario:
+        - Owner registers and creates channel
+        - random_user registers
+        - Owner invites random_user and random_user joins owner's channel
+        - Owner sends message
+        - Test checks that message was sent
+        - Owner and user send multiple messages of increasing lengths
     '''
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
@@ -70,7 +93,25 @@ def test_message_send_valid():
 
 def test_message_remove():
     '''
-    Test message removal
+    Test:
+        - Removing message with invalid message id
+        - Removing message with invalid token
+        - Removing message without being owner of channel or message
+        - Removing message whilst being owner of message or channel
+        - Removing already removed message
+
+    Scenario:
+        - Owner registers and creates channel
+        - random_user and random_user2 join owner's channel
+        - Owner sends message
+        - Owner tries to remove invalid message
+        - Both users send messages
+        - Test tries to remove first message with invalid token
+        - Users try to remove owner's message (should not work)
+        - random_user2 removes their own message
+        - Owner removes random_user's message
+        - Owner removes it's own message
+        - Owner tries to remove removed message
     '''
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
@@ -80,14 +121,14 @@ def test_message_remove():
     random_user2 = auth_register('randomguy@gmail.com', 'password', 'Random2', 'Guy2')
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
 
-    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First message')['message_id']
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First msg')['message_id']
 
     # Invalid message_id
     with pytest.raises(InputError):
         message_remove(f_owner['token'], m_id1 + 1)
 
-    m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second message')['message_id']
-    m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')['message_id']
+    m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second msg')['message_id']
+    m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third msg')['message_id']
 
     # Invalid token
     with pytest.raises(AccessError):
@@ -101,14 +142,17 @@ def test_message_remove():
 
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     assert len(messages) == 3
+
     # Message sender can remove their own message
     message_remove(random_user2['token'], m_id3)
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     assert len(messages) == 2
+
     # Flockr owner can remove anyone's message
     message_remove(f_owner['token'], m_id2)
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     assert len(messages) == 1
+
     # Flockr owner can remove their own message
     message_remove(f_owner['token'], m_id1)
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
@@ -121,8 +165,27 @@ def test_message_remove():
 
 def test_message_edit():
     '''
-    Test message edit
+    Test:
+        - Editing message with invalid message id
+        - Editing message with invalid token
+        - Editing message without being owner of channel or message
+        - Editing message whilst being owner of message or channel
+        - Editing message to an empty string for deletion
+
+    Scenario:
+        - Owner registers and creates channel
+        - random_user and random_user2 join owner's channel
+        - Owner sends message
+        - Owner tries to edit first message with invalid message id
+        - Users both send messages
+        - Test tries to edit first message with invalid token
+        - Users try to edit messages without being owner of channel or message
+        - Users edit their own messages
+        - Owner edits user's messages
+        - Users try to delete messages via editing without being owner of channel or message
+        - Owner deletes user's messages via edit to empty string
     '''
+
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
     f_channel = channels_create(f_owner['token'], 'Main Channel', True)
@@ -131,14 +194,14 @@ def test_message_edit():
     random_user2 = auth_register('randomguy@gmail.com', 'password', 'Random2', 'Guy2')
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user2['u_id'])
 
-    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First message')['message_id']
+    m_id1 = message_send(f_owner['token'], f_channel['channel_id'], 'First msg')['message_id']
 
     # Invalid message_id
     with pytest.raises(InputError):
         message_edit(f_owner['token'], m_id1 + 1, 'Edited first message')
 
-    m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second message')['message_id']
-    m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third message')['message_id']
+    m_id2 = message_send(random_user['token'], f_channel['channel_id'], 'Second msg')['message_id']
+    m_id3 = message_send(random_user2['token'], f_channel['channel_id'], 'Third msg')['message_id']
 
     # Invalid token
     with pytest.raises(AccessError):
@@ -157,8 +220,10 @@ def test_message_edit():
 
     # Message sender can edit their own message
     message_edit(random_user2['token'], m_id3, 'Edited third message')
+
     # Flockr owner can edit anyone's message
     message_edit(f_owner['token'], m_id2, 'Edited second message')
+
     # Flockr owner can edit their own message
     message_edit(f_owner['token'], m_id1, 'Edited first message')
 
@@ -168,9 +233,9 @@ def test_message_edit():
     assert messages == ['Edited third message', 'Edited second message', 'Edited first message']
 
     # If the edited message becomes an empty string, it should be deleted
-    m_id4 = message_send(f_owner['token'], f_channel['channel_id'], 'Fourth message')['message_id']
-    m_id5 = message_send(random_user['token'], f_channel['channel_id'], 'Fifth message')['message_id']
-    m_id6 = message_send(random_user2['token'], f_channel['channel_id'], 'Sixth message')['message_id']
+    m_id4 = message_send(f_owner['token'], f_channel['channel_id'], 'Fourth msg')['message_id']
+    m_id5 = message_send(random_user['token'], f_channel['channel_id'], 'Fifth msg')['message_id']
+    m_id6 = message_send(random_user2['token'], f_channel['channel_id'], 'Sixth msg')['message_id']
 
     messages = channel_messages(f_owner['token'], f_channel['channel_id'], 0)['messages']
     assert len(messages) == 6
@@ -183,8 +248,10 @@ def test_message_edit():
 
     # Message sender can delete their own message by editing it to an empty message
     message_edit(random_user2['token'], m_id6, '')
+
     # Flockr owner can delete anyone's message by editing it to an empty message
     message_edit(f_owner['token'], m_id5, '')
+
     # Flockr owner can delete their own message by editing it to an empty message
     message_edit(f_owner['token'], m_id4, '')
 
@@ -194,7 +261,15 @@ def test_message_edit():
 
 def test_message_sendlater_invalid():
     '''
-    Test invalidly sending a message later
+    Test:
+        - Sending a message later with an invalid token
+        - Sending a message later with an invalid channel id
+        - Sending a message later without being a member of channel
+        - Sending a message later with an invalid length
+
+    Scenario:
+        - Owner registers and creates channel
+        -
     '''
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
@@ -213,16 +288,20 @@ def test_message_sendlater_invalid():
         message_sendlater('', f_channel['channel_id'], 'Test Message', time_sent)
     # Invalid channel
     with pytest.raises(InputError):
-        message_sendlater(f_owner['token'], f_channel['channel_id'] + 100, 'Test message', time_sent)
+        message_sendlater(f_owner['token'], f_channel['channel_id'] + 100, 'Test msg', time_sent)
 
     random_user = auth_register('random@gmail.com', 'password', 'Random', 'User')
     r_channel = channels_create(random_user['token'], 'Random Channel', True)
 
     # User not in channel as member
     with pytest.raises(AccessError):
-        message_sendlater(f_owner['token'], r_channel['channel_id'], 'f_owner in r_channel', time_sent)
+        message_sendlater(
+            f_owner['token'], r_channel['channel_id'], 'f_owner in r_channel', time_sent
+        )
     with pytest.raises(AccessError):
-        message_sendlater(random_user['token'], f_channel['channel_id'], 'random_user in f_channel', time_sent)
+        message_sendlater(
+            random_user['token'], f_channel['channel_id'], 'random_user in f_channel', time_sent
+        )
 
     # Message lengths
     with pytest.raises(InputError):
@@ -236,7 +315,12 @@ def test_message_sendlater_invalid():
 
 def test_message_sendlater_valid():
     '''
-    Test validly sending a message later
+    Test:
+        -
+
+    Scenario:
+        - Owner registers and creates channel
+        -
     '''
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
@@ -257,17 +341,18 @@ def test_message_sendlater_valid():
 def test_message_react_valid():
     '''
     Test:
-    - Multiple users reacting to the same message
+        - Multiple users reacting to the same message
 
     Scenario:
-    - The owner and 2 random user creates an account
-    - The owner creates a public channel and sends a message
-    - 1st random user has reacted to the message
-    - Test that only 1 random user has reacted by checking the id
-    - from the owner's point of view, it shows that the owner has not reacted
-    - 2nd random user has reacted to the same message
-    - Test that the message has been reacted by those two random users
-    - from the first user's point of view, it shows that it has reacted to the msg
+        - Owner registers and creates channel
+        - Random users register and join owner's channel
+        - Owner sends message
+        - random_user reacts to the message
+        - Test checks that only 1 random user has reacted
+        - From the owner's point of view, it shows that the owner has not reacted
+        - random_user2 has reacted to the same message
+        - Test checks that the message has been reacted to by both random users
+        - From the random_user point of view, it shows that random_user has reacted to the msg
     '''
     clear()
 
@@ -314,17 +399,17 @@ def test_message_react_valid():
 def test_message_react_invalid():
     '''
     Test:
-    - User react with invalid tokens
-    - User react with invalid message id
-    - User react with invalid react id
+        - User react with invalid tokens
+        - User react with invalid message id
+        - User react with invalid react id
 
     Scenario:
-    - The owner registers an account and creates a channel
-    - The user creates an account and gets invited to the channel
-    - The owner sends a message
-    - Invalid user tries to react to the message
-    - Valid user tries to react to non existent message
-    - Valid user tries to react with invalid react id
+        - The owner registers an account and creates a channel
+        - The user creates an account and gets invited to the channel
+        - The owner sends a message
+        - Invalid user tries to react to the message
+        - Valid user tries to react to non existent message
+        - Valid user tries to react with invalid react id
     '''
     clear()
 
@@ -352,17 +437,17 @@ def test_message_react_invalid():
 def test_message_unreact_valid():
     '''
     Test:
-    - Unreact the message after giving reaction
+        - Unreact the message after giving reaction
 
     Scenario:
-    - Owner, user1 and user2 all create an account
-    - The owner creates a channel and invites user1 and user2
-    - The owner sends a message and all 3 users react to the message
-    - Test that the message has got reacts from those 3 users
-    - user1 and user2 unreacts the message
-    - Test that the message has got reacts only from the owner
-    - Owner unreacst the message
-    - Test that the message has no reacts
+        - Owner, user1 and user2 all create an account
+        - The owner creates a channel and invites user1 and user2
+        - The owner sends a message and all 3 users react to the message
+        - Test that the message has gotten reactions from those 3 users
+        - user1 and user2 unreact to the message
+        - Test that the message has gotten reactions only from the owner
+        - Owner unreacst the message
+        - Test that the message has no reactions
     '''
     clear()
 
@@ -405,17 +490,17 @@ def test_message_unreact_valid():
 def test_message_unreact_invalid():
     '''
     Test:
-    - Invalid user tries to unreact the message
-    - Valid user tries to unreact with invalid message id
-    - Valid user tries to unreact with invalid react id
+        - Invalid user tries to unreact the message
+        - Valid user tries to unreact with invalid message id
+        - Valid user tries to unreact with invalid react id
 
     Scenario:
-    - The owner creates an account and a channel
-    - The user creats an account and gets invited to the channel
-    - The owner sends a message and the user reacts to it
-    - Test that the invalid user tries to unreact to the message
-    - Test that the valid user tries to unreact with invalid message id
-    - Test that the valid user tries to unreact with invalid id
+        - The owner creates an account and a channel
+        - The user creats an account and gets invited to the channel
+        - The owner sends a message and the user reacts to it
+        - Test that the invalid user tries to unreact to the message
+        - Test that the valid user tries to unreact with invalid message id
+        - Test that the valid user tries to unreact with invalid id
     '''
     clear()
 
@@ -445,14 +530,14 @@ def test_message_unreact_invalid():
 def test_message_unreact_already_unreacted():
     '''
     Test:
-    - Unreact on a message that contains no reacts at all
+        - Unreact on a message that contains no reacts at all
 
     Scenario:
-    - The owner creates an account and channel
-    - The user creats an account and gets invited to the channel
-    - The owner sends a message
-    - No one has reacted to the message at all
-    - Test that the user tries to unreact with valid tokens, message id and react id
+        - The owner creates an account and channel
+        - The user creats an account and gets invited to the channel
+        - The owner sends a message
+        - No one has reacted to the message at all
+        - Test that the user tries to unreact with valid tokens, message id and react id
     '''
     clear()
 
@@ -473,15 +558,15 @@ def test_message_unreact_already_unreacted():
 def test_message_unreact_others_react():
     '''
     Test:
-    - Unreact other user's reaction
+        - Unreact other user's reaction
 
     Scenario:
-    - The owner, user1 and user2 creates an account
-    - The owner creates a channel and invites user1 and user2
-    - The owner sends the message
-    - User1 reacts to the message while user2 does nothing at all
-    - Check that the message has react only from user1
-    - Test that the user2 unreact to the message that has react from user1
+        - The owner, user1 and user2 creates an account
+        - The owner creates a channel and invites user1 and user2
+        - The owner sends the message
+        - User1 reacts to the message while user2 does nothing at all
+        - Check that the message has react only from user1
+        - Test that the user2 unreact to the message that has react from user1
     '''
     clear()
 
@@ -514,15 +599,15 @@ def test_message_unreact_others_react():
 def test_message_pin_valid():
     '''
     Test:
-    - Pinning a message normally
+        - Pinning a message normally
 
     Scenario:
-    - Two users register (owner and user)
-    - Owner creates a private channel and invites user
-    - Owner and user send messages
-    - Test checks that all messages are not pinned
-    - Owner pins 1 message
-    - Test checks that the message is pinned
+        - Two users register (owner and user)
+        - Owner creates a private channel and invites user
+        - Owner and user send messages
+        - Test checks that all messages are not pinned
+        - Owner pins 1 message
+        - Test checks that the message is pinned
     '''
     clear()
 
@@ -566,16 +651,16 @@ def test_message_pin_valid():
 def test_message_pin_invalid():
     '''
     Test:
-    - Pinning with invalid token
-    - Pinning with invalid message id
-    - Pinning messages whilst not being in channel
+        - Pinning with invalid token
+        - Pinning with invalid message id
+        - Pinning messages whilst not being in channel
 
     Scenario:
-    - Two users register (owner and user)
-    - Owner creates a private channel and sends a message
-    - Test attempts to pin this message with invalid token and message id
-    - User tries to pin the message without being in the channel
-    - Test checks that the message is not pinned
+        - Two users register (owner and user)
+        - Owner creates a private channel and sends a message
+        - Test attempts to pin this message with invalid token and message id
+        - User tries to pin the message without being in the channel
+        - Test checks that the message is not pinned
     '''
     clear()
 
@@ -613,16 +698,16 @@ def test_message_pin_invalid():
 def test_message_pin_permission():
     '''
     Test:
-    - Pinning a message without being the owner of the channel
+        - Pinning a message without being the owner of the channel
 
     Scenario:
-    - Two users register (owner and user), owner creates a private channel and
-    invites user to channel
-    - Owner sends a message
-    - User tries to pin message(should not work)
-    - Test checks that the message is not pinned
-    - Owner pins the message (should work)
-    - Test checks that the message is actually pinned
+        - Two users register (owner and user), owner creates a private channel and
+        invites user to channel
+        - Owner sends a message
+        - User tries to pin message(should not work)
+        - Test checks that the message is not pinned
+        - Owner pins the message (should work)
+        - Test checks that the message is actually pinned
     '''
     clear()
 
@@ -666,15 +751,15 @@ def test_message_pin_permission():
 def test_message_pin_already_pinned():
     '''
     Test:
-    - Pinning an already pinned message
+        - Pinning an already pinned message
 
     Scenario:
-    - Owner registers
-    - Owner creates a channel
-    - Owner sends a message
-    - Owner pins the message
-    - Test checks that message is actually pinned
-    - Owner tries to pin the same message again
+        - Owner registers
+        - Owner creates a channel
+        - Owner sends a message
+        - Owner pins the message
+        - Test checks that message is actually pinned
+        - Owner tries to pin the same message again
     '''
     clear()
 
@@ -706,17 +791,17 @@ def test_message_pin_already_pinned():
 def test_message_unpin_valid():
     '''
     Test:
-    - Unpinning a message normally
+        - Unpinning a message normally
 
     Scenario:
-    - Two users register (owner and user)
-    - Owner creates a private channel and invites user
-    - Owner and user send messages
-    - Test checks that all messages are not pinned
-    - Owner pins 1 message
-    - Test checks that the message is pinned
-    - Owner unpins message
-    - Test checks that all messages are unpinned
+        - Two users register (owner and user)
+        - Owner creates a private channel and invites user
+        - Owner and user send messages
+        - Test checks that all messages are not pinned
+        - Owner pins 1 message
+        - Test checks that the message is pinned
+        - Owner unpins message
+        - Test checks that all messages are unpinned
     '''
     clear()
 
@@ -770,18 +855,18 @@ def test_message_unpin_valid():
 def test_message_unpin_invalid():
     '''
     Test:
-    - Unpinning with invalid Token
-    - Unpinning messages whilst not being in channel
-    - Unpinning with invalid message id
+        - Unpinning with invalid token
+        - Unpinning messages whilst not being in channel
+        - Unpinning with invalid message id
 
     Scenario:
-    - Two users register (owner and user)
-    - Owner creates a private channel and sends a message
-    - Owner pins message
-    - Test tries to unpin message with invalid token
-    - Test tries to unpin message with an invalid message id
-    - User1 tries to unpin message without being in the channel
-    - Test checks that the message is still pinned
+        - Two users register (owner and user)
+        - Owner creates a private channel and sends a message
+        - Owner pins message
+        - Test tries to unpin message with invalid token
+        - Test tries to unpin message with an invalid message id
+        - User1 tries to unpin message without being in the channel
+        - Test checks that the message is still pinned
     '''
     clear()
 
@@ -822,17 +907,17 @@ def test_message_unpin_invalid():
 def test_message_unpin_permission():
     '''
     Test:
-    - Unpinning a message without being the owner of the channel
+        - Unpinning a message without being the owner of the channel
 
     Scenario:
-    - Two users register (owner and user), owner creates a private channel and
+        - Two users register (owner and user), owner creates a private channel and
     invites user to channel
-    - Owner sends a message
-    - Owner pins the message
-    - User tries to unpin message (should not work)
-    - Test checks that the message is still pinned
-    - Owner unpins the message (should work)
-    - Test checks that the message is not pinned anymore
+        - Owner sends a message
+        - Owner pins the message
+        - User tries to unpin message (should not work)
+        - Test checks that the message is still pinned
+        - Owner unpins the message (should work)
+        - Test checks that the message is not pinned anymore
     '''
     clear()
 
@@ -879,17 +964,17 @@ def test_message_unpin_permission():
 def test_message_unpin_already_unpinned():
     '''
     Test:
-    - Unpinning an already unpinned message
+        - Unpinning an already unpinned message
 
     Scenario:
-    - Owner registers
-    - Owner creates a channel
-    - Owner sends a message
-    - Owner pins the message
-    - Test checks that the message is pinned
-    - Owner unpins message
-    - Owner tries to unpin message again (should not work)
-    - Test checks that the message is unpinned
+        - Owner registers
+        - Owner creates a channel
+        - Owner sends a message
+        - Owner pins the message
+        - Test checks that the message is pinned
+        - Owner unpins message
+        - Owner tries to unpin message again (should not work)
+        - Test checks that the message is unpinned
     '''
     clear()
 
