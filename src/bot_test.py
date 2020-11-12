@@ -1,10 +1,11 @@
 import pytest
 import time
 from auth import auth_register
-from channel import channel_join, channel_messages
+from channel import channel_join, channel_messages, channel_details
 from channels import channels_create
 from message import message_send
 from bot import bot_message_parser, message_prune
+from user import user_profile_sethandle
 from error import InputError, AccessError
 from other import clear
 
@@ -103,3 +104,21 @@ def test_message_prune_valid():
     messages = channel_messages(c_owner['token'], channel['channel_id'], 0)['messages']
     assert len(messages) == 0
 
+def test_bot_channel_kick():
+    ''' General test for handle since already tested in channel.py '''
+    clear()
+    # Register users and join channel
+    owner = auth_register('admin@gmail.com', 'password', 'Admin', 'User')
+    user_profile_sethandle(owner['token'], 'overlord')
+    user = auth_register('user@gmail.com', 'password', 'Random', 'User')
+    user_profile_sethandle(user['token'], 'naughty_user')
+    channel = channels_create(owner['token'], 'My Channel', True)
+    channel_join(user['token'], channel['channel_id'])
+
+    # Test for kicking via handle
+    # No owner permission - cannot kick owner
+    message_send(user['token'], channel['channel_id'], '/kick overlord')
+    assert len(channel_details(user['token'], channel['channel_id'])['all_members']) == 2
+    # Has owner permission - can kick random user
+    message_send(owner['token'], channel['channel_id'], '/kick naughty_user')
+    assert len(channel_details(owner['token'], channel['channel_id'])['all_members']) == 1

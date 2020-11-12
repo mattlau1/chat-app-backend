@@ -58,7 +58,7 @@ def channel_details(token, channel_id):
                 'u_id': owner.u_id,
                 'name_first': owner.name_first,
                 'name_last': owner.name_last,
-                # image url as well??
+                'profile_img_url': owner.profile_img_url,
             }
             for owner in channel.owner_members
         ],
@@ -67,6 +67,7 @@ def channel_details(token, channel_id):
                 'u_id': member.u_id,
                 'name_first': member.name_first,
                 'name_last': member.name_last,
+                'profile_img_url': member.profile_img_url,
             }
             for member in channel.all_members
         ],
