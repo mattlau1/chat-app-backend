@@ -166,7 +166,7 @@ def message_prune(token, channel_id, num_messages):
 ######################
 ## Hangman commands ##
 ######################
-TOTAL_HANGMAN_GUESSES = 7
+TOTAL_HANGMAN_GUESSES = 10
 hangman_status = {
     'active': False,
     'word': '',

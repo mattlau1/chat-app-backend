@@ -1,4 +1,5 @@
 ''' Import required modules '''
+import os
 import pytest
 import re
 from subprocess import Popen, PIPE
@@ -6,6 +7,8 @@ import signal
 from time import sleep
 import requests
 import json
+import urllib.request
+from PIL import Image
 from echo_http_test import url
 
 ###############
@@ -429,3 +432,97 @@ def test_http_user_profile_sethandle(url):
 
     # Make sure user2's handle isn't the same as user1's
     assert profile2['user']['handle_str'] == 'Apple'
+
+
+def test_http_user_profile_uploadphoto(url):
+    '''
+    HTTP test for user_profile_uploadphoto
+    '''
+    assert requests.delete(url + 'clear').status_code == 200
+
+    # Registering valid user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'stvnnguyen69@hotmail.com',
+        'password': 'password',
+        'name_first': 'Steven',
+        'name_last': 'Nguyen',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+    
+    original_img_url = 'https://wallpapercave.com/wp/OWmhWu0.jpg'
+    # Check size
+    urllib.request.urlretrieve(original_img_url, 'test.jpg')
+    img = Image.open('test.jpg')
+    original_width, original_height = img.size
+
+    # Invalid
+    resp = requests.post(url + 'user/profile/uploadphoto', json={
+        'token': user['token'],
+        'img_url': original_img_url,
+        'x_start': 0,
+        'y_start': 0,
+        'x_end': original_width + 1,
+        'y_end': original_height + 1,
+    })
+    assert resp.status_code == 400
+
+    resp = requests.post(url + 'user/profile/uploadphoto', json={
+        'token': user['token'],
+        'img_url': original_img_url,
+        'x_start': -1,
+        'y_start': -1,
+        'x_end': original_width,
+        'y_end': original_height,
+    })
+    assert resp.status_code == 400
+
+    # Valid
+    resp = requests.post(url + 'user/profile/uploadphoto', json={
+        'token': user['token'],
+        'img_url': original_img_url,
+        'x_start': 0,
+        'y_start': 0,
+        'x_end': original_width,
+        'y_end': original_height,
+    })
+    assert resp.status_code == 200
+    
+    resp = requests.get(url + 'user/profile', params={
+        'token': user['token'],
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+    img_url = resp.json()['user']['profile_img_url']
+
+    # Check crop size
+    urllib.request.urlretrieve(img_url, 'test.jpg')
+    img = Image.open('test.jpg')
+    img_width, img_height = img.size
+    assert img_width == original_width and img_height == original_height
+
+    resp = requests.post(url + 'user/profile/uploadphoto', json={
+        'token': user['token'],
+        'img_url': original_img_url,
+        'x_start': 0,
+        'y_start': 0,
+        'x_end': original_width - 10,
+        'y_end': original_height - 20,
+    })
+    assert resp.status_code == 200
+    
+    resp = requests.get(url + 'user/profile', params={
+        'token': user['token'],
+        'u_id': user['u_id'],
+    })
+    assert resp.status_code == 200
+    img_url = resp.json()['user']['profile_img_url']
+
+    # Check size
+    urllib.request.urlretrieve(img_url, 'test.jpg')
+    img = Image.open('test.jpg')
+    img_width, img_height = img.size
+    assert img_width == original_width - 10 and img_height == original_height - 20
+
+    # Delete test.jpg
+    os.remove('test.jpg')

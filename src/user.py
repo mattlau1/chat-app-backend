@@ -154,8 +154,11 @@ def valid_crop_dimensions(width, height, x_start, y_start, x_end, y_end):
     '''
     Helper function for user_profile_uploadphoto to check for valid crop dimensions
     '''
-    if x_start not in range(width) or x_end not in range(width):
+    if x_start not in range(width + 1) or x_end not in range(width + 1):
         return False
-    if y_start not in range(height) or y_end not in range(height):
+    if y_start not in range(height + 1) or y_end not in range(height + 1):
+        return False
+    # Width/height can't be 0 pixels in length
+    if x_start == x_end or y_start == y_end:
         return False
     return True

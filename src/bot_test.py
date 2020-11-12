@@ -121,6 +121,9 @@ def test_bot_channel_kick():
     # No owner permission - cannot kick owner
     message_send(user['token'], channel['channel_id'], '/kick overlord')
     assert len(channel_details(user['token'], channel['channel_id'])['all_members']) == 2
+    # Incorrect handle provided
+    message_send(owner['token'], channel['channel_id'], '/kick naughty_user1')
+    assert len(channel_details(owner['token'], channel['channel_id'])['all_members']) == 2
     # Has owner permission - can kick random user
     message_send(owner['token'], channel['channel_id'], '/kick naughty_user')
     assert len(channel_details(owner['token'], channel['channel_id'])['all_members']) == 1
