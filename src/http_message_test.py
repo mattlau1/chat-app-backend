@@ -3,6 +3,7 @@ import re
 from subprocess import Popen, PIPE
 import signal
 from time import sleep
+from datetime import datetime
 import json
 import requests
 import pytest
@@ -528,6 +529,153 @@ def test_http_message_sendlater(url):
     HTTP test for message_sendlater
     '''
     assert requests.delete(url + 'clear').status_code == 200
+
+
+    # Test:
+    #   - Check that it only sends a valid message after a certain period has elapsed
+    #
+    # Scenario:
+    #   - The owner registers and creates the channel
+    #   - Cannot message_sendlater() if the time is in the past
+    #   - Check message_sendlater() only works if the token of the authorised user is
+    #   valid and the person is in the channel
+    #   - Check that the message being sent later is not empty and is less than 1000 characters
+
+
+    # Register user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'admin@gmail.com',
+        'password': 'password',
+        'name_first': 'Admin',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    admin_token = payload['token']
+
+    # Set up channel
+    resp = requests.post(url + 'channels/create', json={
+        'token': admin_token,
+        'name': 'Admin Channel',
+        'is_public': True,
+    })
+    assert resp.status_code == 200
+    admin_channel_id = resp.json()['channel_id']
+
+    # Time is in the past
+    time_sent = datetime.timestamp(datetime.now()) - 2
+
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'message': 'First message',
+        'time_sent': time_sent,
+
+    })
+    assert resp.status_code == 400
+
+    # Time is now valid
+    time_sent = datetime.timestamp(datetime.now()) + 2
+
+    # Invalid token
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': '',
+        'channel_id': admin_channel_id,
+        'message': 'test',
+        'time_sent': time_sent,
+    })
+    assert resp.status_code == 400
+
+    # User not in channel tries to send message
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'random@gmail.com',
+        'password': 'password',
+        'name_first': 'Random',
+        'name_last': 'User',
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    random_token = payload['token']
+
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'test',
+        'time_sent': time_sent,
+    })
+    assert resp.status_code == 400
+
+    # Admin sends message
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'message': 'First message',
+        'time_sent': time_sent,
+    })
+    assert resp.status_code == 200
+
+    # Random user sends message after joining
+    resp = requests.post(url + 'channel/join', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'Second message',
+        'time_sent': time_sent,
+    })
+    assert resp.status_code == 200
+
+    # Empty messages
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': '',
+        'time_sent': time_sent,
+    })
+    assert resp.status_code == 400
+
+    # Long messages
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'A' * 1000,
+        'time_sent': time_sent,
+    })
+    assert resp.status_code == 200
+
+    resp = requests.post(url + 'message/sendlater', json={
+        'token': random_token,
+        'channel_id': admin_channel_id,
+        'message': 'A' * 1001,
+        'time_sent': time_sent,
+    })
+    assert resp.status_code == 400
+
+    # Check messages have not been sent immediately
+    resp = requests.get(url + 'channel/messages', params={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 0
+
+    # Check messages have been sent after time elapsed
+    sleep(3)
+    resp = requests.get(url + 'channel/messages', params={
+        'token': admin_token,
+        'channel_id': admin_channel_id,
+        'start': 0,
+    })
+    assert resp.status_code == 200
+    payload = resp.json()
+    assert len(payload['messages']) == 3
+
 
 def test_http_message_react(url):
     '''
