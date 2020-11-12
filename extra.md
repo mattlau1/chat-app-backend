@@ -1,6 +1,5 @@
 1. Refactored code with OOP principles
-2. Data persistence (pickling) - TODO ==================
-3. Flockr Bot, with the following functions/commands:
+2. Flockr Bot, with the following functions/commands:
 - /help: displays a help message
 - /time: displays the current time
 - /prune X: prunes the last X messages
