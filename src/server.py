@@ -337,6 +337,17 @@ def http_user_profile_sethandle():
     return dumps(user_profile_sethandle(payload['token'], payload['handle_str']))
 
 
+@APP.route('/user/profile/uploadphoto', methods=['POST'])
+def http_user_profile_uploadphoto():
+    '''
+    Wrapper function for user_profile_uploadphoto (uploads and crops photo)
+    POST: JSON containing "token" (str), "url_root" (str), "img_url" (str), "x_start" (str), "y_start" (str), "x_end" (str), "y_end" (str)
+    Returns JSON containing empty dict
+    '''
+    payload = request.get_json()
+    return dumps(user_profile_uploadphoto(payload['token'], payload['url_root'], payload['img_url'], payload['x_start'], payload['y_start'], payload['x_end'], payload['y_end']))
+
+
 ################
 ## HTTP other ##
 ################
