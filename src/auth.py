@@ -96,7 +96,7 @@ def generate_reset_code(email):
     '''
     user = user_with_email(email)
 
-    # Error checks - add to assumptions
+    # Error checks
     if not valid_email(email):
         raise InputError('Invalid email')
     if user is None:
@@ -133,6 +133,6 @@ def password_reset(reset_code, new_password):
         data['valid_reset_codes'].remove(reset_code)
     except:
         raise InputError('Invalid reset code')
-    
+
     return {
     }

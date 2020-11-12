@@ -69,6 +69,7 @@ def test_message_prune_invalid():
         # but in this isolated test case, it doesn't
         message_prune(c_owner['token'], channel['channel_id'], 4)
 
+
 def test_message_prune_valid():
     clear()
     # Register users, create channel and users join
@@ -103,6 +104,7 @@ def test_message_prune_valid():
     message_prune(c_owner['token'], channel['channel_id'], 3)
     messages = channel_messages(c_owner['token'], channel['channel_id'], 0)['messages']
     assert len(messages) == 0
+
 
 def test_bot_channel_kick():
     ''' General test for handle since already tested in channel.py '''

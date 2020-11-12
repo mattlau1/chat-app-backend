@@ -31,6 +31,7 @@ def test_register_email_invalid():
     with pytest.raises(InputError):
         auth_register('d.o.t@double.com', 'password', 'Double', 'Dot')
 
+
 def test_register_email_valid():
     '''
     Testing valid email formats for auth_register
@@ -44,6 +45,7 @@ def test_register_email_valid():
     auth_register('idk123@yahoo.com', 'password', 'Anonymous', 'Unknown')
     auth_register('email@example.co', 'password', 'Forgotten', 'Surname')
     auth_register('5py@unitedstates.ru', 'gudpassword', 'Donald', 'Trump')
+
 
 def test_register_existing_email():
     '''
@@ -70,6 +72,7 @@ def test_register_existing_email():
     with pytest.raises(InputError):
         auth_register(user1_email, 'sample', 'Agent', 'Unknown')
 
+
 def test_register_password_invalid():
     '''
     Testing invalid passwords for auth_register
@@ -86,6 +89,7 @@ def test_register_password_invalid():
     with pytest.raises(InputError):
         auth_register('valid@email.com', 'pass', 'Whois', 'Bob')
 
+
 def test_register_password_valid():
     '''
     Testing valid passwords for auth_register
@@ -99,6 +103,7 @@ def test_register_password_valid():
     auth_register('empty@space.com', '      ', 'Limit', 'Testing')
     auth_register('seven@seven.com', '1234567', 'S7v7n', 'Teen')
 
+
 def test_register_name_invalid():
     '''
     Testing invalid first and last names for auth_register
@@ -106,9 +111,9 @@ def test_register_name_invalid():
     clear()
     invalid_string1 = ''
     # 52 characters
-    invalid_string2 = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz'
+    invalid_string2 = 'a' * 52
     # 51 characters
-    invalid_string3 = 'abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxy'
+    invalid_string3 = 'a' * 51
     invalid_string4 = invalid_string3 + invalid_string2
     # Test name_first
     with pytest.raises(InputError):
@@ -140,6 +145,7 @@ def test_register_name_invalid():
         auth_register('valid@email.com', 'password', '   ', 'Last')
     with pytest.raises(InputError):
         auth_register('valid@email.com', 'password', 'First', '    ')
+
 
 def test_register_name_valid():
     '''
@@ -175,6 +181,7 @@ def test_login_email_invalid():
     with pytest.raises(InputError):
         auth_login('', 'password')
 
+
 def test_login_unregistered_email():
     '''
     Testing unregistered emails for auth_login
@@ -189,6 +196,7 @@ def test_login_unregistered_email():
         auth_login('unregistered@gmail.com', 'password')
     with pytest.raises(InputError):
         auth_login('google@gmail.com', 'password')
+
 
 def test_login_incorrect_password():
     '''
@@ -211,6 +219,7 @@ def test_login_incorrect_password():
         auth_login('user1@gmail.com', 'user2')
     with pytest.raises(InputError):
         auth_login('user2@gmail.com', 'user1')
+
 
 def test_login_success():
     '''
@@ -245,6 +254,7 @@ def test_logout_invalid_token():
     with pytest.raises(AccessError):
         auth_logout(' ' + token)
 
+
 def test_logout_success():
     '''
     Testing successful auth_logout
@@ -272,6 +282,7 @@ def test_logout_success():
     with pytest.raises(AccessError):
         auth_logout(user2['token'])
 
+
 def test_token_tampering():
     '''
     Tests for JWT token tampering
@@ -288,6 +299,7 @@ def test_token_tampering():
     fake_user1_token = '.'.join(fake_user1_token_components)
     with pytest.raises(AccessError):
         channels_create(fake_user1_token, 'Attempt', True)
+
 
 def test_password_reset_invalid():
     '''
@@ -310,6 +322,7 @@ def test_password_reset_invalid():
     with pytest.raises(InputError):
         # Password too short
         password_reset(reset_code, 'short')
+
 
 def test_password_reset_valid():
     '''
