@@ -46,7 +46,7 @@ def bot_init():
     else:
         # Create new bot
         bot_user = User('flockbot@gmail.com', 'c0mpLicAt3d', 'Flockr', 'Bot')
-        bot_user.profile_img_url = 'https://www.pinclipart.com/picdir/big/493-4936596_team-communication-app-on-the-mac-app-store.png'
+        bot_user.profile_img_url = 'https://nuvro.com/wp-content/uploads/2018/11/Flock-Logo-1.png'
         data['users'].append(bot_user)
         # Change status
         bot_status = {

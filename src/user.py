@@ -29,6 +29,7 @@ def user_profile(token, u_id):
             'name_first': target_user.name_first,
             'name_last': target_user.name_last,
             'handle_str': target_user.handle,
+            'profile_img_url': target_user.profile_img_url,
         }
     }
 
