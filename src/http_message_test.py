@@ -537,15 +537,15 @@ def test_http_message_react(url):
 
 
     # Test:
-    # - React to the message normally
-    # - User can see themselves if they have reacted or not
+    #    - React to the message normally
+    #    - User can see themselves if they have reacted or not
     #
     # Scenario:
-    # - The owner, user1 and user2 creates an account
-    # - The owner creates a channel, invites user1 and user2 and sends a message
-    # - user1 and user2 react to the message
-    # - test that the user1 and user2 has both reacted to the message from owner's
-    # point of view
+    #    - The owner, user1 and user2 creates an account
+    #    - The owner creates a channel, invites user1 and user2 and sends a message
+    #    - user1 and user2 react to the message
+    #    - test that the user1 and user2 has both reacted to the message from owner's
+    #    point of view
 
 
     # Register owner
@@ -645,14 +645,14 @@ def test_http_message_react(url):
 
 
     # Test:
-    # - React with invalid token
-    # - React with invalid message id
-    # - React with invalid react id
+    #    - React with invalid token
+    #    - React with invalid message id
+    #    - React with invalid react id
     #
     # Scenario:
-    # - Test invalid user reacts to the message
-    # - Test valid user reacts to invalid message
-    # - Test valid user reacts to the message with invalid react id
+    #    - Test invalid user reacts to the message
+    #    - Test valid user reacts to invalid message
+    #    - Test valid user reacts to the message with invalid react id
 
 
     # invalid user react
@@ -687,14 +687,14 @@ def test_http_message_unreact(url):
 
 
     # Test:
-    # - React to the message
-    # - Unreact to the message normally
+    #    - React to the message
+    #    - Unreact to the message normally
     #
     # Scenario:
-    # - Owner, user1 and user2 create account
-    # - owner invites user1 and user2 and sends a message
-    # - Owner, user1 and user2 reacts to the message
-    # - Test that all 3 users reacted to the message
+    #    - Owner, user1 and user2 create account
+    #    - owner invites user1 and user2 and sends a message
+    #    - Owner, user1 and user2 reacts to the message
+    #    - Test that all 3 users reacted to the message
 
 
     # Register owner
@@ -830,14 +830,14 @@ def test_http_message_unreact(url):
 
 
     # Test:
-    # - Unreact to the message with invalid token
-    # - Unreact to the message with invalid message id
-    # - Unreact to the message with invalid react id
+    #    - Unreact to the message with invalid token
+    #    - Unreact to the message with invalid message id
+    #    - Unreact to the message with invalid react id
     #
     # Scenario:
-    # - invalid user unreact to the message
-    # - valid user unreact to invalid message
-    # - valid user unreact to the message with invalid react id
+    #    - invalid user unreact to the message
+    #    - valid user unreact to invalid message
+    #    - valid user unreact to the message with invalid react id
 
 
     # invalid user unreact
@@ -865,14 +865,14 @@ def test_http_message_unreact(url):
 
 
     # Test:
-    # - Unreact to the message that has no reacts
-    # - Unreact to the message without using react beforehand
+    #    - Unreact to the message that has no reacts
+    #    - Unreact to the message without using react beforehand
     #
     # Scenario:
-    # - owner unreacts to the message
-    # - user1 attempts to unreact the message that has no react at all
-    # - user1 reacts to the message
-    # - user2 attempts to unreact the message that user1 reacted to
+    #    - owner unreacts to the message
+    #    - user1 attempts to unreact the message that has no react at all
+    #    - user1 reacts to the message
+    #    - user2 attempts to unreact the message that user1 reacted to
 
 
     # owner unreacts
@@ -937,19 +937,27 @@ def test_http_message_unreact(url):
 def test_http_message_pin(url):
     '''
     HTTP test for message_pin
+
+    Tests:
+        - Pinning a message normally
+        - Pinning with invalid token
+        - Pinning messages whilst not being in channel
+        - Pinning with invalid message id
+        - Pinning without being owner of channel
+        - Pinning an already pinned message
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
 
     # Test:
-    # - Pinning a message normally
+    #    - Pinning a message normally
     #
     # Scenario:
-    # - The owner and user1 register
-    # - The owner creates a channel, invites user1
-    # - user1 sends a message
-    # - The owner pins the message
-    # - Test checks that the message is pinned
+    #    - The owner and user1 register
+    #    - The owner creates a channel, invites user1
+    #    - user1 sends a message
+    #    - The owner pins the message
+    #    - Test checks that the message is pinned
 
 
     # Register owner
@@ -1022,18 +1030,18 @@ def test_http_message_pin(url):
 
 
     # Test:
-    # - Pinning with invalid token
-    # - Pinning messages whilst not being in channel
-    # - Pinning with invalid message id
-    # - Pinning without being owner of channel
+    #    - Pinning with invalid token
+    #    - Pinning messages whilst not being in channel
+    #    - Pinning with invalid message id
+    #    - Pinning without being owner of channel
     #
     # Scenario:
-    # - user2 registers (not in channel)
-    # - user1 sends another message
-    # - Test tries pinning with invalid token and message id
-    # - user2 tries pinning without being in channel
-    # - user1 tries pinning whilst being in channel (not owner)
-    # - Test checks that message is still not pinned
+    #    - user2 registers (not in channel)
+    #    - user1 sends another message
+    #    - Test tries pinning with invalid token and message id
+    #    - user2 tries pinning without being in channel
+    #    - user1 tries pinning whilst being in channel (not owner)
+    #    - Test checks that message is still not pinned
 
 
     # Register user 2
@@ -1108,13 +1116,13 @@ def test_http_message_pin(url):
 
 
     # Test:
-    # - Pinning an already pinned message
+    #    - Pinning an already pinned message
     #
     # Scenario:
-    # - owner sends a message
-    # - owner pins the message
-    # - test checks that message is pinned
-    # - owner tries to pin the same message again
+    #    - owner sends a message
+    #    - owner pins the message
+    #    - test checks that message is pinned
+    #    - owner tries to pin the same message again
 
 
     # owner sends a message
@@ -1157,21 +1165,28 @@ def test_http_message_pin(url):
 def test_http_message_unpin(url):
     '''
     HTTP test for message_unpin
+    Tests:
+        - Unpinning a message normally
+        - Unpinning with invalid token
+        - Unpinning messages whilst not being in channel
+        - Unpinning with invalid message id
+        - Unpinning without being owner of channel
+        - Unpinning an already unpinned message
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
 
     # Test:
-    # - Unpinning a message normally
+    #    - Unpinning a message normally
     #
     # Scenario:
-    # - The owner and user1 register
-    # - The owner creates a channel, invites user1
-    # - user1 sends a message
-    # - The owner pins the message
-    # - Test checks that the message is pinned
-    # - owner unpins the message
-    # - Test checks that the message is not pinned
+    #    - The owner and user1 register
+    #    - The owner creates a channel, invites user1
+    #    - user1 sends a message
+    #    - The owner pins the message
+    #    - Test checks that the message is pinned
+    #    - owner unpins the message
+    #    - Test checks that the message is not pinned
 
 
     # Register owner
@@ -1266,19 +1281,19 @@ def test_http_message_unpin(url):
 
 
     # Test:
-    # - Unpinning with invalid token
-    # - Unpinning messages whilst not being in channel
-    # - Unpinning with invalid message id
-    # - Unpinning without being owner of channel
+    #    - Unpinning with invalid token
+    #    - Unpinning messages whilst not being in channel
+    #    - Unpinning with invalid message id
+    #    - Unpinning without being owner of channel
     #
     # Scenario:
-    # - user2 registers (not in channel)
-    # - user1 sends another message
-    # - owner pins the message
-    # - Test tries unpinning with invalid token and message id
-    # - user2 tries unpinning without being in channel
-    # - user1 tries unpinning whilst being in channel (not owner)
-    # - Test checks that message is still pinned
+    #    - user2 registers (not in channel)
+    #    - user1 sends another message
+    #    - owner pins the message
+    #    - Test tries unpinning with invalid token and message id
+    #    - user2 tries unpinning without being in channel
+    #    - user1 tries unpinning whilst being in channel (not owner)
+    #    - Test checks that message is still pinned
 
 
     # Register user 2
@@ -1369,15 +1384,15 @@ def test_http_message_unpin(url):
 
 
     # Test:
-    # - Unpinning an already unpinned message
+    #    - Unpinning an already unpinned message
     #
     # Scenario:
-    # - owner sends a message
-    # - owner pins the message
-    # - Test checks that message is pinned
-    # - owner unpins the message
-    # - owner tries to unpin the message again
-    # - Test checks that the message is unpinned
+    #    - owner sends a message
+    #    - owner pins the message
+    #    - Test checks that message is pinned
+    #    - owner unpins the message
+    #    - owner tries to unpin the message again
+    #    - Test checks that the message is unpinned
 
 
     # owner sends a message
@@ -1436,4 +1451,3 @@ def test_http_message_unpin(url):
     for message in messages:
         if message['message_id'] == m_id3:
             assert message['is_pinned'] is False
-
