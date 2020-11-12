@@ -3,7 +3,8 @@ import random
 from threading import Timer
 from datetime import datetime
 from english_words import english_words_set
-from data import data, User, Message, current_time, user_with_token, user_with_id, user_with_handle, channel_with_id
+from data import (data, User, Message, current_time, user_with_token,
+                  user_with_id, user_with_handle, channel_with_id)
 from channel import channel_kick
 from error import InputError, AccessError
 
@@ -102,7 +103,7 @@ def bot_help(channel_id):
 
 
 def bot_time(channel_id):
-    bot_user = bot_init()
+    bot_init()
     channel = channel_with_id(channel_id)
     bot_msg = f'The current time is {datetime.now().strftime(r"%A %-d %B %Y, %-I:%M %p")}.'
     bot_send_message(channel, bot_msg, temporary=False)
@@ -125,7 +126,7 @@ def bot_kick(token, channel_id, message):
 
 
 def bot_message_prune(token, channel_id, message):
-    bot_user = bot_init()
+    bot_init()
     channel = channel_with_id(channel_id)
     try:
         auth_user = user_with_token(token)
