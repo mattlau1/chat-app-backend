@@ -123,6 +123,13 @@ def user_profile_sethandle(token, handle_str):
 
 def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, y_end):
     x_start, y_start, x_end, y_end = int(x_start), int(y_start), int(x_end), int(y_end)
+    '''
+    Given a URL of an image on the internet, crops the image within bounds (x_start, y_start)
+    and (x_end, y_end). Position (0,0) is the top left.
+    Input: token (str), url_root (str), img_url (str), x_start (str), y_start (str), x_end (str), y_end (str)
+    Output: empty dict
+    '''
+    # Retrieve data
     auth_user = user_with_token(token)
     if auth_user is None:
         raise AccessError('Invalid token')
