@@ -429,3 +429,22 @@ def test_http_user_profile_sethandle(url):
 
     # Make sure user2's handle isn't the same as user1's
     assert profile2['user']['handle_str'] == 'Apple'
+
+
+def test_http_user_profile_uploadphoto(url):
+    '''
+    HTTP test for user_profile_uploadphoto
+    '''
+    assert requests.delete(url + 'clear').status_code == 200
+
+    # Registering valid user
+    resp = requests.post(url + 'auth/register', json={
+        'email': 'stvnnguyen69@hotmail.com',
+        'password': 'password',
+        'name_first': 'Steven',
+        'name_last': 'Nguyen',
+    })
+    assert resp.status_code == 200
+    user = resp.json()
+
+
