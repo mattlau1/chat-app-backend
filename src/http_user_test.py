@@ -187,7 +187,7 @@ def test_http_user_profile_setemail(url):
     '''
     HTTP test for user_profile_setemail
 
-    Test:
+    Tests:
         - Setting a valid email
         - Setting an invalid email
         - Setting a taken email address
@@ -339,10 +339,22 @@ def test_http_user_profile_setemail(url):
 def test_http_user_profile_sethandle(url):
     '''
     HTTP test for user_profile_sethandle
+
+    Tests:
+        - Setting a valid handle
+        - Setting a handle with an invalid length
+        - Setting a handle that has already been taken
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
-    # SET VALID HANDLE
+    
+    # Test:
+    #   - Setting a valid handle
+    #
+    # Scenario:
+    #   - User registers and sets handle
+    #   - Test checks if handle was set correctly
+
 
     # Registering valid user
     resp = requests.post(url + 'auth/register', json={
@@ -372,7 +384,15 @@ def test_http_user_profile_sethandle(url):
     # Check new handle
     assert profile['user']['handle_str'] == 'Stevenson'
 
-    # SET INVALID HANDLE LENGTH
+
+    # Test:
+    #   - Setting a handle with an invalid length (must be between 3-20 chars)
+    #
+    # Scenario:
+    #   - User registers
+    #   - User tries to set handle to one that is too short (2 chars)
+    #   - User tries to set handle that is too long (21 chars)
+
 
     # Register valid user
     resp = requests.post(url + 'auth/register', json={
@@ -398,7 +418,15 @@ def test_http_user_profile_sethandle(url):
     })
     assert resp.status_code == 400
 
-    # HANDLE TAKEN
+    # Test:
+    #   - Setting a handle that has already been taken
+    #
+    # Scenario:
+    #   - Two users register
+    #   - user1 changes to unique handle
+    #   - user2 changes to unique handle
+    #   - user2 tries to change handle to user1's new handle
+    #   - Test checks that both handles are not the same
 
     # Register two valid users
     resp = requests.post(url + 'auth/register', json={
