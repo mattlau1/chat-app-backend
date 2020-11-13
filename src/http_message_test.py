@@ -814,7 +814,7 @@ def test_http_message_react(url):
     # valid user react to invalid message
     resp = requests.post(url + 'message/react', json={
         'token': owner['token'],
-        'message_id': m_id1+666,
+        'message_id': 666,
         'react_id': 1,
     })
     assert resp.status_code == 400
@@ -999,7 +999,7 @@ def test_http_message_unreact(url):
     # owner unreact to invalid message id
     resp = requests.post(url + 'message/unreact', json={
         'token': owner['token'],
-        'message_id': m_id1+666,
+        'message_id': 666,
         'react_id': 1,
     })
     assert resp.status_code == 400
