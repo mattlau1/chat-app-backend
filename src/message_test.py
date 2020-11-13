@@ -269,7 +269,10 @@ def test_message_sendlater_invalid():
 
     Scenario:
         - Owner registers and creates channel
-        -
+        - Owner tries to send message later with invalid time
+        - Owner tries to send message later with invalid token
+        - Owner tries to send message later with invalid channel id
+        - Random user registers and tries to send later without being member of channel
     '''
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
@@ -286,6 +289,7 @@ def test_message_sendlater_invalid():
     # Invalid token
     with pytest.raises(AccessError):
         message_sendlater('', f_channel['channel_id'], 'Test Message', time_sent)
+
     # Invalid channel
     with pytest.raises(InputError):
         message_sendlater(f_owner['token'], f_channel['channel_id'] + 100, 'Test msg', time_sent)
@@ -316,11 +320,12 @@ def test_message_sendlater_invalid():
 def test_message_sendlater_valid():
     '''
     Test:
-        -
+        - Testing valid use of sending a message later
 
     Scenario:
         - Owner registers and creates channel
-        -
+        - Owner sends a message later
+        - Test checks that message is sent
     '''
     clear()
     f_owner = auth_register('owner@gmail.com', 'password', 'Flockr', 'Boss')
