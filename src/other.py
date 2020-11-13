@@ -96,6 +96,15 @@ def search(token, query_str):
                 'u_id': message.sender.u_id,
                 'time_created': message.time_created,
                 'message': message.message,
+                'reacts': [
+                    {
+                        'react_id': react.react_id,
+                        'u_ids': [reactor.u_id for reactor in react.reactors],
+                        'is_this_user_reacted': auth_user in react.reactors,
+                    }
+                    for react in message.reacts
+                ],
+                'is_pinned': message.is_pinned,
             }
             for message in messages
         ],
