@@ -176,9 +176,25 @@ def test_http_channels_listall(url):
 def test_http_channels_create(url):
     '''
     HTTP test for channels_create
+
+    Test:
+        - Create a channel
+        - Create a channel with more than 20 characters in name
+        - Create a channel with invalid token
+        - Create a channel with an empty name
+        - Create a channel with spaces in the name
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
+
+
+    # Test:
+    #   - Create a channel
+    #
+    # Scenario:
+    #   - Owner creates an account
+    #   - Owner creates a channel successfully
+
+
     # Create user
     resp = requests.post(url + 'auth/register', json={
         'email': 'stvnnguyen69@hotmail.com',
@@ -196,6 +212,20 @@ def test_http_channels_create(url):
         'is_public': True
     })
     assert resp.status_code == 200
+
+
+    # Test:
+    #   - Create a channel with more than 20 characters in name
+    #   - Create a channel with invalid token
+    #   - Create a channel with an empty name
+    #   - Create a channel with spaces in the name
+    #
+    # Scenario:
+    #   - Owner creates another channel with a very long name
+    #   - Owner with invalid token creates another channel
+    #   - Owner creates another channel with no name
+    #   - Owner creates another channel with spaces in the name
+
 
     # Create a channel with name more than 20 characters
     resp = requests.post(url + 'channels/create', json={
