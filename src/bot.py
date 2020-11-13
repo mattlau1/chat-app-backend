@@ -8,15 +8,15 @@ from data import (data, User, Message, current_time, user_with_token,
 from channel import channel_kick
 from error import InputError, AccessError
 
-# Currently only for message_send, will need to add to message_sendlater
-
 bot_status = {
     'active': False,
     'u_id': -1,
 }
 
-# For both message_send and message_sendlater
 def bot_message_parser(token, channel_id, message):
+    '''
+    Parses a message sent to find valid command
+    '''
     if message == '/help':
         bot_help(channel_id)
     elif message == '/time':
@@ -38,7 +38,11 @@ def bot_message_parser(token, channel_id, message):
     elif message.startswith('/dice'):
         bot_dice(channel_id, message)
 
+
 def bot_init():
+    '''
+    Creates a bot user if not already started
+    '''
     global bot_status
     # Bot not technically registered
     if bot_status['active']:
@@ -55,9 +59,11 @@ def bot_init():
         }
         return bot_user
 
+
 def bot_send_message(channel, message, temporary):
     '''
-    Channel object message string
+    Sends a message to a provided channel through the bot
+    The message can be temporary
     '''
     bot_user = bot_init()
     # Bot sends message to channel
@@ -67,6 +73,7 @@ def bot_send_message(channel, message, temporary):
     if temporary:
         t = Timer(5, channel.messages.remove, args=[msg])
         t.start()
+
 
 ######################
 ## General commands ##
@@ -103,6 +110,9 @@ def bot_help(channel_id):
 
 
 def bot_time(channel_id):
+    '''
+    Displays the current time
+    '''
     bot_init()
     channel = channel_with_id(channel_id)
     bot_msg = f'The current time is {datetime.now().strftime(r"%A %-d %B %Y, %-I:%M %p")}.'
@@ -110,6 +120,9 @@ def bot_time(channel_id):
 
 
 def bot_kick(token, channel_id, message):
+    '''
+    Wrapper command for kicking a user from a channel
+    '''
     user = user_with_token(token)
     channel = channel_with_id(channel_id)
     try:
@@ -126,6 +139,9 @@ def bot_kick(token, channel_id, message):
 
 
 def bot_message_prune(token, channel_id, message):
+    '''
+    Wrapper command for pruning messages
+    '''
     bot_init()
     channel = channel_with_id(channel_id)
     try:
@@ -139,8 +155,12 @@ def bot_message_prune(token, channel_id, message):
         bot_send_message(channel, bot_msg, temporary=False)
 
 
-# Cannot put in message.py due to circular imports
 def message_prune(token, channel_id, num_messages):
+    '''
+    Prunes the last num_messages messages from a channel
+    NOTE: this function cannot be placed in message.py
+          due to circular imports
+    '''
     # Retrieve data
     auth_user = user_with_token(token)
     channel = channel_with_id(channel_id)
@@ -176,6 +196,9 @@ hangman_status = {
 }
 
 def bot_hangman_word_display(channel):
+    '''
+    Displays the current hangman game status
+    '''
     global hangman_status
     correct_word = hangman_status['word']
     show_word = ' '.join([c if c in hangman_status['guessed_letters'] else '_' for c in correct_word])
@@ -184,6 +207,9 @@ def bot_hangman_word_display(channel):
     bot_send_message(channel, bot_msg, temporary=False)
 
 def bot_hangman_start(channel_id):
+    '''
+    Starts a new hangman game
+    '''
     channel = channel_with_id(channel_id)
     global hangman_status
     if hangman_status['active']:
@@ -203,6 +229,9 @@ def bot_hangman_start(channel_id):
     bot_hangman_word_display(channel)
 
 def bot_hangman_reset():
+    '''
+    Resets a hangman game
+    '''
     global hangman_status
     hangman_status = {
         'active': False,
@@ -213,6 +242,9 @@ def bot_hangman_reset():
     }
 
 def bot_hangman_guess(token, channel_id, message):
+    '''
+    Registers a guess for an active hangman game
+    '''
     channel = channel_with_id(channel_id)
     try:
         global hangman_status
@@ -262,16 +294,24 @@ def bot_hangman_guess(token, channel_id, message):
 ## Fun Utilities ##
 ###################
 def bot_choose(channel_id, message):
-    # Separate by space, ignoring '/choose'
+    '''
+    Bot randomly chooses one of the options listed in the /choose command
+    '''
     options = message.split(' ')[1:]
     bot_msg = f'Hmm.. tough choice.. but I choose {random.choice(options)}'
     bot_send_message(channel_with_id(channel_id), bot_msg, temporary=False)
 
 def bot_flip(channel_id):
+    '''
+    Bot flips a coin and returns heads or tails
+    '''
     bot_msg = f"It appears to be {random.choice(['heads', 'tails'])}!"
     bot_send_message(channel_with_id(channel_id), bot_msg, temporary=False)
 
 def bot_dice(channel_id, message):
+    '''
+    Bot rolls a dice (6 if no number of sides specified), returning a random side
+    '''
     sides = 6
     # Not default
     try:

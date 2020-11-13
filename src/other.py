@@ -9,6 +9,7 @@ def clear():
     data['users'] = []
     data['channels'] = []
     data['latest_message_id'] = 0
+    data['valid_reset_codes'] = []
     return {
     }
 
@@ -31,6 +32,7 @@ def users_all(token):
                 'name_first': user.name_first,
                 'name_last': user.name_last,
                 'handle_str': user.handle,
+                'profile_img_url': user.profile_img_url,
             }
             for user in data['users']
         ],

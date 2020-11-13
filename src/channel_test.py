@@ -57,6 +57,7 @@ def test_channel_details():
 
     # Checking if owner of channel can check channel details, and if they are correct
     details = channel_details(owner['token'], channel['channel_id'])
+    # Ignore profile_img_url from checks
     for member in details['owner_members']:
         del member['profile_img_url']
     for member in details['all_members']:
@@ -93,6 +94,7 @@ def test_channel_details():
     # Change the name of 'user' (2nd person) and check that all instances are updated
     user_profile_setname(user['token'], 'Kevin', 'Zhu')     
     details = channel_details(user['token'], channel['channel_id'])
+    # Ignore profile_img_url from checks
     for member in details['owner_members']:
         del member['profile_img_url']
     for member in details['all_members']:

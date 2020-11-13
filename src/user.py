@@ -93,6 +93,7 @@ def user_profile_setemail(token, email):
     return {
     }
 
+
 def user_profile_sethandle(token, handle_str):
     '''
     Update the authorised user's handle (i.e. display name)
@@ -122,8 +123,21 @@ def user_profile_sethandle(token, handle_str):
     return {
     }
 
+
 def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, y_end):
-    x_start, y_start, x_end, y_end = int(x_start), int(y_start), int(x_end), int(y_end)
+    '''
+    Helper function for cropping the image with url within provided bounds,
+    and setting this image as their profile picture.
+    Input: token (str), url_root (root of url - str), img_url (str),
+           x_start (int), y_start (int), x_end (int), y_end (int)
+    Output: empty dict
+    '''
+    # Get bounds
+    try:
+        x_start, y_start, x_end, y_end = int(x_start), int(y_start), int(x_end), int(y_end)
+    except ValueError:
+        raise InputError('Invalid image dimensions provided.')
+    
     auth_user = user_with_token(token)
     if auth_user is None:
         raise AccessError('Invalid token')
@@ -154,8 +168,10 @@ def valid_crop_dimensions(width, height, x_start, y_start, x_end, y_end):
     '''
     Helper function for user_profile_uploadphoto to check for valid crop dimensions
     '''
+    # x coordinates must be from 0 to width
     if x_start not in range(width + 1) or x_end not in range(width + 1):
         return False
+    # y coordinates must be from 0 to height
     if y_start not in range(height + 1) or y_end not in range(height + 1):
         return False
     # Width/height can't be 0 pixels in length

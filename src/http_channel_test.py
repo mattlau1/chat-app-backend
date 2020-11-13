@@ -144,6 +144,7 @@ def test_http_channel_details(url):
     assert resp.status_code == 200
 
     payload = resp.json()
+    # Ignore profile_img_url from checks
     for member in payload['owner_members']:
         del member['profile_img_url']
     for member in payload['all_members']:
@@ -382,6 +383,7 @@ def test_http_channel_leave(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+    # Ignore profile_img_url from checks
     for member in payload['owner_members']:
         del member['profile_img_url']
     for member in payload['all_members']:
@@ -477,6 +479,7 @@ def test_http_channel_join(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+    # Ignore profile_img_url from checks
     for member in payload['owner_members']:
         del member['profile_img_url']
     for member in payload['all_members']:
@@ -587,6 +590,7 @@ def test_http_channel_addowner(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+    # Ignore profile_img_url from checks
     for member in payload['owner_members']:
         del member['profile_img_url']
     for member in payload['all_members']:
@@ -710,6 +714,7 @@ def test_http_channel_removeowner(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+    # Ignore profile_img_url from checks
     for member in payload['owner_members']:
         del member['profile_img_url']
     for member in payload['all_members']:

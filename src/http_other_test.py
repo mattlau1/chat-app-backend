@@ -136,6 +136,10 @@ def test_http_users_all(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+    # Ignore profile_img_url from checks
+    for member in payload['users']:
+        del member['profile_img_url']
+
     assert payload == {
         'users': [
             {

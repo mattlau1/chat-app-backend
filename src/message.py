@@ -160,6 +160,7 @@ def message_react(token, message_id, react_id):
         raise InputError('Invalid react_id')
 
     message.add_react(auth_user, react_id)
+
     return {
     }
 
