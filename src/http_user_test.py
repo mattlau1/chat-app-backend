@@ -17,8 +17,26 @@ from echo_http_test import url
 def test_http_user_profile(url):
     '''
     HTTP test for user_profile
+    
+    Test:
+        - User profile details correspond to the information given
+        when creating account
+        - Access user profile information without making an account or
+        using invalid token.
+        - Access user profile information with valid token and invalid id
     '''
     assert requests.delete(url + 'clear').status_code == 200
+
+
+    # Test:
+    #   - User profile details correspond to the information given 
+    #   when creating account
+    #   
+    # Scenario:
+    #   - User creates an account
+    #   - User changes handle string
+    #   - Check user profile detail such as names, id, email and handle string
+
 
     # Registering valid user
     resp = requests.post(url + 'auth/register', json={
@@ -50,6 +68,18 @@ def test_http_user_profile(url):
     assert profile['user']['email'] == 'stvnnguyen69@hotmail.com'
     assert profile['user']['handle_str'] == 'Stevenson'
 
+
+    # Test:
+    #   - Access user profile information without making an account or
+    #   using invalid token.
+    #   - Access user profile information with valid token and invalid id
+    #
+    # Scenario:
+    #   - Get user detail using invalid token
+    #   - Create an account
+    #   - Get user detail using new account's valid token but with invalid id
+
+
     # Access user details without registering
     resp = requests.get(url + "user/profile", params={
         'token': "&73hf(s!)@",
@@ -75,8 +105,34 @@ def test_http_user_profile(url):
 def test_http_user_profile_setname(url):
     '''
     HTTP test for user_profile_setname
+    
+    Test:
+        - User's default name
+        - Change name successfully
+        - Change name for second time
+        - Change name using maximum valid length
+        - Change name to an empty string
+        - Change name to a name that exceeds character limit
     '''
     assert requests.delete(url + 'clear').status_code == 200
+
+
+    # Test:
+    #   - User's default name
+    #   - Change name successfully
+    #   - Change name for second time
+    #   - Change name using maximum valid length
+    #
+    # Scenario:
+    #   - User create an account
+    #   - Check user's default name 
+    #   - Change first and last name to a new name 
+    #   - Check that the user has new name under the same id
+    #   - Change the name again
+    #   - Check that the user has new name again with same id
+    #   - Change the name with maximum valid length
+    #   - Check that the user has both long first and last name
+
 
     # Create user
     resp = requests.post(url + 'auth/register', json={
@@ -163,6 +219,16 @@ def test_http_user_profile_setname(url):
     assert profile['user']['name_last'] == long_last
     assert profile['user']['u_id'] == user['u_id']
 
+
+    # Test:
+    #   - Change name to an empty string
+    #   - Change name to a name that exceeds character limit
+    #
+    # Scenario:
+    #   - User tries to change name for the third time into an empty string
+    #   - User tries again to change name into a very long first and last name
+    
+
     # Change into empty name
     resp = requests.put(url+'user/profile/setname', json={
         'token': user['token'],
@@ -186,7 +252,7 @@ def test_http_user_profile_setemail(url):
     '''
     HTTP test for user_profile_setemail
 
-    Test:
+    Tests:
         - Setting a valid email
         - Setting an invalid email
         - Setting a taken email address
@@ -338,10 +404,22 @@ def test_http_user_profile_setemail(url):
 def test_http_user_profile_sethandle(url):
     '''
     HTTP test for user_profile_sethandle
+
+    Tests:
+        - Setting a valid handle
+        - Setting a handle with an invalid length
+        - Setting a handle that has already been taken
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
-    # SET VALID HANDLE
+    
+    # Test:
+    #   - Setting a valid handle
+    #
+    # Scenario:
+    #   - User registers and sets handle
+    #   - Test checks if handle was set correctly
+
 
     # Registering valid user
     resp = requests.post(url + 'auth/register', json={
@@ -371,7 +449,15 @@ def test_http_user_profile_sethandle(url):
     # Check new handle
     assert profile['user']['handle_str'] == 'Stevenson'
 
-    # SET INVALID HANDLE LENGTH
+
+    # Test:
+    #   - Setting a handle with an invalid length (must be between 3-20 chars)
+    #
+    # Scenario:
+    #   - User registers
+    #   - User tries to set handle to one that is too short (2 chars)
+    #   - User tries to set handle that is too long (21 chars)
+
 
     # Register valid user
     resp = requests.post(url + 'auth/register', json={
@@ -397,7 +483,15 @@ def test_http_user_profile_sethandle(url):
     })
     assert resp.status_code == 400
 
-    # HANDLE TAKEN
+    # Test:
+    #   - Setting a handle that has already been taken
+    #
+    # Scenario:
+    #   - Two users register
+    #   - user1 changes to unique handle
+    #   - user2 changes to unique handle
+    #   - user2 tries to change handle to user1's new handle
+    #   - Test checks that both handles are not the same
 
     # Register two valid users
     resp = requests.post(url + 'auth/register', json={

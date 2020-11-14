@@ -14,6 +14,20 @@ from echo_http_test import url
 def test_http_channel_invite(url):
     '''
     HTTP test for channel_invite
+
+    Test:
+        - Inviting to channel with invalid channel
+        - Inviting to channel with invalid user id
+        - Inviting to channel without being in the channel
+        - Inviting to channel validly
+    
+    Scenario:
+        - Owner and user register
+        - Owner sets up channel
+        - Owner invites user to channel with invalid channel id
+        - Owner with invalid user id invites user
+        - User invites owner without being in channel
+        - Owner invites user successfully
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -82,6 +96,19 @@ def test_http_channel_invite(url):
 def test_http_channel_details(url):
     '''
     HTTP test for channel_details
+
+    Test:
+        - Getting channel details with invalid channel id
+        - Getting channel details without being in the channel
+        - Getting channel details successfully
+    
+    Scenario:
+        - Owner and user register
+        - Owner sets up channel
+        - Owner tries to get channel details with invalid channel id
+        - User tries to get channel details without being in channel
+        - Owner invites user to channel
+        - User successfully sees channel details
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -177,6 +204,20 @@ def test_http_channel_details(url):
 def test_http_channel_messages(url):
     '''
     HTTP test for channel_messages
+
+    Test:
+        - Getting channel messages with invalid token
+        - Getting channel messages without being in channel
+        - Getting channel messages with invalid start index
+        - Getting channel messages validly
+    
+    Scenario:
+        - Owner and user register
+        - Owner sets up channel
+        - Test tries to get channel messages with invalid token
+        - User tries to get channel messages without being in channel
+        - Owner tries to get channel messages with invalid start index
+        - Owner gets channel messages successfully
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -316,6 +357,18 @@ def test_http_channel_messages(url):
 def test_http_channel_leave(url):
     '''
     HTTP test for channel_leave
+
+    Test:
+        - Leaving a channel with an invalid channel id
+        - Leaving a channel without being in the channel
+        - Leaving a channel validly
+    
+    Scenario:
+        - Owner and user register
+        - User tries to leave channel with invalid channel id
+        - User tries to leave channel without being in channel
+        - User joins owner's channel
+        - User leaves channel successfully
     '''
     assert requests.delete(url + 'clear').status_code == 200
     
@@ -383,6 +436,7 @@ def test_http_channel_leave(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+
     # Ignore profile_img_url from checks
     for member in payload['owner_members']:
         del member['profile_img_url']
@@ -411,6 +465,18 @@ def test_http_channel_leave(url):
 def test_http_channel_join(url):
     '''
     HTTP test for channel_join
+
+    Test:
+        - Joining a channel with an invalid channel id
+        - Joining a private channel with no invitation
+        - Joining a channel validly
+    
+    Scenario:
+        - Owner and user register
+        - Owner sets up private and public channel
+        - User tries to join channel with invalid channel id
+        - User tries to join private channel with no invite
+        - User joins public channel successfully
     '''
     assert requests.delete(url + 'clear').status_code == 200
     
@@ -459,7 +525,7 @@ def test_http_channel_join(url):
     assert resp.status_code == 400
 
     # channel_id refers to a private channel (authorised user is not global owner)
-    resp = requests.post(url + 'channel/leave', json={
+    resp = requests.post(url + 'channel/join', json={
         'token': user['token'],
         'channel_id': private_channel_id,
     })
@@ -512,6 +578,19 @@ def test_http_channel_join(url):
 def test_http_channel_addowner(url):
     '''
     HTTP test for channel_addowner
+
+    Test:
+        - Adding a user as an owner with an invalid channel id
+        - Adding a user as an owner whilst already being an owner
+        - Adding a user as an owner without user being in the channel
+    
+    Scenario:
+        - Owner and user register
+        - Owner sets up channel
+        - User joins channel
+        - Owner tries to add user as owner with invalid channel id
+        - Owner tries to add owner as owner
+        - Owner tries to add user as owner without user being in channel
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -628,6 +707,21 @@ def test_http_channel_addowner(url):
 def test_http_channel_removeowner(url):
     '''
     HTTP test for channel_removeowner
+
+    Test:
+        - Removing user as owner without being an owner
+        - Removing user as owner with an invalid channel id
+        - Successfully removing owner
+    
+    Scenario:
+        - Owner and user register
+        - Owner sets up channel
+        - User joins channel
+        - Owner tries to remove user as owner without them being an owner
+        - User tries to remove owner but is not an owner
+        - Owner adds user as an owner
+        - Owner tries to remove user as owner with an invalid channel id
+        - Owner removes user as an owner successfully
     '''
     assert requests.delete(url + 'clear').status_code == 200
 

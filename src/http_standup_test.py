@@ -14,20 +14,20 @@ from echo_http_test import url
 def test_http_standup_start_valid(url):
     '''
     HTTP test for standup_start (valid)
+
+    Test:
+        - Validly start a standup
+    
+    Scenario:
+        - The owner creates an account, and then a channel
+        - The owner starts a standup for 5 seconds
+        - Check that standup is active by calling standup_active
+        - Check that the returned time_finish of standup_start and standup_active
+        are the same
+        - After standup ends, check that standup is inactive by calling 
+        standup_active
     '''
     assert requests.delete(url + 'clear').status_code == 200
-
-    # Test:
-    # - Validly start a standup
-    #
-    # Scenario:
-    # - The owner creates an account, and then a channel
-    # - The owner starts a standup for 5 seconds
-    # - Check that standup is active by calling standup_active
-    # - Check that the returned time_finish of standup_start and standup_active
-    #   are the same
-    # - After standup ends, check that standup is inactive by calling 
-    #   standup_active
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={
@@ -83,20 +83,20 @@ def test_http_standup_start_valid(url):
 def test_http_standup_start_invalid(url):
     '''
     HTTP test for standup_start (invalid)
+    
+    Test:
+        - Invalidly start standups to check if errors are correctly raised
+    
+    Scenario:
+        - The owner and a user create accounts
+        - The owner creates a channel
+        - Test starting standup with an invalid token
+        - Test starting standup for an invalid channel ID
+        - Test starting standup in channel that user is not a member of
+        - Test starting standup with an invalid standup length
+        - Test starting standup while an active standup is running
     '''
     assert requests.delete(url + 'clear').status_code == 200
-
-    # Test:
-    # - Invalidly start standups to check if errors are correctly raised
-    #
-    # Scenario:
-    # - The owner and a user create accounts
-    # - The owner creates a channel
-    # - Test starting standup with an invalid token
-    # - Test starting standup for an invalid channel ID
-    # - Test starting standup in channel that user is not a member of
-    # - Test starting standup with an invalid standup length
-    # - Test starting standup while an active standup is running
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={
@@ -183,20 +183,20 @@ def test_http_standup_start_invalid(url):
 def test_http_standup_active_valid(url):
     '''
     HTTP test for standup_active (valid)
+
+    Test:
+        - Validly check if a standup is active
+    
+    Scenario:
+        - The owner creates an account, and then a channel
+        - Check standup_active returns correct values when standup inactive
+        - The owner starts a standup for 5 seconds
+        - Check standup_active returns correct values when standup active
+        - Check that the returned time_finish of standup_start and standup_active
+        are the same
+        - Check standup_active returns correct values after standup ends
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
-    # Test:
-    # - Validly check if a standup is active
-    #
-    # Scenario:
-    # - The owner creates an account, and then a channel
-    # - Check standup_active returns correct values when standup inactive
-    # - The owner starts a standup for 5 seconds
-    # - Check standup_active returns correct values when standup active
-    # - Check that the returned time_finish of standup_start and standup_active
-    #   are the same
-    # - Check standup_active returns correct values after standup ends
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={
@@ -262,19 +262,19 @@ def test_http_standup_active_valid(url):
 def test_http_standup_active_invalid(url):
     '''
     HTTP test for standup_active (invalid)
+
+    Test:
+        - Invalidly check if a standup is active to check if errors are
+        correctly raised
+    
+    Scenario:
+        - The owner and a user create accounts
+        - The owner creates a channel
+        - Test checking standup status with an invalid token
+        - Test checking standup status for an invalid channel ID
+        - Test checking standup status in channel that user is not a member of
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
-    # Test:
-    # - Invalidly check if a standup is active to check if errors are
-    #   correctly raised
-    #
-    # Scenario:
-    # - The owner and a user create accounts
-    # - The owner creates a channel
-    # - Test checking standup status with an invalid token
-    # - Test checking standup status for an invalid channel ID
-    # - Test checking standup status in channel that user is not a member of
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={
@@ -330,19 +330,19 @@ def test_http_standup_active_invalid(url):
 def test_http_standup_send_valid(url):
     '''
     HTTP test for standup_send (valid)
+
+    Test:
+        - Validly send messages to get buffered in the standup queue
+    
+    Scenario:
+        - The owner and a user create accounts
+        - The owner creates a channel, and the user joins the channel
+        - The owner starts standup for 8 seconds
+        - The owner and user send messages during the standup
+        - Check only one message (the packaged message containing all 
+        standup messages) is sent after the standup ends
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
-    # Test:
-    # - Validly send messages to get buffered in the standup queue
-    #
-    # Scenario:
-    # - The owner and a user create accounts
-    # - The owner creates a channel, and the user joins the channel
-    # - The owner starts standup for 8 seconds
-    # - The owner and user send messages during the standup
-    # - Check only one message (the packaged message containing all 
-    #   standup messages) is sent after the standup ends
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={
@@ -421,22 +421,22 @@ def test_http_standup_send_valid(url):
 def test_http_standup_send_invalid(url):
     '''
     HTTP test for standup_send (invalid)
+
+    Test:
+        - Invalidly send messages to get buffered in the standup queue to
+        check if errors are correctly raised
+    
+    Scenario:
+        - The owner and a user create accounts
+        - The owner creates a channel
+        - Test sending standup message when standup inactive
+        - The owner starts a standup
+        - Test sending standup message with an invalid token
+        - Test sending standup message for an invalid channel ID
+        - Test sending standup message with invalid message length
+        - Test sending standup message in channel user is not a member of
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
-    # Test:
-    # - Invalidly send messages to get buffered in the standup queue to
-    #   check if errors are correctly raised
-    #
-    # Scenario:
-    # - The owner and a user create accounts
-    # - The owner creates a channel
-    # - Test sending standup message when standup inactive
-    # - The owner starts a standup
-    # - Test sending standup message with an invalid token
-    # - Test sending standup message for an invalid channel ID
-    # - Test sending standup message with invalid message length
-    # - Test sending standup message in channel user is not a member of
 
     # Register owner
     resp = requests.post(url + 'auth/register', json={

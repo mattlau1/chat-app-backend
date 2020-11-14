@@ -680,6 +680,13 @@ def test_http_message_sendlater(url):
 def test_http_message_react(url):
     '''
     HTTP test for message_react
+    
+    Test:
+        - React to the message normally
+        - User can see themselves if they have reacted or not
+        - React with invalid token
+        - React with invalid message id
+        - React with invalid react id
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -830,6 +837,15 @@ def test_http_message_react(url):
 def test_http_message_unreact(url):
     '''
     HTTP test for message_unreact
+    
+    Test:
+        - React to the message
+        - Unreact to the message normally
+        - Unreact to the message with invalid token
+        - Unreact to the message with invalid message id
+        - Unreact to the message with invalid react id
+        - Unreact to the message that has no reacts
+        - Unreact to the message without using react beforehand
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -1313,6 +1329,7 @@ def test_http_message_pin(url):
 def test_http_message_unpin(url):
     '''
     HTTP test for message_unpin
+    
     Tests:
         - Unpinning a message normally
         - Unpinning with invalid token
