@@ -332,6 +332,9 @@ def test_password_reset_valid():
     # Register User One
     auth_register('forgetful@gmail.com', 'complicated', 'User', 'One')
     reset_code = generate_reset_code('forgetful@gmail.com')
+    # Multiple reset code requests won't raise exceptions
+    # but only one will be valid for changing password
+    reset_code = generate_reset_code('forgetful@gmail.com')
     # Successful password reset
     password_reset(reset_code, 'password')
     # Cannot reuse code
