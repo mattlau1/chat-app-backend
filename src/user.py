@@ -132,12 +132,6 @@ def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, 
            x_start (int), y_start (int), x_end (int), y_end (int)
     Output: empty dict
     '''
-    # Get bounds
-    try:
-        x_start, y_start, x_end, y_end = int(x_start), int(y_start), int(x_end), int(y_end)
-    except ValueError:
-        raise InputError('Invalid image dimensions provided.')
-    
     auth_user = user_with_token(token)
     if auth_user is None:
         raise AccessError('Invalid token')
@@ -150,8 +144,11 @@ def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, 
         raise InputError('Invalid image url')
     
     # Crop and save image
-    img = Image.open(image_name)
-    width, height = img.size
+    try:
+        img = Image.open(image_name)
+        width, height = img.size
+    except:
+        raise InputError('Invalid image url')
     if not valid_crop_dimensions(width, height, x_start, y_start, x_end, y_end):
         raise InputError(f'Invalid image dimensions provided. \
             Original image has width {width} and height {height}.')

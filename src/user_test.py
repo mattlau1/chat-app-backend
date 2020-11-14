@@ -1,9 +1,12 @@
 '''
 Tests written to test user.py
 '''
+import os
 import pytest
+import urllib.request
+from PIL import Image
 from user import (
-    user_profile, user_profile_setname,
+    user_profile, user_profile_setname, user_profile_uploadphoto,
     user_profile_setemail, user_profile_sethandle,
 )
 from other import clear
@@ -335,3 +338,51 @@ def test_taken_handle():
 
     with pytest.raises(InputError):
         user_profile_sethandle(user1['token'], 'goodbye world')
+
+def test_user_profile_uploadphoto_invalid():
+    '''
+    Invalid test cases for user_profile_uploadphoto
+    Correct crop size is tested in the HTTP test
+    '''
+    user = auth_register('admin@gmail.com', 'password', 'Admin', 'User')
+    # Invalid img_url
+    with pytest.raises(InputError):
+        url = 'https://asldfkjh.asdfkj'
+        user_profile_uploadphoto(user['token'], '', url, 0, 0, 1, 1)
+    with pytest.raises(InputError):
+        url = 'https://google.com'
+        user_profile_uploadphoto(user['token'], '', url, 0, 0, 1, 1)
+    # Invalid dimensions for a valid jpg
+    img_url = 'https://wallpapercave.com/wp/OWmhWu0.jpg'
+    urllib.request.urlretrieve(img_url, 'test.jpg')
+    img = Image.open('test.jpg')
+    width, height = img.size
+    with pytest.raises(InputError):
+        user_profile_uploadphoto(user['token'], '', img_url, 'a', 'a', 'a', 'a')
+    
+    # Invalid token
+    with pytest.raises(AccessError):
+        user_profile_uploadphoto(user['token'] + 'padding', '', img_url, 0, 0, 1, 1)
+    # x coordinates not between 0 and width inclusive
+    with pytest.raises(InputError):
+        user_profile_uploadphoto(user['token'], '', img_url, -1, 0, width, height)
+    with pytest.raises(InputError):
+        user_profile_uploadphoto(user['token'], '', img_url, 0, 0, width+1, height)
+
+    # y coordinates not between 0 and height inclusive
+    with pytest.raises(InputError):
+        user_profile_uploadphoto(user['token'], '', img_url, 0, -1, width, height)
+    with pytest.raises(InputError):
+        user_profile_uploadphoto(user['token'], '', img_url, 0, 0, width, height+1)
+
+    # 0 pixels high / wide
+    with pytest.raises(InputError):
+        user_profile_uploadphoto(user['token'], '', img_url, 0, 0, 0, height)
+    with pytest.raises(InputError):
+        user_profile_uploadphoto(user['token'], '', img_url, 0, 0, width, 0)
+
+    # Valid crop dimensions
+    user_profile_uploadphoto(user['token'], '', img_url, 0, 0, width, height)
+
+    # Delete test.jpg
+    os.remove('test.jpg')

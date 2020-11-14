@@ -51,11 +51,10 @@ def test_http_user_profile(url):
     assert profile['user']['handle_str'] == 'Stevenson'
 
     # Access user details without registering
-    resp = requests.get(url+"user/profile", params={
-        'tokens': "&73hf(s!)@",
+    resp = requests.get(url + "user/profile", params={
+        'token': "&73hf(s!)@",
         'u_id': 42
     })
-
     assert resp.status_code == 400
 
     # Retrieving information with correct token but wrong id
