@@ -14,6 +14,21 @@ from echo_http_test import url
 def test_http_clear(url):
     '''
     HTTP test for clear
+
+    Test:
+        - Clearing all registered users
+        - Clearing channels
+
+    Scenario:
+        - owner successfully registers and sets up channel
+        - Test clears
+        - owner now cannot see channel details
+        - owner successfully registers
+        - Test checks that registration was successful
+        - owner successfully registers again
+        - Test checks that registration was unsuccessful
+        - Test clears
+        - owner successfully registers again
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -80,6 +95,15 @@ def test_http_clear(url):
 def test_http_users_all(url):
     '''
     HTTP test for users_all
+
+    Test:
+        - Getting details of all users validly
+        - Getting details of all users with an invalid token
+
+    Scenario:
+        - Three users register and set handles
+        - Test checks that details from users_all is correct
+        - Test tries to get details from all users with an invalid token
     '''
     assert requests.delete(url + 'clear').status_code == 200
     
@@ -136,6 +160,7 @@ def test_http_users_all(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+
     # Ignore profile_img_url from checks
     for member in payload['users']:
         del member['profile_img_url']
@@ -284,6 +309,17 @@ def test_http_admin_userpermission_change(url):
 def test_http_search(url):
     '''
     HTTP test for search
+
+    Test:
+        - 
+
+    Scenario:
+        - owner registers and sets up channel
+        - user registers and joins channel
+        - owner sends message
+        - user also sends messages
+        - 
+
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
