@@ -559,6 +559,18 @@ def test_http_user_profile_sethandle(url):
 def test_http_user_profile_uploadphoto(url):
     '''
     HTTP test for user_profile_uploadphoto
+
+    Test:
+        - Setting profile picture with crop greater than image size
+        - Setting profile picture with invalid crop dimensions
+        - Setting profile picture with valid crop dimensions
+    
+    Scenario:
+        - user registers
+        - user tries to set profile picture with invalid x_end and y_end dimensions
+        - user tries to set profile picture with invalid x_start and y_start dimensions
+        - Test tries to set profile picture with invalid token
+        - user sets profile picture with valid crop dimensions
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -573,6 +585,7 @@ def test_http_user_profile_uploadphoto(url):
     user = resp.json()
     
     original_img_url = 'https://wallpapercave.com/wp/OWmhWu0.jpg'
+
     # Check size
     urllib.request.urlretrieve(original_img_url, 'test.jpg')
     img = Image.open('test.jpg')
@@ -594,6 +607,17 @@ def test_http_user_profile_uploadphoto(url):
         'img_url': original_img_url,
         'x_start': -1,
         'y_start': -1,
+        'x_end': original_width,
+        'y_end': original_height,
+    })
+    assert resp.status_code == 400
+
+    # Invalid token
+    resp = requests.post(url + 'user/profile/uploadphoto', json={
+        'token': '',
+        'img_url': original_img_url,
+        'x_start': 0,
+        'y_start': 0,
         'x_end': original_width,
         'y_end': original_height,
     })
