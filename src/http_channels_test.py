@@ -15,7 +15,7 @@ def test_http_channels_list(url):
     '''
     HTTP test for channels_list
 
-    Tests:
+    Test:
         - Listing channels validly (valid token & name)
         - Listing channels with invalid token
     '''
@@ -100,7 +100,7 @@ def test_http_channels_listall(url):
     '''
     HTTP test for channels_listall
 
-    Tests:
+    Test:
         - Validly listing all channels
         - Invalidly listing all channels
     '''
