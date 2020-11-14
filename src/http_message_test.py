@@ -15,6 +15,23 @@ from echo_http_test import url
 def test_http_message_send(url):
     '''
     HTTP test for message_send
+
+    Test:
+        - Sending messages with invalid token
+        - Sending messages without being in channel
+        - Sending messages validly
+        - Sending messages of invalid length
+
+    Scenario:
+        - owner registers and sets up channel
+        - Test tries to send message with invalid token
+        - random_user registers 
+        - random_user tries to send message without being in channel
+        - owner sends message in channel successfully
+        - random_user joins channel and sends message successfully
+        - random_user tries to send empty message
+        - random_user tries to send long message
+
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -123,6 +140,25 @@ def test_http_message_send(url):
 def test_http_message_remove(url):
     '''
     HTTP test for message_remove
+
+    Test:
+        - Removing messages with invalid message id
+        - Removing messages with an invalid token
+        - Removing messages without being an owner
+        - Removing own messages
+        - Removing user messages as an owner
+
+    Scenario:
+        - owner registers and sets up channel
+        - user1 and user2 register and join owner's channel 
+        - owner sends message
+        - owner tries to remove message with invalid message id
+        - user1 and user2 send message
+        - test tries to remove owner's message with invalid token
+        - user1 tries to remove owner's message without being an owner
+        - user2 removes own message successfully
+        - owner removes user1's message
+        - owner removes own message
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -300,6 +336,27 @@ def test_http_message_remove(url):
 def test_http_message_edit(url):
     '''
     HTTP test for message_edit
+
+    Test:
+        - Editing messages with an invalid message id
+        - Editing messages with an invalid token
+        - Editing messages with/without being the sender
+        - Editing messages whilst being the owner
+        - Removing messages by editing messages to an empty string
+    
+    Scenario:
+        - owner registers and sets up channel
+        - user1 and user2 register
+        - owner invites user1 and user2 to channel
+        - owner sends message
+        - owner tries to edit message with invalid message id
+        - user1 and user2 send a message
+        - test tries to edit message with invalid token
+        - user1 tries to edit owner's message
+        - user2 edits own message
+        - owner edits user1's message
+        - owner sends multiple messages 
+        - owner removes messages by editing them to empty strings 
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -527,20 +584,18 @@ def test_http_message_edit(url):
 def test_http_message_sendlater(url):
     '''
     HTTP test for message_sendlater
+
+    Test:
+        - Check that it only sends a valid message after a certain period has elapsed
+    
+    Scenario:
+        - The owner registers and creates the channel
+        - Cannot message_sendlater() if the time is in the past
+        - Check message_sendlater() only works if the token of the authorised user is
+        valid and the person is in the channel
+        - Check that the message being sent later is not empty and is less than 1000 characters
     '''
     assert requests.delete(url + 'clear').status_code == 200
-
-
-    # Test:
-    #   - Check that it only sends a valid message after a certain period has elapsed
-    #
-    # Scenario:
-    #   - The owner registers and creates the channel
-    #   - Cannot message_sendlater() if the time is in the past
-    #   - Check message_sendlater() only works if the token of the authorised user is
-    #   valid and the person is in the channel
-    #   - Check that the message being sent later is not empty and is less than 1000 characters
-
 
     # Register user
     resp = requests.post(url + 'auth/register', json={
