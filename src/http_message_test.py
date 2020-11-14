@@ -1102,7 +1102,7 @@ def test_http_message_pin(url):
     '''
     HTTP test for message_pin
 
-    Tests:
+    Test:
         - Pinning a message normally
         - Pinning with invalid token
         - Pinning messages whilst not being in channel
@@ -1330,7 +1330,7 @@ def test_http_message_unpin(url):
     '''
     HTTP test for message_unpin
     
-    Tests:
+    Test:
         - Unpinning a message normally
         - Unpinning with invalid token
         - Unpinning messages whilst not being in channel
