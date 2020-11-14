@@ -252,7 +252,7 @@ def test_http_user_profile_setemail(url):
     '''
     HTTP test for user_profile_setemail
 
-    Tests:
+    Test:
         - Setting a valid email
         - Setting an invalid email
         - Setting a taken email address
@@ -405,7 +405,7 @@ def test_http_user_profile_sethandle(url):
     '''
     HTTP test for user_profile_sethandle
 
-    Tests:
+    Test:
         - Setting a valid handle
         - Setting a handle with an invalid length
         - Setting a handle that has already been taken
