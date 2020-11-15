@@ -189,7 +189,7 @@ def test_hangman():
     messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
     assert len(messages) == 9
     # Can't really test hangman guesses (esp win condition), so..
-    for guess in range(5):
+    for _ in range(5):
         message_send(user['token'], channel['channel_id'], '/guess z')
         message_send(user['token'], channel['channel_id'], '/guess Z')
         message_send(user['token'], channel['channel_id'], '/guess hellowolrd')
