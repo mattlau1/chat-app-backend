@@ -1,5 +1,7 @@
 ''' Import required modules '''
-from data import data, valid_email, user_with_id, user_with_token, user_email_list, user_handle_list
+import urllib.request
+from PIL import Image
+from data import valid_email, user_with_id, user_with_token, user_email_list, user_handle_list
 from error import InputError, AccessError
 
 def user_profile(token, u_id):
@@ -22,11 +24,12 @@ def user_profile(token, u_id):
 
     return {
         'user': {
-            'u_id': target_user['u_id'],
-        	'email': target_user['email'],
-        	'name_first': target_user['name_first'],
-        	'name_last': target_user['name_last'],
-        	'handle_str': target_user['handle'],
+            'u_id': target_user.u_id,
+            'email': target_user.email,
+            'name_first': target_user.name_first,
+            'name_last': target_user.name_last,
+            'handle_str': target_user.handle,
+            'profile_img_url': target_user.profile_img_url,
         }
     }
 
@@ -57,8 +60,8 @@ def user_profile_setname(token, name_first, name_last):
         raise InputError('Last name cannot be empty')
 
     # Update name
-    data['users'][auth_user['u_id']]['name_first'] = name_first
-    data['users'][auth_user['u_id']]['name_last'] = name_last
+    auth_user.name_first = name_first
+    auth_user.name_last = name_last
 
     return {
     }
@@ -85,10 +88,11 @@ def user_profile_setemail(token, email):
         raise InputError('Email already taken')
 
     # Update email
-    data['users'][auth_user['u_id']]['email'] = email
+    auth_user.email = email
 
     return {
     }
+
 
 def user_profile_sethandle(token, handle_str):
     '''
@@ -114,7 +118,60 @@ def user_profile_sethandle(token, handle_str):
         raise InputError('Handle already taken')
 
     # Update handle
-    data['users'][auth_user['u_id']]['handle'] = handle_str
+    auth_user.handle = handle_str
 
     return {
     }
+
+
+def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, y_end):
+    '''
+    Helper function for cropping the image with url within provided bounds,
+    and setting this image as their profile picture.
+    Input: token (str), url_root (root of url - str), img_url (str),
+           x_start (int), y_start (int), x_end (int), y_end (int)
+    Output: empty dict
+    '''
+    auth_user = user_with_token(token)
+    if auth_user is None:
+        raise AccessError('Invalid token')
+    
+    # Retrieve image
+    image_name = f'static/{auth_user.handle}.jpg'
+    try:
+        urllib.request.urlretrieve(img_url, image_name)
+    except urllib.request.URLError:
+        raise InputError('Invalid image url')
+    
+    # Crop and save image
+    try:
+        img = Image.open(image_name)
+        width, height = img.size
+    except:
+        raise InputError('Invalid image url')
+    if not valid_crop_dimensions(width, height, x_start, y_start, x_end, y_end):
+        raise InputError(f'Invalid image dimensions provided. \
+            Original image has width {width} and height {height}.')
+    img = img.crop((x_start, y_start, x_end, y_end))
+    img.save(image_name)
+    
+    # Update profile pic
+    auth_user.profile_img_url = url_root + image_name
+    
+    return {
+    }
+
+def valid_crop_dimensions(width, height, x_start, y_start, x_end, y_end):
+    '''
+    Helper function for user_profile_uploadphoto to check for valid crop dimensions
+    '''
+    # x coordinates must be from 0 to width
+    if x_start not in range(width + 1) or x_end not in range(width + 1):
+        return False
+    # y coordinates must be from 0 to height
+    if y_start not in range(height + 1) or y_end not in range(height + 1):
+        return False
+    # Width/height can't be 0 pixels in length
+    if x_start == x_end or y_start == y_end:
+        return False
+    return True

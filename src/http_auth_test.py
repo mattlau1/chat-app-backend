@@ -14,6 +14,19 @@ from echo_http_test import url
 def test_http_auth_login(url):
     '''
     HTTP test for auth_login
+
+    Test:
+        - Logging in with an invalid email format
+        - Logging in without registering
+        - Logging in with invalid password
+        - Logging in validly
+    
+    Scenario:
+        - User tries to login with invalid email format
+        - User tries to login with unregistered account
+        - User registers
+        - User attempts to login with incorrect password
+        - User logs in with correct password
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -73,6 +86,15 @@ def test_http_auth_login(url):
 def test_http_auth_logout(url):
     '''
     HTTP test for auth_logout
+
+    Test:
+        - Logging out with invalid token
+        - Logging out normally
+    
+    Scenario:
+        - Test tries to logout with invalid token
+        - User registers and logs in
+        - User logs out normally
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -119,6 +141,20 @@ def test_http_auth_logout(url):
 def test_http_auth_register(url):
     '''
     HTTP test for auth_register
+
+    Test:
+        - Registering with an invalid email format
+        - Registering with a password less than 6 characters long
+        - Registering with invalid first and last name Length
+        - Registering normally
+        - Registering with email already in use
+    
+    Scenario:
+        - User tries to register with invalid email format
+        - User tries to register with passwords shorter than 6 characters
+        - User tries to register with empty names and long names (first & last names)
+        - Users successfully register
+        - New user tries to register with another user's email
     '''
     assert requests.delete(url + 'clear').status_code == 200
 

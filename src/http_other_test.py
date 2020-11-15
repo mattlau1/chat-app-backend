@@ -14,6 +14,21 @@ from echo_http_test import url
 def test_http_clear(url):
     '''
     HTTP test for clear
+
+    Test:
+        - Clearing all registered users
+        - Clearing channels
+
+    Scenario:
+        - owner successfully registers and sets up channel
+        - Test clears
+        - owner now cannot see channel details
+        - owner successfully registers
+        - Test checks that registration was successful
+        - owner successfully registers again
+        - Test checks that registration was unsuccessful
+        - Test clears
+        - owner successfully registers again
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -80,6 +95,15 @@ def test_http_clear(url):
 def test_http_users_all(url):
     '''
     HTTP test for users_all
+
+    Test:
+        - Getting details of all users validly
+        - Getting details of all users with an invalid token
+
+    Scenario:
+        - Three users register and set handles
+        - Test checks that details from users_all is correct
+        - Test tries to get details from all users with an invalid token
     '''
     assert requests.delete(url + 'clear').status_code == 200
     
@@ -136,6 +160,11 @@ def test_http_users_all(url):
     })
     assert resp.status_code == 200
     payload = resp.json()
+
+    # Ignore profile_img_url from checks
+    for member in payload['users']:
+        del member['profile_img_url']
+
     assert payload == {
         'users': [
             {
@@ -172,6 +201,21 @@ def test_http_users_all(url):
 def test_http_admin_userpermission_change(url):
     '''
     HTTP test for admin_userpermission_change
+
+    Test:
+        - Flockr owner changing permissions of a member to make them a Flockr owner
+        - Flockr owner changing permissions of a Flockr owner to make them a member
+
+    Scenario:
+        - Two users register
+        - User 1 creates a private channel
+        - User 1 (a Flockr owner) changes permissions of User 2, making them
+          a Flockr owner too
+        - User 2 is now able to join the private channel as a Flockr owner
+        - User 2 creates a private channel
+        - User 2 changes permissions of User 1, making them a member
+        - Check that User 1 is unable to join User 2's private channel as they
+          are now a member
     '''
     assert requests.delete(url + 'clear').status_code == 200
     
@@ -244,6 +288,18 @@ def test_http_admin_userpermission_change(url):
     })
     assert resp.status_code == 400
 
+    # Test:
+    #    - Changing an invalid user's permissions
+    #    - Changing a user's permissions to an invalid permission
+    #    - Changing a user's permissions without owner permissions
+    #    - Changing a user's permissions using an invalid token
+    #
+    # Scenario:
+    #    - Check that a user with invalid u_id's permissions cannot be changed
+    #    - Check that a user's permissions cannot be changed to an invalid permission_id
+    #    - Check that a user without owner permissions cannot change permissions
+    #    - Check that a user's permissions cannot be changed with an invalid token
+
     # u_id does not refer to a valid user
     resp = requests.post(url + 'admin/userpermission/change', json={
         'token': user2['token'],
@@ -280,6 +336,19 @@ def test_http_admin_userpermission_change(url):
 def test_http_search(url):
     '''
     HTTP test for search
+
+    Test:
+        - Searching for a query string, only returns the messages containing the string
+          in channels the user has joined
+
+    Scenario:
+        - Admin registers and sets up a channel
+        - User registers, and sets up a private channel
+        - User joins the admin channel, then sends the message: 'Hello world'
+        - Admin sends two messages, 'Hello' and 'hello' to admin channel
+        - User sends a message, 'Hellooo', to both channels
+        - Check that 3 messages appear when admin searches for the substring 'Hello'
+        - Check that 4 messages appear when user searches for the substring 'Hello'
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
@@ -383,6 +452,15 @@ def test_http_search(url):
     assert resp.status_code == 200
     payload = resp.json()
     assert len(payload['messages']) == 4
+
+    # Test:
+    #    - Searching for a string with an invalid token
+    #    - Searching for a string not contained in any messages
+    #
+    # Scenario:
+    #    - Check that you cannot search with an invalid token
+    #    - Admin searches for substring 'asdf' - check that no messages are returned
+    #    - User searches for substring 'asdf' - check that no messages are returned
 
     # Invalid token
     resp = requests.get(url + 'search', params={

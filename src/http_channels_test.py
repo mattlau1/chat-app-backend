@@ -14,10 +14,21 @@ from echo_http_test import url
 def test_http_channels_list(url):
     '''
     HTTP test for channels_list
+
+    Test:
+        - Listing channels validly (valid token & name)
+        - Listing channels with invalid token
     '''
     assert requests.delete(url + 'clear').status_code == 200
 
-    # CREATING VALID CHANNEL
+
+    # Test:
+    #    - Listing user channels validly
+    #
+    # Scenario:
+    #    - user registers and creates channel
+    #    - user lists channel
+
 
     # Create user
     resp = requests.post(url + 'auth/register', json={
@@ -62,7 +73,14 @@ def test_http_channels_list(url):
 
     assert len(channel['channels']) == 2
 
-    # INVALID TOKEN
+
+    # Test:
+    #    - Listing user channels invalidly
+    #
+    # Scenario:
+    #    - user creates another channel
+    #    - test tries to list channels with invalid token
+
 
     # Create normal channel
     resp = requests.post(url + 'channels/create', json={
@@ -81,7 +99,23 @@ def test_http_channels_list(url):
 def test_http_channels_listall(url):
     '''
     HTTP test for channels_listall
+
+    Test:
+        - Validly listing all channels
+        - Invalidly listing all channels
     '''
+
+
+    # Test:
+    #    - Listing all channels validly
+    #
+    # Scenario:
+    #    - Two users register
+    #    - user1 creates private channel
+    #    - user2 creates private channel
+    #    - Test checks if channels_listall is working correctly with private channels
+
+
     assert requests.delete(url + 'clear').status_code == 200
 
     # Register user 1
@@ -165,7 +199,13 @@ def test_http_channels_listall(url):
 
     assert len(all_channels['channels']) == 2
 
-    # INVALID TOKEN
+
+    # Test:
+    #    - Listing all channels with invalid token
+    #
+    # Scenario:
+    #    - Test tries to list all channels with an invalid token
+
 
     resp = requests.get(url + 'channels/listall', params={
         'token': 'thisisaninvalidtoken',
@@ -176,9 +216,25 @@ def test_http_channels_listall(url):
 def test_http_channels_create(url):
     '''
     HTTP test for channels_create
+
+    Test:
+        - Create a channel
+        - Create a channel with more than 20 characters in name
+        - Create a channel with invalid token
+        - Create a channel with an empty name
+        - Create a channel with spaces in the name
     '''
     assert requests.delete(url + 'clear').status_code == 200
-    
+
+
+    # Test:
+    #   - Create a channel
+    #
+    # Scenario:
+    #   - Owner creates an account
+    #   - Owner creates a channel successfully
+
+
     # Create user
     resp = requests.post(url + 'auth/register', json={
         'email': 'stvnnguyen69@hotmail.com',
@@ -189,13 +245,27 @@ def test_http_channels_create(url):
     assert resp.status_code == 200
     user = resp.json()
 
-    # Create normal channel 
+    # Create normal channel
     resp = requests.post(url + 'channels/create', json={
         'token': user['token'],
         'name': 'Gaming Hub',
         'is_public': True
     })
     assert resp.status_code == 200
+
+
+    # Test:
+    #   - Create a channel with more than 20 characters in name
+    #   - Create a channel with invalid token
+    #   - Create a channel with an empty name
+    #   - Create a channel with spaces in the name
+    #
+    # Scenario:
+    #   - Owner creates another channel with a very long name
+    #   - Owner with invalid token creates another channel
+    #   - Owner creates another channel with no name
+    #   - Owner creates another channel with spaces in the name
+
 
     # Create a channel with name more than 20 characters
     resp = requests.post(url + 'channels/create', json={

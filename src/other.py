@@ -9,6 +9,7 @@ def clear():
     data['users'] = []
     data['channels'] = []
     data['latest_message_id'] = 0
+    data['valid_reset_codes'] = []
     return {
     }
 
@@ -26,11 +27,12 @@ def users_all(token):
     return {
         'users': [
             {
-                'u_id': user['u_id'],
-                'email': user['email'],
-                'name_first': user['name_first'],
-                'name_last': user['name_last'],
-                'handle_str': user['handle'],
+                'u_id': user.u_id,
+                'email': user.email,
+                'name_first': user.name_first,
+                'name_last': user.name_last,
+                'handle_str': user.handle,
+                'profile_img_url': user.profile_img_url,
             }
             for user in data['users']
         ],
@@ -50,7 +52,7 @@ def admin_userpermission_change(token, u_id, permission_id):
     if auth_user is None:
         # Invalid token
         raise AccessError('Invalid token')
-    elif auth_user['permission_id'] != 1:
+    elif auth_user.permission_id != 1:
         # Requested user not a Flockr owner
         raise AccessError('Invalid permission')
     elif target_user is None:
@@ -61,7 +63,7 @@ def admin_userpermission_change(token, u_id, permission_id):
         raise InputError('Invalid Permission ID')
 
     # Edit target_user's permissions
-    target_user['permission_id'] = permission_id
+    target_user.permission_id = permission_id
 
     return {
     }
@@ -83,12 +85,29 @@ def search(token, query_str):
     messages = []
     for channel in data['channels']:
         # Channels the auth_user is a member of
-        if auth_user['u_id'] in channel['all_members']:
-            for message in channel['messages']:
+        if auth_user in channel.all_members:
+            for message in channel.messages:
                 # query_str is a substring of message
-                if query_str in message['message']:
+                if query_str in message.message:
                     messages.append(message)
 
     return {
-        'messages': messages,
+        'messages': [
+            {
+                'message_id': message.message_id,
+                'u_id': message.sender.u_id,
+                'time_created': message.time_created,
+                'message': message.message,
+                'reacts': [
+                    {
+                        'react_id': react.react_id,
+                        'u_ids': [reactor.u_id for reactor in react.reactors],
+                        'is_this_user_reacted': auth_user in react.reactors,
+                    }
+                    for react in message.reacts
+                ],
+                'is_pinned': message.is_pinned,
+            }
+            for message in messages
+        ],
     }

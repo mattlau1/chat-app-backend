@@ -3,7 +3,7 @@ import pytest
 from auth import auth_register
 from channel import channel_invite, channel_details, channel_messages, channel_join, channel_leave
 from channels import channels_create, channels_list
-from message import message_send, message_remove, message_edit
+from message import message_send, message_remove, message_edit, message_react
 from other import clear, users_all, admin_userpermission_change, search
 from user import user_profile_sethandle
 from error import InputError, AccessError
@@ -47,10 +47,9 @@ def test_clear_channels_messages():
     clear()
     f_owner = auth_register('admin@gmail.com', 'password', 'Bob', 'Bob')
     channel1 = channels_create(f_owner['token'], 'Channel 1', True)
-    m_id = message_send(f_owner['token'], channel1['channel_id'], 'First message')
+    message_send(f_owner['token'], channel1['channel_id'], 'First message')
     messages = channel_messages(f_owner['token'], channel1['channel_id'], 0)
     assert len(messages['messages']) == 1
-    assert m_id['message_id'] == 1
     channels_create(f_owner['token'], 'Channel 2', True)
     assert len(channels_list(f_owner['token'])['channels']) == 2
 
@@ -240,6 +239,7 @@ def test_search_valid_substring():
     channel_invite(f_owner['token'], f_channel['channel_id'], random_user['u_id'])
 
     msg = message_send(f_owner['token'], f_channel['channel_id'], 'First message')
+    message_react(f_owner['token'], msg['message_id'], 1)
 
     # Test exact match
     messages = search(f_owner['token'], 'First message')['messages']
