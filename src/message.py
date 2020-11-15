@@ -23,7 +23,7 @@ def message_send(token, channel_id, message):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('User not in channel')
     elif not message:
         raise InputError('Empty message not allowed')
@@ -32,11 +32,11 @@ def message_send(token, channel_id, message):
 
     # Store message
     new_message = Message(auth_user, message, current_time())
-    channel.messages.append(new_message)
+    channel.get_messages().append(new_message)
     bot_message_parser(token, channel_id, message)
 
     return {
-        'message_id': new_message.message_id,
+        'message_id': new_message.get_message_id(),
     }
 
 
@@ -57,14 +57,14 @@ def message_remove(token, message_id):
     elif message is None:
         raise InputError('Invalid Message ID')
 
-    user_is_channel_owner = (auth_user in channel.owner_members)
-    user_is_flockr_owner = (auth_user.permission_id == 1)
+    user_is_channel_owner = (auth_user in channel.get_owner_members())
+    user_is_flockr_owner = (auth_user.get_permission_id() == 1)
 
-    if auth_user is not message.sender and not user_is_channel_owner and not user_is_flockr_owner:
+    if auth_user is not message.get_sender() and not user_is_channel_owner and not user_is_flockr_owner:
         raise AccessError('Invalid permissions')
 
     # Remove message
-    channel.messages.remove(message)
+    channel.get_messages().remove(message)
 
     return {
     }
@@ -92,15 +92,15 @@ def message_edit(token, message_id, message):
     elif message_object is None:
         raise InputError('Invalid Message ID')
 
-    sender = message_object.sender
-    user_is_channel_owner = (auth_user in channel.owner_members)
-    user_is_flockr_owner = (auth_user.permission_id == 1)
+    sender = message_object.get_sender()
+    user_is_channel_owner = (auth_user in channel.get_owner_members())
+    user_is_flockr_owner = (auth_user.get_permission_id() == 1)
 
     if auth_user is not sender and not user_is_channel_owner and not user_is_flockr_owner:
         raise AccessError('Invalid permissions')
 
     # Update message
-    message_object.message = message
+    message_object.set_message(message)
 
     return {
     }
@@ -123,7 +123,7 @@ def message_sendlater(token, channel_id, message, time_sent):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('User not in channel')
     elif not message:
         raise InputError('Empty message not allowed')
@@ -135,11 +135,11 @@ def message_sendlater(token, channel_id, message, time_sent):
     # Note that message will still be sent later even if the user
     # leaves channel or logs out before message is actually sent
     new_message = Message(auth_user, message, time_created=time_sent)
-    t = Timer(time_diff, channel.messages.append, args=[new_message])
+    t = Timer(time_diff, channel.get_messages().append, args=[new_message])
     t.start()
-    
+
     return {
-        'message_id': new_message.message_id,
+        'message_id': new_message.get_message_id(),
     }
 
 
@@ -167,7 +167,7 @@ def message_react(token, message_id, react_id):
 
 def message_unreact(token, message_id, react_id):
     '''
-    Given a message that has a react on it, a matching user can unreact the 
+    Given a message that has a react on it, a matching user can unreact the
     message based on user's token.
     Input: token (str), message_id (int), react_id (int)
     Output: empty dict
@@ -181,9 +181,9 @@ def message_unreact(token, message_id, react_id):
     elif react_id != 1:
         raise InputError('Invalid react_id')
     react = react_with_id_for_message(message, react_id)
-    if react is None or not react.reactors:
+    if react is None or not react.get_reactors():
         raise InputError('Message does not contain an active react with react_id')
-    elif auth_user not in react.reactors:
+    elif auth_user not in react.get_reactors():
         raise AccessError(f'You have not reacted to this message with react_id {react_id}')
 
     message.remove_react(auth_user, react_id)
@@ -206,14 +206,14 @@ def message_pin(token, message_id):
         raise AccessError('Invalid token')
     elif message is None:
         raise InputError('Invalid message_id')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('Invalid permission')
-    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
+    elif auth_user not in channel.get_owner_members() and auth_user.get_permission_id() != 1:
         raise AccessError('Invalid permission for pinning messages')
-    elif message.is_pinned:
+    elif message.get_is_pinned():
         raise InputError('Message already pinned')
 
-    message.is_pinned = True
+    message.set_is_pinned(True)
 
     return {
     }
@@ -233,14 +233,14 @@ def message_unpin(token, message_id):
         raise AccessError('Invalid token')
     elif message is None:
         raise InputError('Invalid message_id')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('Invalid permission')
-    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
+    elif auth_user not in channel.get_owner_members() and auth_user.get_permission_id() != 1:
         raise AccessError('Invalid permission for unpinning messages')
-    elif not message.is_pinned:
+    elif not message.get_is_pinned():
         raise InputError('Message already unpinned')
 
-    message.is_pinned = False
+    message.set_is_pinned(False)
 
     return {
     }

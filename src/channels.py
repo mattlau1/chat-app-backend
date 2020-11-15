@@ -16,10 +16,10 @@ def channels_list(token):
     return {
         'channels': [
             {
-                'channel_id': channel.channel_id,
-                'name': channel.name,
+                'channel_id': channel.get_channel_id(),
+                'name': channel.get_name(),
             }
-            for channel in data['channels'] if auth_user in channel.all_members
+            for channel in data['channels'] if auth_user in channel.get_all_members()
         ],
     }
 
@@ -36,8 +36,8 @@ def channels_listall(token):
     return {
         'channels': [
             {
-                'channel_id': channel.channel_id,
-                'name': channel.name,
+                'channel_id': channel.get_channel_id(),
+                'name': channel.get_name(),
             }
             for channel in data['channels']
         ],
@@ -65,5 +65,5 @@ def channels_create(token, name, is_public):
     data['channels'].append(new_channel)
 
     return {
-        'channel_id': new_channel.channel_id,
+        'channel_id': new_channel.get_channel_id(),
     }

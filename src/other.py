@@ -27,12 +27,12 @@ def users_all(token):
     return {
         'users': [
             {
-                'u_id': user.u_id,
-                'email': user.email,
-                'name_first': user.name_first,
-                'name_last': user.name_last,
-                'handle_str': user.handle,
-                'profile_img_url': user.profile_img_url,
+                'u_id': user.get_u_id(),
+                'email': user.get_email(),
+                'name_first': user.get_name_first(),
+                'name_last': user.get_name_last(),
+                'handle_str': user.get_handle(),
+                'profile_img_url': user.get_profile_img_url(),
             }
             for user in data['users']
         ],
@@ -52,7 +52,7 @@ def admin_userpermission_change(token, u_id, permission_id):
     if auth_user is None:
         # Invalid token
         raise AccessError('Invalid token')
-    elif auth_user.permission_id != 1:
+    elif auth_user.get_permission_id() != 1:
         # Requested user not a Flockr owner
         raise AccessError('Invalid permission')
     elif target_user is None:
@@ -63,7 +63,7 @@ def admin_userpermission_change(token, u_id, permission_id):
         raise InputError('Invalid Permission ID')
 
     # Edit target_user's permissions
-    target_user.permission_id = permission_id
+    target_user.set_permission_id(permission_id)
 
     return {
     }
@@ -85,28 +85,28 @@ def search(token, query_str):
     messages = []
     for channel in data['channels']:
         # Channels the auth_user is a member of
-        if auth_user in channel.all_members:
-            for message in channel.messages:
+        if auth_user in channel.get_all_members():
+            for message in channel.get_messages():
                 # query_str is a substring of message
-                if query_str in message.message:
+                if query_str in message.get_message():
                     messages.append(message)
 
     return {
         'messages': [
             {
-                'message_id': message.message_id,
-                'u_id': message.sender.u_id,
-                'time_created': message.time_created,
-                'message': message.message,
+                'message_id': message.get_message_id(),
+                'u_id': message.get_sender().get_u_id(),
+                'time_created': message.get_time_created(),
+                'message': message.get_message(),
                 'reacts': [
                     {
-                        'react_id': react.react_id,
-                        'u_ids': [reactor.u_id for reactor in react.reactors],
-                        'is_this_user_reacted': auth_user in react.reactors,
+                        'react_id': react.get_react_id(),
+                        'u_ids': [reactor.get_u_id() for reactor in react.get_reactors()],
+                        'is_this_user_reacted': auth_user in react.get_reactors(),
                     }
-                    for react in message.reacts
+                    for react in message.get_reacts()
                 ],
-                'is_pinned': message.is_pinned,
+                'is_pinned': message.get_is_pinned(),
             }
             for message in messages
         ],
