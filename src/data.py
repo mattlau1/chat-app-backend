@@ -62,16 +62,76 @@ class User:
             token - string
         '''
         # Save passed parameters
-        self.email = email
-        self.password = encrypt_string(password)
-        self.name_first = name_first
-        self.name_last = name_last
+        self.__email = email
+        self.__password = encrypt_string(password)
+        self.__name_first = name_first
+        self.__name_last = name_last
         # Generate extra parameters
-        self.profile_img_url = ''
-        self.u_id = len(data['users'])
-        self.handle = self.generate_handle()
-        self.token = self.generate_token()
-        self.permission_id = 1 if len(data['users']) == 0 else 2
+        self.__profile_img_url = ''
+        self.__u_id = len(data['users'])
+        self.__handle = self.generate_handle()
+        self.__token = self.generate_token()
+        self.__permission_id = 1 if len(data['users']) == 0 else 2
+
+    def get_email(self):
+        ''' Getter for email '''
+        return self.__email
+
+    def set_email(self, email):
+        ''' Setter for email '''
+        self.__email = email
+
+    def get_name_first(self):
+        ''' Getter for name_first '''
+        return self.__name_first
+
+    def set_name_first(self, name_first):
+        ''' Setter for name_first '''
+        self.__name_first = name_first
+
+    def get_name_last(self):
+        ''' Getter for name_last '''
+        return self.__name_last
+
+    def set_name_last(self, name_last):
+        ''' Setter for name_last '''
+        self.__name_last = name_last
+
+    def get_profile_img_url(self):
+        ''' Getter for profile_img_url '''
+        return self.__profile_img_url
+
+    def set_profile_img_url(self, profile_img_url):
+        ''' Setter for profile_img_url '''
+        self.__profile_img_url = profile_img_url
+
+    def get_u_id(self):
+        ''' Getter for u_id '''
+        return self.__u_id
+
+    def get_handle(self):
+        ''' Getter for handle '''
+        return self.__handle
+
+    def set_handle(self, handle):
+        ''' Setter for handle '''
+        self.__handle = handle
+
+    def get_token(self):
+        ''' Getter for token '''
+        return self.__token
+
+    def set_token(self, token):
+        ''' Setter for token '''
+        self.__token = token
+
+    def get_permission_id(self):
+        ''' Getter for permission_id '''
+        return self.__permission_id
+
+    def set_permission_id(self, permission_id):
+        ''' Setter for permission_id '''
+        self.__permission_id = permission_id
 
     def generate_handle(self):
         '''
@@ -80,10 +140,10 @@ class User:
         Output: handle_string (str)
         '''
         # First 20 characters of concatenation of name_first and name_last
-        handle_string = (self.name_first.lower() + self.name_last.lower())[:20]
+        handle_string = (self.__name_first.lower() + self.__name_last.lower())[:20]
         # Ensure unique by appending u_id to front
         while handle_string in user_handle_list():
-            handle_string = (str(self.u_id) + handle_string)[:20]
+            handle_string = (str(self.__u_id) + handle_string)[:20]
         return handle_string
 
     def generate_token(self):
@@ -92,7 +152,7 @@ class User:
         Input: User object
         Output: JWT-encoded token (str)
         '''
-        return jwt_encode_payload({'u_id': self.u_id})
+        return jwt_encode_payload({'u_id': self.__u_id})
 
     def update_password(self, new_password):
         '''
@@ -100,7 +160,7 @@ class User:
         Input: User object, new_password (string)
         No output
         '''
-        self.password = encrypt_string(new_password)
+        self.__password = encrypt_string(new_password)
 
     def verify_password(self, check_password):
         '''
@@ -108,7 +168,7 @@ class User:
         Input: User object, check_password (string)
         Output: True or False (bool)
         '''
-        return self.password == encrypt_string(check_password)
+        return self.__password == encrypt_string(check_password)
 
 def jwt_encode_payload(payload):
     '''
@@ -138,20 +198,20 @@ def user_email_list():
     '''
     Returns a list containing all the user emails (str)
     '''
-    return [user.email for user in data['users']]
+    return [user.get_email() for user in data['users']]
 
 def user_handle_list():
     '''
     Returns a list containing all the user handles (str)
     '''
-    return [user.handle for user in data['users']]
+    return [user.get_handle() for user in data['users']]
 
 def user_with_email(email):
     '''
     Tries to return User object with specified email address (str), returning None if not found
     '''
     for user in data['users']:
-        if user.email == email:
+        if user.get_email() == email:
             return user
     return None
 
@@ -172,7 +232,7 @@ def user_with_token(token):
         payload = jwt_decode_string(token)
         u_id = payload['u_id']
         # Check for valid session
-        if data['users'][u_id].token != '':
+        if data['users'][u_id].get_token() != '':
             return user_with_id(payload['u_id'])
         return None
     except:
@@ -183,7 +243,7 @@ def user_with_handle(handle):
     Tries to return User object with specified handle (str), returning None if not found
     '''
     for user in data['users']:
-        if user.handle == handle:
+        if user.get_handle() == handle:
             return user
     return None
 
@@ -209,23 +269,51 @@ class Channel:
                              queued_messages (list of Message objects)
         '''
         # Save passed parameters
-        self.name = name
-        self.is_public = is_public
+        self.__name = name
+        self.__is_public = is_public
         # Generate extra parameters
-        self.channel_id = len(data['channels'])
-        self.owner_members = [channel_creator,]
-        self.all_members = [channel_creator,]
-        self.messages = []
-        self.standup_status = {
+        self.__channel_id = len(data['channels'])
+        self.__owner_members = [channel_creator,]
+        self.__all_members = [channel_creator,]
+        self.__messages = []
+        self.__standup_status = {
             'is_active': False,
             'time_finish': None,
             'initiator': None,
             'queued_messages': [],
         }
 
+    def get_name(self):
+        ''' Getter for name '''
+        return self.__name
+
+    def get_is_public(self):
+        ''' Getter for is_public '''
+        return self.__is_public
+
+    def get_channel_id(self):
+        ''' Getter for channel_id '''
+        return self.__channel_id
+
+    def get_owner_members(self):
+        ''' Getter for owner_members '''
+        return self.__owner_members
+
+    def get_all_members(self):
+        ''' Getter for all_members '''
+        return self.__all_members
+
+    def get_messages(self):
+        ''' Getter for messages '''
+        return self.__messages
+
+    def get_standup_status(self):
+        ''' Getter for standup_status '''
+        return self.__standup_status
+
     def start_standup(self, initiator, length):
         end_time = current_time() + length
-        self.standup_status = {
+        self.__standup_status = {
             'is_active': True,
             'time_finish': end_time,
             'initiator': initiator,
@@ -238,14 +326,15 @@ class Channel:
 
     def end_standup(self):
         # Send packaged message if there are any messages
-        initiator = self.standup_status['initiator']
-        standup_messages = self.standup_status['queued_messages']
+        initiator = self.__standup_status['initiator']
+        standup_messages = self.__standup_status['queued_messages']
         if standup_messages:
-            message = '\n'.join(f'{msg.sender.handle}: {msg.message}' for msg in standup_messages)
+            message = '\n'.join(f'{msg.get_sender().get_handle()}: {msg.get_message()}'
+                                for msg in standup_messages)
             packaged_msg = Message(sender=initiator, message=message, time_created=current_time())
-            self.messages.append(packaged_msg)
+            self.__messages.append(packaged_msg)
         # Reset standup_status
-        self.standup_status = {
+        self.__standup_status = {
             'is_active': False,
             'time_finish': None,
             'initiator': None,
@@ -267,8 +356,8 @@ def channel_with_message_id(message_id):
     message with specified message_id (int), returning None if not found
     '''
     for channel in data['channels']:
-        for message in channel.messages:
-            if message.message_id == message_id:
+        for message in channel.get_messages():
+            if message.get_message_id() == message_id:
                 return channel
     return None
 
@@ -288,15 +377,47 @@ class Message:
             is_pinned - boolean
         '''
         # Save passed parameters
-        self.sender = sender
-        self.message = message
+        self.__sender = sender
+        self.__message = message
         # Generate extra parameters
-        self.message_id = data['latest_message_id']
+        self.__message_id = data['latest_message_id']
         data['latest_message_id'] += 1
-        self.time_created = time_created
-        self.reacts = []
-        self.is_pinned = False
-    
+        self.__time_created = time_created
+        self.__reacts = []
+        self.__is_pinned = False
+
+    def get_sender(self):
+        ''' Getter for sender '''
+        return self.__sender
+
+    def get_message(self):
+        ''' Getter for message '''
+        return self.__message
+
+    def set_message(self, message):
+        ''' Setter for message '''
+        self.__message = message
+
+    def get_message_id(self):
+        ''' Getter for message_id '''
+        return self.__message_id
+
+    def get_time_created(self):
+        ''' Getter for time_created '''
+        return self.__time_created
+
+    def get_reacts(self):
+        ''' Getter for reacts '''
+        return self.__reacts
+
+    def get_is_pinned(self):
+        ''' Getter for is_pinned '''
+        return self.__is_pinned
+
+    def set_is_pinned(self, is_pinned):
+        ''' Setter for is_pinned '''
+        self.__is_pinned = is_pinned
+
     def add_react(self, reactor, react_id):
         '''
         Adds the reactor's react to a Message object
@@ -306,17 +427,17 @@ class Message:
         if react is None:
             # Create new react
             new_react = React(react_id, reactor)
-            self.reacts.append(new_react)
+            self.__reacts.append(new_react)
         else:
             # Append new reactor to existing of reactors
-            react.reactors.append(reactor)
+            react.get_reactors().append(reactor)
 
     def remove_react(self, reactor, react_id):
         '''
         Removes the reactor's react from a Message object
         '''
         react = react_with_id_for_message(self, react_id)
-        react.reactors.remove(reactor)
+        react.get_reactors().remove(reactor)
 
 
 def message_with_message_id(message_id):
@@ -329,8 +450,8 @@ def message_with_message_id(message_id):
         return None
     # If message_id has been found in channel_with_message_id, then
     # message_id is in channel.messages from this point forth
-    for message in channel.messages:
-        if message.message_id == message_id:
+    for message in channel.get_messages():
+        if message.get_message_id() == message_id:
             return message
 
 
@@ -344,17 +465,24 @@ class React:
             react_id - unique integer
             reactors - array of User objects
         '''
-        self.react_id = react_id
-        self.reactors = [reactor,]
+        self.__react_id = react_id
+        self.__reactors = [reactor,]
 
+    def get_react_id(self):
+        ''' Getter for react_id '''
+        return self.__react_id
+
+    def get_reactors(self):
+        ''' Getter for reactors '''
+        return self.__reactors
 
 def react_with_id_for_message(message, react_id):
     '''
     Tries to return the React object with a given
     react_id (int) in a message (Message object)
     '''
-    for react in message.reacts:
+    for react in message.get_reacts():
         # NOTE: if there is only one valid react_id, this will always be true
-        if react.react_id == react_id:
+        if react.get_react_id() == react_id:
             return react
     return None
