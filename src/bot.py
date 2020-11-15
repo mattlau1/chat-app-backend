@@ -48,7 +48,8 @@ def bot_init():
     else:
         # Create new bot
         bot_user = User('flockbot@gmail.com', 'c0mpLicAt3d', 'Flockr', 'Bot')
-        bot_user.profile_img_url = 'https://nuvro.com/wp-content/uploads/2018/11/Flock-Logo-1.png'
+        img_url = 'https://nuvro.com/wp-content/uploads/2018/11/Flock-Logo-1.png'
+        bot_user.set_profile_img_url(img_url)
         data['users'].append(bot_user)
         # Change status
         bot_status = {
@@ -66,10 +67,10 @@ def bot_send_message(channel, message, temporary):
     bot_user = bot_init()
     # Bot sends message to channel
     msg = Message(sender=bot_user, message=message, time_created=current_time())
-    channel.messages.append(msg)
+    channel.get_messages().append(msg)
     # Temporary message (automatically removes after 10 seconds)
     if temporary:
-        t = Timer(5, channel.messages.remove, args=[msg])
+        t = Timer(5, channel.get_messages().remove, args=[msg])
         t.start()
 
 
@@ -128,8 +129,8 @@ def bot_kick(token, channel_id, message):
         kick_user = user_with_handle(handle)
         if kick_user is None:
             raise InputError('Please provide a valid user handle!')
-        channel_kick(token, channel_id, kick_user.u_id)
-        bot_msg = f'⚽️ {kick_user.handle} has been kicked by {user.handle}!'
+        channel_kick(token, channel_id, kick_user.get_u_id())
+        bot_msg = f'⚽️ {kick_user.get_handle()} has been kicked by {user.get_handle()}!'
         bot_send_message(channel, bot_msg, temporary=False)
     except Exception as e:
         bot_msg = f'Failed to kick: {e}'
@@ -146,7 +147,7 @@ def bot_message_prune(token, channel_id, message):
         auth_user = user_with_token(token)
         num_messages = int(message[6:])
         message_prune(token, channel_id, num_messages)
-        bot_msg = f'{num_messages} messages have been successfully pruned by {auth_user.handle}'
+        bot_msg = f'{num_messages} messages have been successfully pruned by {auth_user.get_handle()}'
         bot_send_message(channel, bot_msg, temporary=True)
     except Exception as e:
         bot_msg = f'Failed to prune: {e}'
@@ -167,16 +168,16 @@ def message_prune(token, channel_id, num_messages):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('Invalid permission')
-    elif auth_user not in channel.owner_members and auth_user.permission_id != 1:
+    elif auth_user not in channel.get_owner_members() and auth_user.get_permission_id() != 1:
         raise AccessError('Invalid permission for pruning messages')
-    total_messages = len(channel.messages)
+    total_messages = len(channel.get_messages())
     if num_messages > total_messages:
         raise InputError(f'Attempted to prune more messages than there are messages in the channel')
     # Prune last num_messages messages
-    del channel.messages[-num_messages:]
-    
+    del channel.get_messages()[-num_messages:]
+
     return {
     }
 
@@ -271,7 +272,7 @@ def bot_hangman_guess(token, channel_id, message):
         if game_win:
             # Win condition (word guessed)
             user = user_with_token(token)
-            bot_msg = f"Congratulations {user.handle} on guessing the word {hangman_status['word']}!"
+            bot_msg = f"Congratulations {user.get_handle()} on guessing the word {hangman_status['word']}!"
             bot_send_message(channel, bot_msg, temporary=False)
             bot_hangman_reset()
         elif hangman_status['guesses_remaining'] == 0:

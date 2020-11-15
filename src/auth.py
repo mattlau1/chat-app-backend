@@ -22,11 +22,11 @@ def auth_login(email, password):
         raise InputError('Incorrect password')
 
     # Update token
-    user.token = user.generate_token()
+    user.set_token(user.generate_token())
 
     return {
-        'u_id': user.u_id,
-        'token': user.token,
+        'u_id': user.get_u_id(),
+        'token': user.get_token(),
     }
 
 
@@ -41,8 +41,8 @@ def auth_logout(token):
     if user is None:
         raise AccessError('Invalid token')
 
-    # Invalidate user token - session stuff in future iterations?
-    user.token = ''
+    # Invalidate user token
+    user.set_token('')
 
     return {
         'is_success': True,
@@ -83,8 +83,8 @@ def auth_register(email, password, name_first, name_last):
     data['users'].append(new_user)
 
     return {
-        'u_id': new_user.u_id,
-        'token': new_user.token,
+        'u_id': new_user.get_u_id(),
+        'token': new_user.get_token(),
     }
 
 

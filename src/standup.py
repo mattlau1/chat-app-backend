@@ -21,11 +21,11 @@ def standup_start(token, channel_id, length):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('User not member of channel')
     elif length <= 0:
         raise InputError('Invalid standup time')
-    elif channel.standup_status['is_active']:
+    elif channel.get_standup_status()['is_active']:
         raise InputError('An active standup is currently running')
 
     end_time = channel.start_standup(initiator=auth_user, length=length)
@@ -52,10 +52,10 @@ def standup_active(token, channel_id):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('User not member of channel')
 
-    standup_status = channel.standup_status
+    standup_status = channel.get_standup_status()
 
     return {
         'is_active': standup_status['is_active'],
@@ -79,9 +79,9 @@ def standup_send(token, channel_id, message):
         raise AccessError('Invalid token')
     elif channel is None:
         raise InputError('Invalid channel')
-    elif auth_user not in channel.all_members:
+    elif auth_user not in channel.get_all_members():
         raise AccessError('User not member of channel')
-    elif not channel.standup_status['is_active']:
+    elif not channel.get_standup_status()['is_active']:
         raise InputError('An active standup is not currently running')
     elif not message:
         raise InputError('Empty message not allowed')
@@ -90,7 +90,7 @@ def standup_send(token, channel_id, message):
 
     # Add message to queue
     msg = Message(auth_user, message, time_created=current_time())
-    channel.standup_status['queued_messages'].append(msg)
+    channel.get_standup_status()['queued_messages'].append(msg)
 
     return {
     }

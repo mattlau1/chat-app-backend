@@ -24,12 +24,12 @@ def user_profile(token, u_id):
 
     return {
         'user': {
-            'u_id': target_user.u_id,
-            'email': target_user.email,
-            'name_first': target_user.name_first,
-            'name_last': target_user.name_last,
-            'handle_str': target_user.handle,
-            'profile_img_url': target_user.profile_img_url,
+            'u_id': target_user.get_u_id(),
+            'email': target_user.get_email(),
+            'name_first': target_user.get_name_first(),
+            'name_last': target_user.get_name_last(),
+            'handle_str': target_user.get_handle(),
+            'profile_img_url': target_user.get_profile_img_url(),
         }
     }
 
@@ -60,8 +60,8 @@ def user_profile_setname(token, name_first, name_last):
         raise InputError('Last name cannot be empty')
 
     # Update name
-    auth_user.name_first = name_first
-    auth_user.name_last = name_last
+    auth_user.set_name_first(name_first)
+    auth_user.set_name_last(name_last)
 
     return {
     }
@@ -88,7 +88,7 @@ def user_profile_setemail(token, email):
         raise InputError('Email already taken')
 
     # Update email
-    auth_user.email = email
+    auth_user.set_email(email)
 
     return {
     }
@@ -118,7 +118,7 @@ def user_profile_sethandle(token, handle_str):
         raise InputError('Handle already taken')
 
     # Update handle
-    auth_user.handle = handle_str
+    auth_user.set_handle(handle_str)
 
     return {
     }
@@ -135,14 +135,14 @@ def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, 
     auth_user = user_with_token(token)
     if auth_user is None:
         raise AccessError('Invalid token')
-    
+
     # Retrieve image
-    image_name = f'static/{auth_user.handle}.jpg'
+    image_name = f'static/{auth_user.get_handle()}.jpg'
     try:
         urllib.request.urlretrieve(img_url, image_name)
     except urllib.request.URLError:
         raise InputError('Invalid image url')
-    
+
     # Crop and save image
     try:
         img = Image.open(image_name)
@@ -154,10 +154,10 @@ def user_profile_uploadphoto(token, url_root, img_url, x_start, y_start, x_end, 
             Original image has width {width} and height {height}.')
     img = img.crop((x_start, y_start, x_end, y_end))
     img.save(image_name)
-    
+
     # Update profile pic
-    auth_user.profile_img_url = url_root + image_name
-    
+    auth_user.set_profile_img_url(url_root + image_name)
+
     return {
     }
 
