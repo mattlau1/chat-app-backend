@@ -9,8 +9,44 @@ from user import user_profile_sethandle
 from error import InputError, AccessError
 from other import clear
 
-''' Message prune tests '''
+def test_message_praser():
+    ''' Simple test to ensure that bot sends back a response '''
+    clear()
+    user = auth_register('admin@gmail.com', 'password', 'Admin', 'User')
+    channel = channels_create(user['token'], 'Channel', True)
+    # Help
+    message_send(user['token'], channel['channel_id'], '/help')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 2
+    # Time
+    message_send(user['token'], channel['channel_id'], '/time')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 4
+    # Choose
+    message_send(user['token'], channel['channel_id'], '/choose A B C')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 6
+    # Flip
+    message_send(user['token'], channel['channel_id'], '/flip')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 8
+    # Dice
+    message_send(user['token'], channel['channel_id'], '/dice')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 10
+    # Dice (10-sided)
+    message_send(user['token'], channel['channel_id'], '/dice 10')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 12
+    # Dice (invalid-sided)
+    message_send(user['token'], channel['channel_id'], '/dice X')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 14
+
+
 def test_bot_message_parser_prune():
+    ''' Message prune tests '''
+    clear()
     # Check messages have been deleted - and bot sends a temporary message (10s)
     f_owner = auth_register('admin@gmail.com', 'password', 'Admin', 'User')
     channel = channels_create(f_owner['token'], 'Channel', True)
@@ -36,6 +72,7 @@ def test_bot_message_parser_prune():
 
 
 def test_message_prune_invalid():
+    ''' Invalid test cases for message prune (function) '''
     clear()
     # Register users, create channel and users join
     f_owner = auth_register('admin@gmail.com', 'password', 'Admin', 'User')
@@ -71,6 +108,7 @@ def test_message_prune_invalid():
 
 
 def test_message_prune_valid():
+    ''' Valid test cases for message prune (function) '''
     clear()
     # Register users, create channel and users join
     f_owner = auth_register('admin@gmail.com', 'password', 'Admin', 'User')
@@ -127,3 +165,31 @@ def test_bot_channel_kick():
     # Has owner permission - can kick random user
     message_send(owner['token'], channel['channel_id'], '/kick naughty_user')
     assert len(channel_details(owner['token'], channel['channel_id'])['all_members']) == 1
+
+
+def test_hangman():
+    ''' Tests hangman game (just for coverage) '''
+    clear()
+    user = auth_register('admin@gmail.com', 'password', 'Admin', 'User')
+    channel = channels_create(user['token'], 'Channel', True)
+    # Hangman game not started
+    message_send(user['token'], channel['channel_id'], '/guess A')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 2
+    # Hangman game already started (doesn't raise Exception, just sends a message
+    # saying game already in progress, and displays the current game)
+    message_send(user['token'], channel['channel_id'], '/hangman start')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 4
+    message_send(user['token'], channel['channel_id'], '/hangman start')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 7
+    # Invalid message format
+    message_send(user['token'], channel['channel_id'], '/guess')
+    messages = channel_messages(user['token'], channel['channel_id'], 0)['messages']
+    assert len(messages) == 9
+    # Can't really test hangman guesses (esp win condition), so..
+    for guess in range(5):
+        message_send(user['token'], channel['channel_id'], '/guess z')
+        message_send(user['token'], channel['channel_id'], '/guess Z')
+        message_send(user['token'], channel['channel_id'], '/guess hellowolrd')
