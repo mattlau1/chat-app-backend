@@ -10,7 +10,7 @@ from error import InputError, AccessError
 
 bot_status = {
     'active': False,
-    'u_id': -1,
+    'bot_user': None,
 }
 
 def bot_message_parser(token, channel_id, message):
@@ -21,6 +21,8 @@ def bot_message_parser(token, channel_id, message):
         bot_help(channel_id)
     elif message == '/time':
         bot_time(channel_id)
+    elif message == '/flip':
+        bot_flip(channel_id)
     elif message == '/hangman start':
         bot_hangman_start(channel_id)
     elif message.startswith('/kick'):
@@ -31,10 +33,6 @@ def bot_message_parser(token, channel_id, message):
         bot_hangman_guess(token, channel_id, message)
     elif message.startswith('/choose'):
         bot_choose(channel_id, message)
-    elif message.startswith('/choose'):
-        bot_choose(channel_id, message)
-    elif message.startswith('/flip'):
-        bot_flip(channel_id)
     elif message.startswith('/dice'):
         bot_dice(channel_id, message)
 
@@ -46,7 +44,7 @@ def bot_init():
     global bot_status
     # Bot not technically registered
     if bot_status['active']:
-        return user_with_id(bot_status['u_id'])
+        return bot_status['bot_user']
     else:
         # Create new bot
         bot_user = User('flockbot@gmail.com', 'c0mpLicAt3d', 'Flockr', 'Bot')
@@ -55,7 +53,7 @@ def bot_init():
         # Change status
         bot_status = {
             'active': True,
-            'u_id': bot_user.u_id,
+            'bot_user': bot_user,
         }
         return bot_user
 
